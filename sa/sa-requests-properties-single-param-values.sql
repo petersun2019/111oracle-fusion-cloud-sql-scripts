@@ -184,6 +184,7 @@ display.attribute27.value: Ledger
 			 , rp.name
 			 , '#' || rp.value value
 			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
+			 , regexp_replace(substr(rh.error_warning_message, instr(rh.error_warning_message, 'process identifier '), 200), '[^0-9]', '') error_report_id
 			 , rhv.lastscheduleinstanceid
 		  from request_history rh
 		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
@@ -224,6 +225,7 @@ with my_data as (
 			 , rp.name
 			 , rp.value value_
 			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
+			 , regexp_replace(substr(rh.error_warning_message, instr(rh.error_warning_message, 'process identifier '), 200), '[^0-9]', '') error_report_id
 			 , rhv.lastscheduleinstanceid
 		  from request_history rh
 		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
@@ -238,12 +240,11 @@ with my_data as (
 		   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute27.value' and rp2.value = 'XX Ledger')
 		   -- and rh.requestid in (4821699,4821690,4821344,4821343,4821015,4820997,4820737,4820698,4820604,4820383)
 		   -- and rh.username = 'USER123'
-		   and to_char(rh.processstart, 'YYYY') = '2023'
-		   and to_char(rh.processstart, 'MM') = '10'
+		   -- and to_char(rh.processstart, 'YYYY') = '2023'
+		   -- and to_char(rh.processstart, 'MM') = '10'
 		   and rh.processend is not null
-		   -- and flv_state.meaning = 'Warning'
-	  order by rh.requestid desc
-			 , rp.name)
+		   and flv_state.meaning = 'Warning'
+		   and 1 = 1)
 select * from (
 		select id
 			 , absparentid
@@ -256,6 +257,7 @@ select * from (
 			 , product
 			 , name
 			 , value_
+			 , error_report_id
 			 , error_warning_message
 			 , lastscheduleinstanceid
 		  from my_data)
@@ -264,6 +266,7 @@ pivot
    max(value_)
    for name in ('display.attribute26.value' application,'display.attribute27.value' ledger,'display.attribute6.value' end_date,'display.attribute8.value' mode_)
 )
+order by id desc
 
 -- ##############################################################
 -- XLAFSNAPRPT - Create Accounting - Payroll
