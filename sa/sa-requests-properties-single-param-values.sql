@@ -1,8 +1,5 @@
 /*
 File Name: sa-requests-properties-single-param-values.sql
-Version: Oracle Fusion Cloud
-Author: Throwing Cheese
-URL: https://github.com/throwing-cheese/oracle-fusion-cloud-sql-scripts
 
 The REQUEST_PROPERTY table can be used to access parameter values used when submitting a request
 
@@ -12,7 +9,6 @@ Queries:
 -- XLAGLTRN - Post Subledger Journal Entries
 -- CreateAccounting - Create Accounting for Projects
 -- XLAFSNAPRPT - Create Accounting
--- XLAFSNAPRPT - Create Accounting - Payroll
 -- XLAFSNAPRPTRPT - Create Accounting Execution Report 1
 -- XLAFSNAPRPTRPT - Create Accounting Execution Report 2
 -- JournalImportLauncher - Import Journals - Source
@@ -54,12 +50,20 @@ Queries:
 			 , rh.username
 			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
 			 , rp.name
-			 , '#' || rp.value value
+			 , rp.value value_
+			 -- , '#########################'
+			 -- , rhv.name rhv_name
+			 -- , rhv.requesttype
+			 -- , rhv.lastscheduleinstanceid
+			 -- , rhv.submitter_dms_rid
+			 -- , rhv.dms_rid
+			 -- , rhv.waittime
 		  from request_history rh
 		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
 		  join request_property rp on rp.requestid = rh.requestid
+		  join fusion_ora_ess.request_history_view rhv on rhv.requestid = rh.requestid
 		 where 1 = 1
-		   and rh.requestid in (123)
+		   -- and rh.requestid in (123)
 		   -- and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('LoadSegValAndHierData')
 	  order by rh.requestid desc
 			 , rp.name
@@ -86,15 +90,9 @@ submit.argument17: ParentID - ID of parent Create Accounting job
 			 , rh.product
 			 , rh.username
 			 , rp.name
-			 , '#' || rp.value value
-			 -- , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
-			 -- , '#########################'
-			 -- , rhv.name rhv_name
-			 -- , rhv.requesttype
-			 -- , rhv.lastscheduleinstanceid
-			 -- , rhv.submitter_dms_rid
-			 -- , rhv.dms_rid
-			 -- , rhv.waittime
+			 , rp.value value_
+			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
+			 , rhv.lastscheduleinstanceid
 		  from request_history rh
 		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
 		  join request_property rp on rp.requestid = rh.requestid
@@ -104,11 +102,70 @@ submit.argument17: ParentID - ID of parent Create Accounting job
 		   -- and rp.name in ('display.attribute6.value')
 		   and rp.name in ('submit.argument5','submit.argument3','submit.argument17')
 		   and flv_state.meaning = 'Succeeded'
-		   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute8.value' and rp2.value = 'F')
-		   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute26.value' and rp2.value = 'Project Costing')
-		   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute27.value' and rp2.value = 'XX Ledger')
+		   -- and rh.processstart > sysdate - 1 -- last day
+		   and 1 = 1
 	  order by rh.requestid desc
 			 , rp.name
+
+/*
+one row per job using PIVOT
+https://stackoverflow.com/questions/64390380/rows-to-columns-using-pivot-function-oracle
+
+submit.argument3: ApplicationID
+submit.argument5: EndDate
+submit.argument17: ParentID - ID of parent Create Accounting job
+*/
+
+	with my_data as (
+			select rh.requestid id
+				 , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
+				 , rh.instanceparentid -- the parent process in that instance run
+				 , flv_state.meaning status
+				 , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
+				 , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
+				 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
+				 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
+				 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
+				 , rh.product
+				 , rh.username
+				 , rp.name
+				 , rp.value value_
+				 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
+				 , rhv.lastscheduleinstanceid
+			  from request_history rh
+			  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
+			  join request_property rp on rp.requestid = rh.requestid
+			  join fusion_ora_ess.request_history_view rhv on rhv.requestid = rh.requestid
+			 where 1 = 1
+			   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('XLAGLTRN')
+			   -- and rp.name in ('display.attribute6.value')
+			   and rp.name in ('submit.argument3','submit.argument5','submit.argument17')
+			   and flv_state.meaning = 'Succeeded'
+			   -- and rh.processstart > sysdate - 1 -- last day
+			   and rh.requestid in (6347193, 6347253)
+			   and 1 = 1)
+	select * from (
+			select id
+				 , absparentid
+				 , instanceparentid
+				 , status
+				 , process_start
+				 , process_end
+				 , username
+				 , definition
+				 , product
+				 , name
+				 , value_
+				 , error_warning_message
+			  from my_data)
+	pivot
+	(
+	   max(value_)
+	   for name in ('submit.argument3' application_id
+				   ,'submit.argument5' end_date
+				   ,'submit.argument17' parent_id)
+	)
+		  order by id desc
 
 -- ##############################################################
 -- CreateAccounting - Create Accounting for Projects
@@ -136,15 +193,10 @@ display.attribute27.value: BU
 			 , rh.product
 			 , rh.username
 			 , rp.name
-			 , '#' || rp.value value
-			 -- , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
-			 , '#########################'
-			 , rhv.name rhv_name
-			 , rhv.requesttype
+			 , rp.value value_
+			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
+			 , regexp_replace(substr(rh.error_warning_message, instr(rh.error_warning_message, 'process identifier '), 200), '[^0-9]', '') error_report_id
 			 , rhv.lastscheduleinstanceid
-			 , rhv.submitter_dms_rid
-			 , rhv.dms_rid
-			 , rhv.waittime
 		  from request_history rh
 		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
 		  join request_property rp on rp.requestid = rh.requestid
@@ -153,23 +205,24 @@ display.attribute27.value: BU
 		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('CreateAccounting')
 		   -- and rp.name in ('display.attribute6.value')
 		   and rp.name in ('display.attribute6.value','display.attribute8.value','display.attribute10.value','display.attribute11.value','display.attribute12.value','display.attribute26.value','display.attribute27.value')
-		   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute8.value' and rp2.value = 'F')
-		   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute26.value' and rp2.value = 'Project Costing')
-		   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute27.value' and rp2.value = 'XX Ledger')
+		   and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute8.value' and rp2.value = 'Final') -- final mode
 	  order by rh.requestid desc
 			 , rp.name
 
--- ##############################################################
--- XLAFSNAPRPT - Create Accounting
--- ##############################################################
-
 /*
+one row per job using PIVOT
+https://stackoverflow.com/questions/64390380/rows-to-columns-using-pivot-function-oracle
+
 display.attribute6.value: End Date
 display.attribute8.value: Mode
-display.attribute26.value: Application
-display.attribute27.value: Ledger
+display.attribute10.value: Report Style
+display.attribute11.value: TransfertoGeneralLedger
+display.attribute12.value: PostinGeneralLedger
+display.attribute26.value: Ledger
+display.attribute27.value: BU
 */
 
+with my_data as (
 		select rh.requestid id
 			 , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
 			 , rh.instanceparentid -- the parent process in that instance run
@@ -182,7 +235,7 @@ display.attribute27.value: Ledger
 			 , rh.product
 			 , rh.username
 			 , rp.name
-			 , '#' || rp.value value
+			 , rp.value value_
 			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
 			 , regexp_replace(substr(rh.error_warning_message, instr(rh.error_warning_message, 'process identifier '), 200), '[^0-9]', '') error_report_id
 			 , rhv.lastscheduleinstanceid
@@ -191,19 +244,85 @@ display.attribute27.value: Ledger
 		  join request_property rp on rp.requestid = rh.requestid
 		  join fusion_ora_ess.request_history_view rhv on rhv.requestid = rh.requestid
 		 where 1 = 1
-		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('XLAFSNAPRPT')
-		   and rp.name in ('display.attribute6.value','display.attribute8.value','display.attribute27.value','display.attribute26.value')
-		   -- and rp.name in ('display.attribute26.value') and rp.value = 'Payroll'
-		   and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute8.value' and rp2.value = 'F') -- final
-		   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute26.value' and rp2.value = 'Cost Management')
-		   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute27.value' and rp2.value = 'XX Ledger')
-		   -- and rh.requestid in (4821699,4821690,4821344,4821343,4821015,4820997,4820737,4820698,4820604,4820383)
-		   -- and rh.username = 'USER123'
-		   and to_char(rh.processstart, 'YYYY') = '2023'
-		   and to_char(rh.processstart, 'MM') = '10'
-		   and rh.processend is not null
-	  order by rh.requestid desc
-			 , rp.name
+		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('CreateAccounting')
+		   -- and rp.name in ('display.attribute6.value')
+		   and rp.name in ('display.attribute6.value','display.attribute8.value','display.attribute10.value','display.attribute11.value','display.attribute12.value','display.attribute26.value','display.attribute27.value')
+		   and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute8.value' and rp2.value = 'Final') -- final mode
+		   and 1 = 1)
+select * from (
+		select id
+			 , absparentid
+			 , instanceparentid
+			 , status
+			 , process_start
+			 , process_end
+			 , username
+			 , definition
+			 , product
+			 , name
+			 , value_
+			 , error_report_id
+			 , error_warning_message
+			 , lastscheduleinstanceid
+		  from my_data)
+pivot
+(
+   max(value_)
+   for name in ('display.attribute6.value' end_date
+			  , 'display.attribute8.value' mode_
+			  , 'display.attribute10.value' report_style
+			  , 'display.attribute11.value' transfertogeneralledger
+			  , 'display.attribute12.value' postingeneralledger
+			  , 'display.attribute26.value' ledger
+			  , 'display.attribute27.value' bu)
+)
+order by id desc
+
+-- ##############################################################
+-- XLAFSNAPRPT - Create Accounting
+-- ##############################################################
+
+/*
+display.attribute6.value: End Date
+display.attribute8.value: Mode
+display.attribute26.value: Application
+display.attribute27.value: Ledger
+*/
+
+			select rh.requestid id
+				 , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
+				 , rh.instanceparentid -- the parent process in that instance run
+				 , flv_state.meaning status
+				 , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
+				 , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
+				 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
+				 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
+				 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
+				 , rh.product
+				 , rh.username
+				 , rp.name
+				 , rp.value value_
+				 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
+				 , regexp_replace(substr(rh.error_warning_message, instr(rh.error_warning_message, 'process identifier '), 200), '[^0-9]', '') error_report_id
+				 , rhv.lastscheduleinstanceid
+			  from request_history rh
+			  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
+			  join request_property rp on rp.requestid = rh.requestid
+			  join fusion_ora_ess.request_history_view rhv on rhv.requestid = rh.requestid
+			 where 1 = 1
+			   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('XLAFSNAPRPT')
+			   and rp.name in ('display.attribute6.value','display.attribute8.value','display.attribute27.value','display.attribute26.value')
+			   -- and rp.name in ('display.attribute26.value') and rp.value = 'Payroll'
+			   and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute8.value' and rp2.value = 'F') -- final
+			   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute26.value' and rp2.value = 'Cost Management')
+			   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute27.value' and rp2.value = 'XX Ledger')
+			   -- and rh.requestid in (4821699,4821690,4821344,4821343,4821015,4820997,4820737,4820698,4820604,4820383)
+			   -- and rh.username = 'USER123'
+			   and to_char(rh.processstart, 'YYYY') = '2023'
+			   and to_char(rh.processstart, 'MM') = '10'
+			   and rh.processend is not null
+		  order by rh.requestid desc
+				 , rp.name
 
 /*
 one row per job using PIVOT
@@ -269,47 +388,6 @@ pivot
 order by id desc
 
 -- ##############################################################
--- XLAFSNAPRPT - Create Accounting - Payroll
--- ##############################################################
-
-/*
-display.attribute6.value: End Date
-display.attribute8.value: Mode
-display.attribute26.value: Application
-display.attribute27.value: Ledger
-*/
-
-		select rh.requestid id
-			 , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
-			 , rh.instanceparentid -- the parent process in that instance run
-			 , flv_state.meaning status
-			 , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
-			 , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
-			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
-			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
-			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
-			 , rh.product
-			 , rh.username
-			 , rp.name
-			 , '#' || rp.value value
-			 -- , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
-			 , rhv.lastscheduleinstanceid
-		  from request_history rh
-		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
-		  join request_property rp on rp.requestid = rh.requestid
-		  join fusion_ora_ess.request_history_view rhv on rhv.requestid = rh.requestid
-		 where 1 = 1
-		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('XLAFSNAPRPT')
-		   -- and rp.name in ('display.attribute6.value','display.attribute27.value','display.attribute26.value','display.attribute8.value')
-		   and rp.name in ('display.attribute6.value','display.attribute8.value','display.attribute27.value')
-		   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute8.value' and rp2.value = 'F') -- final
-		   and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute26.value' and rp2.value = 'Payroll')
-		   and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute27.value' and rp2.value = 'XX Ledger')
-		   -- and rh.requestid in (123)
-	  order by rh.requestid desc
-			 , rp.name
-
--- ##############################################################
 -- XLAFSNAPRPTRPT - Create Accounting Execution Report 1
 -- ##############################################################
 
@@ -331,7 +409,7 @@ This SQL can be used to find the Execution Report that was generated for the Req
 			 , rh.product
 			 , rh.username
 			 , rp.name
-			 , '#' || rp.value value
+			 , rp.value value_
 			 -- , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
 			 , rhv.lastscheduleinstanceid
 		  from request_history rh
@@ -403,7 +481,7 @@ This query returns the parent ID for the Execution Report along with the module 
 			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
 			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
 			 , rp.name
-			 , '#' || rp.value value
+			 , rp.value value_
 			 , gjst.user_je_source_name
 		  from request_history rh
 		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
@@ -429,7 +507,7 @@ This query returns the parent ID for the Execution Report along with the module 
 			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
 			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
 			 , rp.name
-			 , '#' || rp.value value
+			 , rp.value value_
 		  from request_history rh
 		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
 		  join request_property rp on rp.requestid = rh.requestid
@@ -453,7 +531,7 @@ This query returns the parent ID for the Execution Report along with the module 
 			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
 			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
 			 , rp.name
-			 , '#' || rp.value value
+			 , rp.value value_
 		  from request_history rh
 		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
 		  join request_property rp on rp.requestid = rh.requestid
@@ -482,7 +560,7 @@ This query returns the parent ID for the Execution Report along with the module 
 			 , rh.username
 			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
 			 , rp.name
-			 , '#' || rp.value value
+			 , rp.value value_
 			 , case when rp.name = 'submit.argument1' then (select bu_name from fun_all_business_units_v bu where bu.bu_id = rp.value) end business_unit
 			 , case when rp.name = 'submit.argument8' then (select name from gl_ledgers gl where gl.ledger_id = rp.value) end ledger
 		  from request_history rh
@@ -518,7 +596,7 @@ Returns the Chart of Accounts Segment the job ran against (e.g. XX_GL_COST_CENTR
 			 , rh.username
 			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
 			 , rp.name
-			 , '#' || rp.value value
+			 , rp.value value_
 		  from request_history rh
 		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
 		  join request_property rp on rp.requestid = rh.requestid
@@ -547,7 +625,7 @@ Returns the Chart of Accounts Segment the job ran against (e.g. XX_GL_COST_CENTR
 			 , rh.username
 			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
 			 , rp.name
-			 , '#' || rp.value value
+			 , rp.value value_
 		  from request_history rh
 		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
 		  join request_property rp on rp.requestid = rh.requestid
@@ -584,7 +662,7 @@ Returns the Chart of Accounts Segment the job ran against (e.g. XX_GL_COST_CENTR
 			 , rh.username
 			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
 			 , rp.name
-			 , '#' || rp.value value
+			 , rp.value value_
 		  from request_history rh
 		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
 		  join request_property rp on rp.requestid = rh.requestid
@@ -593,7 +671,7 @@ Returns the Chart of Accounts Segment the job ran against (e.g. XX_GL_COST_CENTR
 		   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'submit.argument8' and rp2.value = 'IMAGE')
 		   -- and rp.value is not null
 		   and rp.name in ('submit.argument8')
-		   and rp.value = 'SOURCE1'
+		   and rp.value = 'PAMS'
 		   and to_char(rh.processend, 'yyyy-mm-dd') = '2023-06-02'
 		   -- and rh.requestid in (1234)
 	  order by rh.requestid desc
@@ -616,7 +694,7 @@ Returns the Chart of Accounts Segment the job ran against (e.g. XX_GL_COST_CENTR
 			 , rh.username
 			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
 			 , rp.name
-			 , '#' || rp.value value
+			 , rp.value value_
 		  from request_history rh
 		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
 		  join request_property rp on rp.requestid = rh.requestid
@@ -652,7 +730,7 @@ submit.argument9: Business Unit ID
 			 , rh.username
 			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
 			 , rp.name
-			 , '#' || rp.value value
+			 , rp.value value_
 		  from request_history rh
 		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
 		  join request_property rp on rp.requestid = rh.requestid
@@ -686,7 +764,7 @@ display.attribute5.value: Expenditure Item Through Date
 			 , rh.username
 			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
 			 , rp.name
-			 , '#' || rp.value value
+			 , rp.value value_
 		  from request_history rh
 		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
 		  join request_property rp on rp.requestid = rh.requestid
@@ -718,7 +796,7 @@ submit.argument4 - Batch Name
 			 , rh.username
 			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
 			 , rp.name
-			 , '#' || rp.value value
+			 , rp.value value_
 		  from request_history rh
 		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
 		  join request_property rp on rp.requestid = rh.requestid
@@ -754,7 +832,7 @@ submit.argument2: Ledger
 			 , rh.username
 			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
 			 , rp.name
-			 , '#' || rp.value value
+			 , rp.value value_
 		  from request_history rh
 		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
 		  join request_property rp on rp.requestid = rh.requestid
@@ -792,7 +870,7 @@ submit.argument4: GL_OPEN
 			 , rh.username
 			 -- , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
 			 , rp.name
-			 , '#' || rp.value value
+			 , rp.value value_
 		  from request_history rh
 		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
 		  join request_property rp on rp.requestid = rh.requestid
@@ -829,7 +907,7 @@ submit.argument1: 4508931 -- ID of the parent job
 			 , rh.product
 			 , rh.username
 			 , rp.name
-			 , '#' || rp.value value
+			 , rp.value value_
 			 -- , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
 			 , rhv.lastscheduleinstanceid
 		  from request_history rh
@@ -864,7 +942,7 @@ display.attribute27.value: Default Invoice Template
 			 , rh.username
 			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
 			 , rp.name
-			 , '#' || rp.value value
+			 , rp.value value_
 		  from request_history rh
 		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
 		  join request_property rp on rp.requestid = rh.requestid
@@ -896,7 +974,7 @@ display.attribute3.value: 2023-03-31
 			 , rh.product
 			 , rh.username
 			 , rp.name
-			 , '#' || rp.value value
+			 , rp.value value_
 			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
 		  from request_history rh
 		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
@@ -933,7 +1011,7 @@ with my_data as (
 			 , rh.product
 			 , rh.username
 			 , rp.name
-			 , '#' || rp.value value_
+			 , rp.value value_
 			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
 		  from request_history rh
 		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
@@ -950,8 +1028,7 @@ with my_data as (
 		   -- and to_char(rh.processstart, 'YYYY') = '2023'
 		   -- and to_char(rh.processstart, 'MM') = '01'
 		   and rh.processend is not null
-	  order by rh.requestid desc
-			 , rp.name)
+		   and 1 = 1)
 select * from (
 		select id
 			 , absparentid
@@ -971,6 +1048,7 @@ pivot
    max(value_)
    for name in ('display.attribute2.value' business_unit,'display.attribute3.value' end_date)
 )
+order by id desc
 
 -- ##############################################################
 -- ReceiptAccrualProcessMasterEssJobDef - Create Receipt Accounting Distributions
@@ -992,7 +1070,7 @@ submit.argument1: BU
 			 , rh.product
 			 , rh.username
 			 , rp.name
-			 , '#' || rp.value value
+			 , rp.value value_
 			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
 		  from request_history rh
 		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
@@ -1029,7 +1107,7 @@ with my_data as (
 			 , rh.product
 			 , rh.username
 			 , rp.name
-			 , '#' || rp.value value_
+			 , rp.value value_
 			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
 		  from request_history rh
 		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
@@ -1042,12 +1120,11 @@ with my_data as (
 		   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute26.value' and rp2.value = 'Receipt Accounting')
 		   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute27.value' and rp2.value = 'XX Ledger')
 		   -- and rh.requestid in (4488735)
-		   -- and rh.username = 'USER123'
+		   and rh.username like '%@%'
 		   -- and to_char(rh.processstart, 'YYYY') = '2023'
 		   -- and to_char(rh.processstart, 'MM') = '01'
 		   and rh.processend is not null
-	  order by rh.requestid desc
-			 , rp.name)
+		   and 1 = 1)
 select * from (
 		select id
 			 , absparentid
@@ -1067,3 +1144,4 @@ pivot
    max(value_)
    for name in ('submit.argument1' bu)
 )
+order by id desc
