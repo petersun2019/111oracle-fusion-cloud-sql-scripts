@@ -1,4 +1,4 @@
-# Oracle Fusion SQL Scripts Library
+# Oracle Fusion Cloud SQL Scripts Library
 
 ## Intro
 
