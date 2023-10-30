@@ -49,6 +49,7 @@ https://cloudcustomerconnect.oracle.com/posts/104def26eb?commentid=382104#382104
 			 , hov.created_by
 			 , hla.location_name
 			 , hla.location_code
+			 , (select count(*) from pjc_exp_items_all peia where peia.expenditure_organization_id = hov.organization_id) exp_item_count
 			 , nvl((select 'Y'
 					  from hr_organization_v y
 					 where hov.organization_id = y.organization_id
@@ -61,9 +62,12 @@ https://cloudcustomerconnect.oracle.com/posts/104def26eb?commentid=382104#382104
 					   and y.classification_code = 'PA_PROJECT_ORG'
 					   and sysdate between y.effective_start_date and y.effective_end_date
 					   and y.status ='A'), 'N') pa_project_org
+			 , nvl2(pao.organization_id, 'Y', 'N') expenditure_org
 		  from hr_organization_v hov
 	 left join hr_locations_all hla on hov.location_id = hla.location_id
+	 left join pjf_all_organizations pao on pao.organization_id = hov.organization_id
 		 where 1 = 1
 		   and hov.classification_code = 'DEPARTMENT'
+		   -- and pao.pa_org_use_type ='EXPENDITURES' -- uncomment to only return Project Expenditure Owning Organizations
 		   and sysdate between hov.effective_start_date and hov.effective_end_date
 		   and 1 = 1
