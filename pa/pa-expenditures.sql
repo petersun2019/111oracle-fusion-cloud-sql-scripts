@@ -104,8 +104,8 @@ When Transfer is done, transferring Raw Cost from 1 Project to another - this ha
 */
 
 		select '#' || peia.expenditure_item_id item_id
-			 -- , pptt.project_type
-			 -- , pptb.burden_cost_flag -- burdening only happens for project types where the burden cost flag = Y
+			 , pptt.project_type
+			 , pptb.burden_cost_flag -- burdening only happens for project types where the burden cost flag = Y
 			 , ppav.segment1 proj
 			 , peia.system_linkage_function cost_fcn
 			 , pslt_fcn.meaning cost_fcn_meaning
@@ -117,79 +117,75 @@ When Transfer is done, transferring Raw Cost from 1 Project to another - this ha
 			 , peia.created_by exp_item_created_by
 			 , to_char(peia.last_update_date, 'yyyy-mm-dd hh24:mi:ss') exp_item_updated
 			 , peia.last_updated_by exp_item_updated_by
-			 -- , ppst.project_status_name project_status
-			 -- , ptv.task_number task
-			 -- , peia.orig_transaction_reference
+			 , ppst.project_status_name project_status
+			 , ptv.task_number task
+			 , peia.orig_transaction_reference
 			 , peia.request_id
-			 -- , ptv.task_id
-			 -- , ptv.top_task_id
-			 -- , ptv.parent_task_id
-			 -- , flv_rev.meaning revenue_status
-			 -- , haou.name project_org
+			 , ptv.task_id
+			 , ptv.top_task_id
+			 , ptv.parent_task_id
+			 , flv_rev.meaning revenue_status
+			 , haou.name project_org
 			 , haou_exp.name expenditure_org
 			 , ptst.user_transaction_source trx_source
 			 , petl.expenditure_type_name exp_type
 			 , pect.expenditure_category_name
-			 -- , ptdet.doc_entry_name exp_document_entry
-			 -- , ptdt.document_name exp_document
-			 -- , pega.expenditure_group
-			 -- , pega.user_batch_name
+			 , ptdet.doc_entry_name exp_document_entry
+			 , ptdt.document_name exp_document
+			 , pega.expenditure_group
+			 , pega.user_batch_name
 			 , '#' exp_item_costs____
-			 
-			 , peia.PROJFUNC_RAW_COST -- Raw cost in project Functional Currency *****
-			 , peia.PROJFUNC_BURDENED_COST -- The burden cost in project functional currency *****
-			 , peia.DENOM_RAW_COST -- The total raw cost of the expenditure item in transaction currency Raw cost = (quantity * cost rate) This value should always equal the sum of the items raw cost distribution lines	
-			 , peia.DENOM_BURDENED_COST -- Total burdened cost of the expenditure item in transaction currency Burdened cost = (raw cost * (1 + burden cost multiplier)) This must equal the sum of the items burden debit cost distribution lines For non-burdened items, burdened cost
-			 , peia.ACCT_RAW_COST -- Raw cost in Functional Currency
-			 , peia.ACCT_BURDENED_COST -- Burdened Cost in Functional Currency
-			 , peia.PROJECT_RAW_COST -- Raw cost in project currency
-			 , peia.PROJECT_BURDENED_COST -- Burdened cost in project currency
+			 , peia.projfunc_raw_cost -- Raw cost in project Functional Currency *****
+			 , peia.projfunc_burdened_cost -- The burden cost in project functional currency *****
+			 , peia.denom_raw_cost -- The total raw cost of the expenditure item in transaction currency Raw cost = (quantity * cost rate) This value should always equal the sum of the items raw cost distribution lines	
+			 , peia.denom_burdened_cost -- Total burdened cost of the expenditure item in transaction currency Burdened cost = (raw cost * (1 + burden cost multiplier)) This must equal the sum of the items burden debit cost distribution lines For non-burdened items, burdened cost
+			 , peia.acct_raw_cost -- Raw cost in Functional Currency
+			 , peia.acct_burdened_cost -- Burdened Cost in Functional Currency
+			 , peia.project_raw_cost -- Raw cost in project currency
+			 , peia.project_burdened_cost -- Burdened cost in project currency
 			 , peia.quantity
-			 -- , peia.unit_of_measure uom
-			 -- , peia.billable_flag
-			 -- , peia.revenue_hold_flag
-			 -- , peia.revenue_recognized_flag
-			 -- , peia.invoiced_flag
-			 -- , peia.denom_currency_code
-			 -- , peia.acct_currency_code
-			 -- , peia.net_zero_adjustment_flag -- if y revenue will never be recognised
-			 -- , peia.revenue_exception_flag
-			 -- , peia.original_header_id
-			 -- , peia.original_line_number
-			 -- , peia.user_batch_name peia_user_batch
-			 -- , peia.creation_source
-			 -- , pha.segment1 po
-			 -- , psv.vendor_name supplier
-			 -- , pcdla.line_num line
-			 -- , pcdla.accounting_status_code
-			 
+			 , peia.unit_of_measure uom
+			 , peia.billable_flag
+			 , peia.revenue_hold_flag
+			 , peia.revenue_recognized_flag
+			 , peia.invoiced_flag
+			 , peia.denom_currency_code
+			 , peia.acct_currency_code
+			 , peia.net_zero_adjustment_flag -- if y revenue will never be recognised
+			 , peia.revenue_exception_flag
+			 , peia.original_header_id
+			 , peia.original_line_number
+			 , peia.user_batch_name peia_user_batch
+			 , peia.creation_source
+			 , pha.segment1 po
+			 , psv.vendor_name supplier
+			 , pcdla.line_num line
+			 , pcdla.accounting_status_code
 			 , '#' cost_line_costs____
-			 
-			 , pcdla.PROJFUNC_RAW_COST PROJFUNC_RAW_COST_
-			 , pcdla.PROJFUNC_BURDENED_COST PROJFUNC_BURDENED_COST_
-			 , pcdla.PROJECT_BURDENED_COST PROJECT_BURDENED_COST_
-			 , pcdla.DENOM_RAW_COST DENOM_RAW_COST_
-			 , pcdla.DENOM_BURDENED_COST DENOM_BURDENED_COST_
-			 , pcdla.ACCT_RAW_COST ACCT_RAW_COST_
-			 , pcdla.ACCT_BURDENED_COST ACCT_BURDENED_COST_
-
-			 -- , pcdla.quantity cost_item_line_qty
-			 -- , pcdla.billable_flag cost_item_billable_flag
-			 -- , to_char(pcdla.prvdr_pa_date, 'yyyy-mm-dd') pa_date
-			 -- , to_char(pcdla.prvdr_gl_date, 'yyyy-mm-dd') gl_date
-			 -- , pcdla.prvdr_gl_period_name
-			 -- , pcdla.transfer_status_code
-			 -- , pcdla.acct_source_code
-			 -- , '#' id_info___
+			 , pcdla.projfunc_raw_cost projfunc_raw_cost_
+			 , pcdla.projfunc_burdened_cost projfunc_burdened_cost_
+			 , pcdla.project_burdened_cost project_burdened_cost_
+			 , pcdla.denom_raw_cost denom_raw_cost_
+			 , pcdla.denom_burdened_cost denom_burdened_cost_
+			 , pcdla.acct_raw_cost acct_raw_cost_
+			 , pcdla.acct_burdened_cost acct_burdened_cost_
+			 , pcdla.quantity cost_item_line_qty
+			 , pcdla.billable_flag cost_item_billable_flag
+			 , to_char(pcdla.prvdr_pa_date, 'yyyy-mm-dd') pa_date
+			 , to_char(pcdla.prvdr_gl_date, 'yyyy-mm-dd') gl_date
+			 , pcdla.prvdr_gl_period_name
+			 , pcdla.transfer_status_code
+			 , pcdla.acct_source_code
+			 , '#' id_info___
 			 , '#' || peia.adjusted_expenditure_item_id adjusted_expenditure_item_id -- The identifier of the expenditure item adjusted by this expenditure item. Adjustment items are entered by users with negative amounts to fully reverse an item, or are system created to reverse a transferred item.	
 			 , '#' || peia.transferred_from_exp_item_id transferred_from_exp_item_id -- The identifier of the expenditure item from which this expenditure item originated. This expenditure item is the new item that is system created when an item is transferred and is charged to the new project/task	
 			 , '#' || peia.source_expenditure_item_id source_expenditure_item_id -- Stores the transaction number of the raw cost for which the separate burden cost was created. This is populated for burden cost transactions only if burden grouping is configured in the Project Process Configurator to group burden costs by transaction number.	
 			 , '#' || peia.burden_sum_dest_run_id burden_sum_dest_run_id -- Burden summarization run id. If populated, means Exp Item is created via Generate Burden Costs. Id will identify all the expenditure items created by burden component summarization process. This is used to identify all the Cost distribution lines summarized together to create expenditure item	
 			 , '#' || pcdla.ind_compiled_set_id ind_compiled_set_id -- The identifier of the compiled set which is used to calculate the burden cost
 			 , '#' || pcdla.burden_sum_source_run_id burden_sum_source_run_id -- If populated, means this is a Raw Cost Exp Item which has been Burdened. The same ID appears in the burden_sum_dest_run_id field on the exp item table for the Exp Item for the Burden Cost. This will identify group of Cost Distribution Lines that were summarized to create summarized burden component expenditure items(EI). The same run_id will be populated in EI table to identify all EI's created during a run.
-			 -- , '#' || pcdla.acct_event_id acct_event_id
+			 , '#' || pcdla.acct_event_id acct_event_id
 			 , '#' || pcdla.request_id cost_item_request_id
-			 -- , '#' || pcdla.interface_id interface_id
+			 , '#' || pcdla.interface_id interface_id
 		  from pjc_exp_items_all peia
 	 left join pjf_projects_all_vl ppav on peia.project_id = ppav.project_id
 	 left join pjf_tasks_v ptv on ppav.project_id = ptv.project_id and peia.task_id = ptv.task_id
