@@ -54,7 +54,7 @@ select * from ar_cash_receipts_all acra where acra.receipt_number in ('123456')
 	 left join hz_cust_accounts hca on hca.cust_account_id = acra.pay_from_customer
 	 left join hz_parties hp on hp.party_id = hca.party_id
 		 where 1 = 1
-		   and hca.account_number in ('496913','47179','46243','72058','75151','82582','109393')
+		   and hca.account_number in ('123')
 		   and 1 = 1
 
 -- ##############################################################
@@ -137,7 +137,6 @@ https://community.oracle.com/customerconnect/discussion/601846/query-to-find-amo
 			 , araa.days_late
 			 , araa.display
 
-
 -- ##############################################################
 -- RECEIPT APPLICATIONS
 -- ##############################################################
@@ -167,7 +166,7 @@ https://community.oracle.com/customerconnect/discussion/601846/query-to-find-amo
 		  join iex_delinq_summaries_all idsa on idsa.cust_account_id = hca.cust_account_id
 		 where 1 = 1
 		   and araa.display = 'Y'
-		   and rcta.trx_number = '5200236634'
+		   and rcta.trx_number = '123'
 		   and 1 = 1
 	  group by acra.receipt_number
 			 , acra.status
@@ -235,7 +234,7 @@ https://community.oracle.com/customerconnect/discussion/601846/query-to-find-amo
 		  join hz_parties hp on hp.party_id = hca.party_id
 		 where 1 = 1
 		   and araa.status = 'ACC'
-		   and hca.account_number = '47179'
+		   and hca.account_number = '123'
 		   and 1 = 1
 	  group by haou.name
 			 , '#' || hca.account_number
