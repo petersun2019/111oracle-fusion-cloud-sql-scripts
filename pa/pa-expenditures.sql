@@ -813,10 +813,10 @@ When Transfer is done, transferring Raw Cost from 1 Project to another - this ha
 		   and 1 = 1
 	  group by petl.expenditure_type_name
 			 , petl.description
-			 , ppav.segment1 project
+			 , ppav.segment1
 	  order by petl.expenditure_type_name
 			 , petl.description
-			 , ppav.segment1 project
+			 , ppav.segment1
 
 -- ##############################################################
 -- COUNT BY TRANSACTION SOURCE
@@ -867,12 +867,11 @@ When Transfer is done, transferring Raw Cost from 1 Project to another - this ha
 	 left join pjc_exp_items_all peia on peia.transaction_source_id = ptst.transaction_source_id and ptst.language = userenv('lang')
 	 left join pjf_projects_all_vl ppav on peia.project_id = ppav.project_id 
 		 where 1 = 1
-		   and ppav.segment1 in ('10364','14509')
 		   and 1 = 1
 	  group by ptst.user_transaction_source
 			 , ppav.segment1
-	  order by ppav.segment1
-			 , ptst.user_transaction_source
+	  order by ptst.user_transaction_source
+			 , ppav.segment1
 
 -- ##############################################################
 -- COUNT OF PA EXP ITEMS SENT TO GL
