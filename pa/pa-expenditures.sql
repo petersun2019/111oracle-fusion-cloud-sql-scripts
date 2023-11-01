@@ -808,6 +808,7 @@ When Transfer is done, transferring Raw Cost from 1 Project to another - this ha
 			 , max(peia.request_id) max_request_id
 		  from pjc_exp_items_all peia
 		  join pjf_exp_types_tl petl on peia.expenditure_type_id = petl.expenditure_type_id and petl.language = userenv('lang')
+	 left join pjf_projects_all_vl ppav on peia.project_id = ppav.project_id 
 		 where 1 = 1
 		   and 1 = 1
 	  group by petl.expenditure_type_name
