@@ -529,6 +529,7 @@ order siblings by rh.requestid
 			 , max(rh.requestid) max_id
 			 , min(rh.username) min_user
 			 , max(rh.username) max_user
+			 , count(rh.requestid) job_count
 		  from request_history rh
 		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
 		 where 1 = 1
