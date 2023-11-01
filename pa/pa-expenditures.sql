@@ -1,8 +1,5 @@
 /*
-File Name: pa-expenditures.sql
-Version: Oracle Fusion Cloud
-Author: Throwing Cheese
-URL: https://github.com/throwing-cheese/oracle-fusion-cloud-sql-scripts
+File Name:		pa-expenditures.sql
 
 Queries:
 
@@ -22,7 +19,9 @@ Queries:
 -- COUNT BY CREATION DATE
 -- COUNT BY CREATED BY
 -- COUNT BY EXPENDITURE TYPE
+-- COUNT BY EXPENDITURE TYPE AND PROJECT
 -- COUNT BY TRANSACTION SOURCE
+-- COUNT BY TRANSACTION SOURCE AND PROJECT
 -- COUNT OF PA EXP ITEMS SENT TO GL
 -- COUNT PER PROJECT
 -- COUNT BY REVENUE STATUS 1
@@ -42,8 +41,8 @@ Queries:
 -- TABLE DUMPS
 -- ##############################################################
 
-select * from pjc_exp_items_all where expenditure_item_id in (1868848,1868862,1868869,1868917,1868938,1868948,1869060,1869074,1869202,2231673,2231675,2231674,2231672)
-select * from pjc_cost_dist_lines_all where expenditure_item_id in (1868848,1868862,1868869,1868917,1868938,1868948,1869060,1869074,1869202,2231673,2231675,2231674,2231672)
+select * from pjc_exp_items_all where expenditure_item_id in (123)
+select * from pjc_cost_dist_lines_all where expenditure_item_id in (123)
 select * from pjc_expend_item_adj_acts
 
 -- ##############################################################
@@ -768,17 +767,20 @@ When Transfer is done, transferring Raw Cost from 1 Project to another - this ha
 
 		select petl.expenditure_type_name exp_type
 			 , petl.description
-			 , count(*)
+			 , count(peia.expenditure_type_id) expenditure_count
 			 , round(sum(peia.acct_raw_cost),2) sum_project_raw_cost
 			 , round(sum(peia.acct_burdened_cost),2) sum_burdened_cost
 			 , min(to_char(peia.creation_date, 'yyyy-mm-dd hh24:mi:ss')) min_creation_date
 			 , max(to_char(peia.creation_date, 'yyyy-mm-dd hh24:mi:ss')) max_creation_date 
 			 , min(to_char(peia.expenditure_item_date, 'yyyy-mm-dd')) min_item_date
 			 , max(to_char(peia.expenditure_item_date, 'yyyy-mm-dd')) max_item_date
+			 , min(ppav.segment1) min_proj
+			 , max(ppav.segment1) max_proj
 			 , min(peia.request_id) min_request_id
 			 , max(peia.request_id) max_request_id
 		  from pjc_exp_items_all peia
 		  join pjf_exp_types_tl petl on peia.expenditure_type_id = petl.expenditure_type_id and petl.language = userenv('lang')
+	 left join pjf_projects_all_vl ppav on peia.project_id = ppav.project_id 
 		 where 1 = 1
 		   and 1 = 1
 	  group by petl.expenditure_type_name
@@ -787,27 +789,89 @@ When Transfer is done, transferring Raw Cost from 1 Project to another - this ha
 			 , petl.description
 
 -- ##############################################################
--- COUNT BY TRANSACTION SOURCE
+-- COUNT BY EXPENDITURE TYPE AND PROJECT
 -- ##############################################################
 
-		select ptst.user_transaction_source trx_source
-			 , count(*)
+		select petl.expenditure_type_name exp_type
+			 , petl.description
+			 , ppav.segment1 project
+			 , count(peia.expenditure_type_id) expenditure_count
 			 , round(sum(peia.acct_raw_cost),2) sum_project_raw_cost
 			 , round(sum(peia.acct_burdened_cost),2) sum_burdened_cost
 			 , min(to_char(peia.creation_date, 'yyyy-mm-dd hh24:mi:ss')) min_creation_date
 			 , max(to_char(peia.creation_date, 'yyyy-mm-dd hh24:mi:ss')) max_creation_date 
 			 , min(to_char(peia.expenditure_item_date, 'yyyy-mm-dd')) min_item_date
 			 , max(to_char(peia.expenditure_item_date, 'yyyy-mm-dd')) max_item_date
+			 , min(ppav.segment1) min_proj
+			 , max(ppav.segment1) max_proj
+			 , min(peia.request_id) min_request_id
+			 , max(peia.request_id) max_request_id
+		  from pjc_exp_items_all peia
+		  join pjf_exp_types_tl petl on peia.expenditure_type_id = petl.expenditure_type_id and petl.language = userenv('lang')
+		 where 1 = 1
+		   and 1 = 1
+	  group by petl.expenditure_type_name
+			 , petl.description
+			 , ppav.segment1 project
+	  order by petl.expenditure_type_name
+			 , petl.description
+			 , ppav.segment1 project
+
+-- ##############################################################
+-- COUNT BY TRANSACTION SOURCE
+-- ##############################################################
+
+		select ptst.user_transaction_source trx_source
+			 , count(peia.expenditure_type_id) expenditure_count
+			 , round(sum(peia.acct_raw_cost),2) sum_project_raw_cost
+			 , round(sum(peia.acct_burdened_cost),2) sum_burdened_cost
+			 , min(to_char(peia.creation_date, 'yyyy-mm-dd hh24:mi:ss')) min_creation_date
+			 , max(to_char(peia.creation_date, 'yyyy-mm-dd hh24:mi:ss')) max_creation_date 
+			 , min(to_char(peia.expenditure_item_date, 'yyyy-mm-dd')) min_item_date
+			 , max(to_char(peia.expenditure_item_date, 'yyyy-mm-dd')) max_item_date
+			 , min(ppav.segment1) min_proj
+			 , max(ppav.segment1) max_proj
 			 , min(peia.request_id) min_request_id
 			 , max(peia.request_id) max_request_id
 			 , min(peia.expenditure_item_id) min_item_id
 			 , max(peia.expenditure_item_id) max_item_id
-		  from pjc_exp_items_all peia
-	 left join pjf_txn_sources_tl ptst on peia.transaction_source_id = ptst.transaction_source_id and ptst.language = userenv('lang')
+		  from pjf_txn_sources_tl ptst
+	 left join pjc_exp_items_all peia on peia.transaction_source_id = ptst.transaction_source_id and ptst.language = userenv('lang')
+	 left join pjf_projects_all_vl ppav on peia.project_id = ppav.project_id 
 		 where 1 = 1
 		   and 1 = 1
 	  group by ptst.user_transaction_source
 	  order by ptst.user_transaction_source
+
+-- ##############################################################
+-- COUNT BY TRANSACTION SOURCE AND PROJECT
+-- ##############################################################
+
+		select ptst.user_transaction_source trx_source
+			 , ppav.segment1 project
+			 , count(peia.expenditure_type_id) expenditure_count
+			 , round(sum(peia.acct_raw_cost),2) sum_project_raw_cost
+			 , round(sum(peia.acct_burdened_cost),2) sum_burdened_cost
+			 , min(to_char(peia.creation_date, 'yyyy-mm-dd hh24:mi:ss')) min_creation_date
+			 , max(to_char(peia.creation_date, 'yyyy-mm-dd hh24:mi:ss')) max_creation_date 
+			 , min(to_char(peia.expenditure_item_date, 'yyyy-mm-dd')) min_item_date
+			 , max(to_char(peia.expenditure_item_date, 'yyyy-mm-dd')) max_item_date
+			 , min(ppav.segment1) min_proj
+			 , max(ppav.segment1) max_proj
+			 , min(peia.request_id) min_request_id
+			 , max(peia.request_id) max_request_id
+			 , min(peia.expenditure_item_id) min_item_id
+			 , max(peia.expenditure_item_id) max_item_id
+		  from pjf_txn_sources_tl ptst
+	 left join pjc_exp_items_all peia on peia.transaction_source_id = ptst.transaction_source_id and ptst.language = userenv('lang')
+	 left join pjf_projects_all_vl ppav on peia.project_id = ppav.project_id 
+		 where 1 = 1
+		   and ppav.segment1 in ('10364','14509')
+		   and 1 = 1
+	  group by ptst.user_transaction_source
+			 , ppav.segment1
+	  order by ppav.segment1
+			 , ptst.user_transaction_source
 
 -- ##############################################################
 -- COUNT OF PA EXP ITEMS SENT TO GL
