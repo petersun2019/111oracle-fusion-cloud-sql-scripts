@@ -1,8 +1,5 @@
 /*
 File Name: sa-requests-history.sql
-Version: Oracle Fusion Cloud
-Author: Throwing Cheese
-URL: https://github.com/throwing-cheese/oracle-fusion-cloud-sql-scripts
 
 Queries:
 
@@ -19,6 +16,7 @@ Queries:
 -- COUNT BY HOUR
 -- COUNT BY USERNAME
 -- COUNT LINKED TO HR RECORD
+-- COUNT SCHEDULED JOBS BY PRODUCT
 -- JOB HISTORY INCLUDING JOB NAME LOOKUP
 -- JOB DEFINITION
 -- BI PUBLISHER JOB HISTORY
@@ -107,7 +105,7 @@ select * from fusion_ora_ess.request_property where requestid = 123456
 		   -------------------------- definition --------------------------
 		   -- and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('APCSTTRF')
 		   -------------------------- users --------------------------
-		   and rh.username like '%@%'
+		   and rh.username = 'THIS'
 		   -- and rh.username not in ('FIN_SCHEDULE','FAAdmin','FUSION_APPS_PRC_SOA_APPID')
 		   -- and rh.username in ('APXIIMPT_BIP')
 		   -------------------------- misc --------------------------
@@ -125,9 +123,9 @@ select * from fusion_ora_ess.request_property where requestid = 123456
 		   -- and rh.processstart > sysdate - 10
 		   -- and rh.completedtime is null
 		   -- and rh.scheduled is null
-		   -- and to_char(rh.processstart, 'YYYY') = '2023'
-		   -- and to_char(rh.processstart, 'MM') = '08'
-		   -- and to_char(rh.processstart, 'DD') = '30'
+		   and to_char(rh.processstart, 'YYYY') = '2023'
+		   and to_char(rh.processstart, 'MM') = '10'
+		   and to_char(rh.processstart, 'DD') = '03'
 		   -- and to_char(rh.processstart, 'HH24') = '03'
 		   -- and to_char(rh.processstart, 'HH24') > 22
 		   -- and to_char(rh.processstart, 'DD') in ('01','02','03','04','05','06')
@@ -521,6 +519,25 @@ order siblings by rh.requestid
 	  order by 7 desc
 
 -- ##############################################################
+-- COUNT SCHEDULED JOBS BY PRODUCT
+-- ##############################################################
+
+		select rh.product
+			 , min(substr(rh.definition,(instr(rh.definition,'/',-1)+1))) min_job
+			 , max(substr(rh.definition,(instr(rh.definition,'/',-1)+1))) max_job
+			 , min(rh.requestid) min_id
+			 , max(rh.requestid) max_id
+			 , min(rh.username) min_user
+			 , max(rh.username) max_user
+		  from request_history rh
+		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
+		 where 1 = 1
+		   and flv_state.meaning = 'Wait'
+		   and rh.adhocschedule is not null -- not scheduled
+	  group by rh.product
+	  order by rh.product
+
+-- ##############################################################
 -- JOB HISTORY INCLUDING JOB NAME LOOKUP
 -- ##############################################################
 
@@ -811,7 +828,7 @@ Error when I try to run the SQL: ORA-01031: insufficient privileges
 
 /*
 BI Publisher (Report Job History)
-https://fa-esms-saasfaukgovprod1.fa.ocs.oraclecloud.com/analytics/saw.dll?bipublisherEntry&Action=history
+https://xyz.oraclecloud.com/analytics/saw.dll?bipublisherEntry&Action=history
 
 Report Job ID: EXTERNALPROCESSID
 Report Job Name: REQUESTID
