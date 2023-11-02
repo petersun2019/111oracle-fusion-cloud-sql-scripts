@@ -50,6 +50,7 @@ If you have any problems with the scripts, [please log an issue](https://github.
 	|       ar-approval-limits.sql
 	|       ar-customers.sql
 	|       ar-memo-lines.sql
+	|       ar-payment-terms.sql
 	|       ar-receipts.sql
 	|       ar-transactions-interface.sql
 	|       ar-transactions.sql
