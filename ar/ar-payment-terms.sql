@@ -1,6 +1,8 @@
 /*
 File Name: ar-payment-terms.sql
-
+Version: Oracle Fusion Cloud
+Author: Throwing Cheese
+URL: https://github.com/throwing-cheese/oracle-fusion-cloud-sql-scripts
 */
 
 -- ##############################################################
