@@ -31,30 +31,31 @@ select * from ar_cash_receipts_all acra where acra.receipt_number in ('123456')
 -- RECEIPT DETAILS
 -- ##############################################################
 
-		select '#' || acra.cash_receipt_id cash_receipt_id
+		select acra.cash_receipt_id
 			 , to_char(acra.creation_date, 'yyyy-mm-dd hh24:mi:ss') creation_date
 			 , to_char(acra.receipt_date, 'yyyy-mm-dd') receipt_date
 			 , acra.receipt_number
+			 , arm.name receipt_method
 			 , acra.doc_sequence_value
 			 , acra.customer_site_use_id
-			 , '#' || acra.doc_sequence_id doc_sequence_id
+			 , hps.party_site_number
 			 , fds.name doc_sequence
 			 , acra.comments
 			 , acra.amount
 			 , haou.name org
 			 , hca.account_number
 			 , hca.account_name
-			 , '#' || hp.party_id party_id
-			 , hp.party_name
-			 , hp.party_number
-			 , hp.party_type
+			 , hca.cust_account_id
 		  from ar_cash_receipts_all acra
 	 left join hr_all_organization_units haou on acra.org_id = haou.organization_id
 	 left join fnd_document_sequences fds on fds.doc_sequence_id = acra.doc_sequence_id
 	 left join hz_cust_accounts hca on hca.cust_account_id = acra.pay_from_customer
 	 left join hz_parties hp on hp.party_id = hca.party_id
+	 left join hz_cust_site_uses_all hcsua on hcsua.site_use_id = acra.customer_site_use_id
+	 left join hz_cust_acct_sites_all hcasa on hcasa.cust_acct_site_id = hcsua.cust_acct_site_id and hca.cust_account_id = hcasa.cust_account_id
+	 left join hz_party_sites hps on hcasa.party_site_id = hps.party_site_id 
+	 left join ar_receipt_methods arm on acra.receipt_method_id = arm.receipt_method_id
 		 where 1 = 1
-		   and hca.account_number in ('123')
 		   and 1 = 1
 
 -- ##############################################################
