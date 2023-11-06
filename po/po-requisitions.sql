@@ -176,8 +176,6 @@ select * from por_req_distributions_all where requisition_line_id = 123
 			 , gcc.segment4
 			 , gcc.segment5
 			 , (replace(replace(prla.item_description,chr(10),''),chr(13),' ')) item_description
-			 , esib.item_number
-			 , esit.description inv_item_descr
 		  from por_requisition_headers_all prha
 		  join por_requisition_lines_all prla on prha.requisition_header_id = prla.requisition_header_id
 		  join por_req_distributions_all prda on prla.requisition_line_id = prda.requisition_line_id
@@ -188,8 +186,6 @@ select * from por_req_distributions_all where requisition_line_id = 123
 		  join poz_suppliers_v psv on prla.vendor_id = psv.vendor_id 
 	 left join hr_all_organization_units haou on prda.pjc_organization_id = haou.organization_id
 	 left join fun_all_business_units_v bu on bu.bu_id = prha.req_bu_id
-	 left join egp_system_items_b esib on esib.inventory_item_id = prla.item_id
-	 left join egp_system_items_tl esit on esit.inventory_item_id = esib.inventory_item_id
 		 where 1 = 1
 		   and 1 = 1
 	  order by to_char(prha.creation_date,'yyyy-mm-dd') desc
