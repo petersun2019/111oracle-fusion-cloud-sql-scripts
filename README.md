@@ -98,9 +98,6 @@ If you have any problems with the scripts, [please log an issue](https://github.
 	|       iex.sql
 	|       iex-collectors.sql
 	|       
-	+---inv
-	|       inv-transactions.sql
-	|       
 	+---pa
 	|       pa-billing-events.sql
 	|       pa-budgets.sql
