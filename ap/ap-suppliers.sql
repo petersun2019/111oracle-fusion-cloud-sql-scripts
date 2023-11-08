@@ -256,7 +256,9 @@ http://oracleebsgeeks.blogspot.com/2020/08/sql-query-to-get-supplier-contact.htm
 		  join iby_external_payees_all iepa on iepa.supplier_site_id = pssam.vendor_site_id and iepa.payment_function = 'PAYABLES_DISB'
 		 where 1 = 1
 		   and iepa.remit_advice_email is not null -- remittance advice email is populated
-		   and iepa.supplier_site_id is not null -- disbursement is at site level
+		   and iepa.ext_payee_id is not null and iepa.party_site_id is not null and iepa.supplier_site_id is not null -- disbursement is at site level
+		   -- and iepa.party_site_id is null and iepa.supplier_site_id is null -- disbursement is at supplier level
+		   -- and iepa.ext_payee_id is not null and iepa.party_site_id is not null and iepa.supplier_site_id is null -- disbursement is at address level
 		   -- and substr(iepa.remit_advice_email,1,1) = ' ' or substr(iepa.remit_advice_email,-1,1) = ' ' -- leading or trailing spaces in email address
 		   and 1 = 1
 
