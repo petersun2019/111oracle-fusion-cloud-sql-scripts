@@ -234,14 +234,13 @@ http://oracleebsgeeks.blogspot.com/2020/08/sql-query-to-get-supplier-contact.htm
 -- ##############################################################
 
 		select psv.vendor_name
+			 , psv.vendor_id
 			 , psv.segment1 supplier_num
 			 , psv.enabled_flag enabled
 			 , pssam.vendor_site_code site
 			 , to_char(pssam.effective_start_date, 'yyyy-mm-dd') site_start_date
 			 , to_char(pssam.effective_end_date, 'yyyy-mm-dd') site_end_date
 			 , to_char(pssam.inactive_date, 'yyyy-mm-dd') site_inactive_date
-			 , hp.party_number
-			 , hp.party_name
 			 , case when iepa.ext_payee_id is not null and iepa.party_site_id is null and iepa.supplier_site_id is null then 'Supplier Header'
 					when iepa.ext_payee_id is not null and iepa.party_site_id is not null and iepa.supplier_site_id is null then 'Address'
 					when iepa.ext_payee_id is not null and iepa.party_site_id is not null and iepa.supplier_site_id is not null then 'Site'
@@ -252,18 +251,14 @@ http://oracleebsgeeks.blogspot.com/2020/08/sql-query-to-get-supplier-contact.htm
 					when substr(iepa.remit_advice_email,-1,1) = ' ' then 'trailing -->'
 			   end space_issue
 			 , iepa.remit_advice_delivery_method "iepa remit_advice_delivery_method"
-			 , to_char(iepa.creation_date, 'yyyy-mm-dd hh24:mi:ss') disb_created
-			 , to_char(iepa.last_update_date, 'yyyy-mm-dd hh24:mi:ss') disb_updated
-			 , iepa.last_updated_by disb_updated_by
 		  from poz_suppliers_v psv
 		  join poz_supplier_sites_all_m pssam on psv.vendor_id = pssam.vendor_id
-		  join hz_parties hp on psv.party_id = hp.party_id
-		  join iby_external_payees_all iepa on iepa.payee_party_id = hp.party_id and iepa.payment_function = 'PAYABLES_DISB'
+		  join iby_external_payees_all iepa on iepa.supplier_site_id = pssam.vendor_site_id and iepa.payment_function = 'PAYABLES_DISB'
 		 where 1 = 1
-		   and iepa.remit_advice_email is not null
+		   and iepa.remit_advice_email is not null -- remittance advice email is populated
+		   and iepa.supplier_site_id is not null -- disbursement is at site level
 		   -- and substr(iepa.remit_advice_email,1,1) = ' ' or substr(iepa.remit_advice_email,-1,1) = ' ' -- leading or trailing spaces in email address
-
-	  order by iepa.last_update_date desc
+		   and 1 = 1
 
 -- ##############################################################
 -- TABLE STORING REMITTANCE INFO LINKED TO A PAYMENT PROCESS PROFILE: IBY_REMIT_ADVICE_SETUP
