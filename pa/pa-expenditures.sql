@@ -1,5 +1,5 @@
 /*
-File Name:		pa-expenditures.sql
+File Name: pa-expenditures.sql
 
 Queries:
 
@@ -33,6 +33,7 @@ Queries:
 -- COUNT AND SUM BY PROJECT
 -- COUNTING AND SUMMING LINKED TO BURDEN STRUCTURES
 -- COUNT OF EXP ITEMS PER BURDEN STRUCTURE
+-- COUNT BY SYSTEM_LINKAGE_FUNCTION AND BUDGETARY_CONTROL_VAL_STATUS
 -- ACCT SUMMARY
 
 */
@@ -108,8 +109,8 @@ When Transfer is done, transferring Raw Cost from 1 Project to another - this ha
 			 , ppav.segment1 proj
 			 , peia.system_linkage_function cost_fcn
 			 , pslt_fcn.meaning cost_fcn_meaning
-			 , peia.src_system_linkage_function src_fcn
-			 , pslt_src.meaning src_fcn_meaning
+			 , peia.src_system_linkage_function src_fcn -- populated for burden transactions
+			 , pslt_src.meaning src_fcn_meaning -- populated for burden transactions
 			 , to_char(peia.expenditure_item_date, 'yyyy-mm-dd') exp_item_date
 			 , replace(replace(pec.expenditure_comment,chr(10),' '),chr(13),' ') expenditure_comment
 			 , to_char(peia.creation_date, 'yyyy-mm-dd hh24:mi:ss') exp_item_created
@@ -131,6 +132,10 @@ When Transfer is done, transferring Raw Cost from 1 Project to another - this ha
 			 , pect.expenditure_category_name
 			 , ptdet.doc_entry_name exp_document_entry
 			 , ptdt.document_name exp_document
+			 , trx_types.transaction_type_name source_trx_type
+			 , peia.source_txn_quantity
+			 , peia.doc_ref_id1 cost_trx_num
+			 , peia.doc_ref_id4 cost_element
 			 , pega.expenditure_group
 			 , pega.user_batch_name
 			 , '#' exp_item_costs____
@@ -156,6 +161,11 @@ When Transfer is done, transferring Raw Cost from 1 Project to another - this ha
 			 , peia.original_line_number
 			 , peia.user_batch_name peia_user_batch
 			 , peia.creation_source
+			 , peia.budgetary_control_val_status -- Budgetary control validation status at the transaction level
+			 , peia.xcc_btc_status -- Budgetary control distribution status indicating if the burden transaction cost process will pick up a separate line burden transaction
+			 , peia.planned_flag -- Identifier whether the transaction amount is palnned or not
+			 , peia.cost_dist_warning_code -- During funds check if the transaction passes in advisory mode then this column will be updated with the apropriate warning
+			 , peia.funding_allocation_id -- Specifies the name of the project funding source
 			 , pha.segment1 po
 			 , psv.vendor_name supplier
 			 , pcdla.line_num line
@@ -186,6 +196,7 @@ When Transfer is done, transferring Raw Cost from 1 Project to another - this ha
 			 , '#' || pcdla.request_id cost_item_request_id
 			 , '#' || pcdla.interface_id interface_id
 		  from pjc_exp_items_all peia
+		  join pjc_cost_dist_lines_all pcdla on pcdla.project_id = peia.project_id and pcdla.expenditure_item_id = peia.expenditure_item_id
 	 left join pjf_projects_all_vl ppav on peia.project_id = ppav.project_id
 	 left join pjf_tasks_v ptv on ppav.project_id = ptv.project_id and peia.task_id = ptv.task_id
 	 left join pjf_project_types_tl pptt on pptt.project_type_id = ppav.project_type_id and pptt.language = userenv('lang')
@@ -206,7 +217,7 @@ When Transfer is done, transferring Raw Cost from 1 Project to another - this ha
 	 left join pjc_exp_comments pec on pec.expenditure_item_id = peia.expenditure_item_id
 	 left join pjf_system_linkages_tl pslt_fcn on pslt_fcn.function = peia.system_linkage_function and pslt_fcn.language = userenv('lang')
 	 left join pjf_system_linkages_tl pslt_src on pslt_src.function = peia.src_system_linkage_function and pslt_src.language = userenv('lang')
-		  join pjc_cost_dist_lines_all pcdla on pcdla.project_id = peia.project_id and pcdla.expenditure_item_id = peia.expenditure_item_id
+	 left join inv_transaction_types_tl trx_types on trx_types.transaction_type_id = peia.base_txn_type_id and trx_types.language = userenv('lang')
 		 where 1 = 1
 		   and 1 = 1
 	  order by to_char(peia.last_update_date, 'yyyy-mm-dd hh24:mi:ss') desc
@@ -822,7 +833,8 @@ When Transfer is done, transferring Raw Cost from 1 Project to another - this ha
 -- COUNT BY TRANSACTION SOURCE
 -- ##############################################################
 
-		select ptst.user_transaction_source trx_source
+		select ptst.transaction_source_id
+			 , ptst.user_transaction_source trx_source
 			 , count(peia.expenditure_type_id) expenditure_count
 			 , round(sum(peia.acct_raw_cost),2) sum_project_raw_cost
 			 , round(sum(peia.acct_burdened_cost),2) sum_burdened_cost
@@ -841,7 +853,8 @@ When Transfer is done, transferring Raw Cost from 1 Project to another - this ha
 	 left join pjf_projects_all_vl ppav on peia.project_id = ppav.project_id 
 		 where 1 = 1
 		   and 1 = 1
-	  group by ptst.user_transaction_source
+	  group by ptst.transaction_source_id
+			 , ptst.user_transaction_source
 	  order by ptst.user_transaction_source
 
 -- ##############################################################
@@ -1199,45 +1212,8 @@ with overheads as
 			 , count(*) item_count
 		  from pjf_projects_all_vl ppav
 		  join pjc_exp_items_all peia on peia.project_id = ppav.project_id
-		  join pjc_cost_dist_lines_all pcdla on pcdla.project_id = peia.project_id and pcdla.expenditure_item_id = peia.expenditure_item_id and pcdla.burden_sum_source_run_id is not null -- exp item cost dist line burden_sum_source_run_id is populated with id for overheads burden_sum_dest_run_id id
-		 where ppav.segment1 = '123'
-	  group by ppav.segment1
-			 , ppav.project_id)
-		select overheads.project
-			 , overheads.total_value overheads_value
-			 , overheads.item_count overheads_item_count
-			 , non_overheads.total_value non_overheads_value
-			 , non_overheads.item_count non_overheads_item_count
-			 , (round((overheads.total_value / non_overheads.total_value), 2)*100) overheads_percent
-		  from overheads
-		  join non_overheads on overheads.project_id = non_overheads.project_id
-	  group by overheads.project
-			 , overheads.total_value
-			 , overheads.item_count
-			 , non_overheads.total_value
-			 , non_overheads.item_count
-			 
-with overheads as
-	   (select ppav.segment1 project
-			 , ppav.project_id
-			 , round(sum(peia.project_burdened_cost),2) total_value
-			 , count(*) item_count
-		  from pjf_projects_all_vl ppav
-		  join pjc_exp_items_all peia on peia.project_id = ppav.project_id
-		 where 1 = 1
-		   and ppav.segment1 = '123'
-		   and peia.burden_sum_dest_run_id is not null -- overheads burden_sum_dest_run_id id is populated...
-	  group by ppav.segment1
-			 , ppav.project_id)
-, non_overheads as
-	   (select ppav.segment1 project
-			 , ppav.project_id
-			 , round(sum(peia.project_raw_cost),2) total_value
-			 , count(*) item_count
-		  from pjf_projects_all_vl ppav
-		  join pjc_exp_items_all peia on peia.project_id = ppav.project_id
-		  join pjf_ind_rate_sch_vl pirsv on ppav.project_id = pirsv.project_id
-		  join pjf_cost_base_exp_types pcbet on peia.expenditure_type_id = pcbet.expenditure_type_id and pcbet.ind_structure_name = pirsv.ind_structure_name
+	 left join pjf_ind_rate_sch_vl pirsv on ppav.project_id = pirsv.project_id
+	 left join pjf_cost_base_exp_types pcbet on peia.expenditure_type_id = pcbet.expenditure_type_id and pcbet.ind_structure_name = pirsv.ind_structure_name
 		  join pjc_cost_dist_lines_all pcdla on pcdla.project_id = peia.project_id and pcdla.expenditure_item_id = peia.expenditure_item_id and pcdla.burden_sum_source_run_id is not null -- exp item cost dist line burden_sum_source_run_id is populated with id for overheads burden_sum_dest_run_id id
 		 where ppav.segment1 = '123'
 	  group by ppav.segment1
@@ -1257,7 +1233,7 @@ with overheads as
 			 , multipliers.multiplier_num
 		  from overheads
 		  join non_overheads on overheads.project_id = non_overheads.project_id
-		  join multipliers on multipliers.project_id = overheads.project_id
+	 left join multipliers on multipliers.project_id = overheads.project_id
 	  group by overheads.project
 			 , overheads.total_value
 			 , overheads.item_count
@@ -1280,6 +1256,39 @@ with overheads as
 	  order by pcbet.ind_structure_name
 			 , pcbet.cost_base
 			 , pcbet.cost_base_type 
+
+-- ##############################################################
+-- COUNT BY SYSTEM_LINKAGE_FUNCTION AND BUDGETARY_CONTROL_VAL_STATUS
+-- ##############################################################
+
+		select peia.system_linkage_function cost_fcn
+			 , pslt_fcn.meaning cost_fcn_meaning
+			 , peia.src_system_linkage_function src_fcn
+			 , ptst.user_transaction_source trx_source
+			 , peia.budgetary_control_val_status
+			 , sum(peia.project_raw_cost) project_raw_cost
+			 , min(peia.project_raw_cost) project_raw_cost_min
+			 , max(peia.project_raw_cost) project_raw_cost_max
+			 , sum(peia.project_burdened_cost) project_burdened_cost
+			 , sum(peia.quantity) quantity
+			 , to_char(min(peia.creation_date),'yyyy-mm-dd') min_item_created
+			 , to_char(max(peia.creation_date),'yyyy-mm-dd') max_item_created
+			 , to_char(min(peia.expenditure_item_date),'yyyy-mm-dd') min_item_date
+			 , to_char(max(peia.expenditure_item_date),'yyyy-mm-dd') max_item_date
+			 , min(peia.expenditure_item_id) min_item_id
+			 , max(peia.expenditure_item_id) max_item_id
+			 , min(peia.request_id) min_request_id
+			 , max(peia.request_id) max_request_id
+			 , count(peia.expenditure_item_id) item_count
+		  from pjc_exp_items_all peia
+	 left join pjf_txn_sources_tl ptst on peia.transaction_source_id = ptst.transaction_source_id and ptst.language = userenv('lang')
+	 left join pjf_system_linkages_tl pslt_fcn on pslt_fcn.function = peia.system_linkage_function and pslt_fcn.language = userenv('lang')
+	 left join pjf_system_linkages_tl pslt_src on pslt_src.function = peia.src_system_linkage_function and pslt_src.language = userenv('lang')
+	  group by peia.system_linkage_function
+			 , pslt_fcn.meaning
+			 , peia.src_system_linkage_function
+			 , ptst.user_transaction_source
+			 , peia.budgetary_control_val_status
 
 -- ##############################################################
 -- ACCT SUMMARY
