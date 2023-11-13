@@ -1259,15 +1259,20 @@ with overheads as
 -- COUNT BY SYSTEM_LINKAGE_FUNCTION AND BUDGETARY_CONTROL_VAL_STATUS
 -- ##############################################################
 
+-- ##############################################################
+-- COUNT BY SYSTEM_LINKAGE_FUNCTION AND BUDGETARY_CONTROL_VAL_STATUS
+-- ##############################################################
+
 		select peia.system_linkage_function cost_fcn
 			 , pslt_fcn.meaning cost_fcn_meaning
 			 , pslt_src.meaning src_fcn
 			 , ptst.user_transaction_source trx_source
 			 , trx_types.transaction_type_name source_trx_type
+			 , ptdet.doc_entry_name exp_document_entry
+			 , ptdt.document_name exp_document
 			 , peia.budgetary_control_val_status
 			 , sum(peia.project_raw_cost) project_raw_cost
 			 , sum(peia.project_burdened_cost) project_burdened_cost
-			 , sum(peia.quantity) quantity
 			 , to_char(min(peia.creation_date),'yyyy-mm-dd') min_item_created
 			 , to_char(max(peia.creation_date),'yyyy-mm-dd') max_item_created
 			 , to_char(min(peia.expenditure_item_date),'yyyy-mm-dd') min_item_date
@@ -1283,11 +1288,15 @@ with overheads as
 	 left join pjf_system_linkages_tl pslt_src on pslt_src.function = peia.src_system_linkage_function and pslt_src.language = userenv('lang')
 	 left join inv_transaction_types_tl trx_types on trx_types.transaction_type_id = peia.base_txn_type_id and trx_types.language = userenv('lang')
 	 left join pjf_system_linkages_tl pslt_src_fcn on pslt_src_fcn.function = peia.src_system_linkage_function and pslt_src_fcn.language = userenv('lang')
+	 left join pjf_txn_doc_entry_tl ptdet on ptdet.doc_entry_id = peia.doc_entry_id and ptdet.language = userenv('lang')
+	 left join pjf_txn_document_tl ptdt on ptdt.document_id = peia.document_id and ptdt.language = userenv('lang')
 	  group by peia.system_linkage_function
 			 , pslt_fcn.meaning
 			 , pslt_src.meaning
 			 , ptst.user_transaction_source
 			 , trx_types.transaction_type_name
+			 , ptdet.doc_entry_name
+			 , ptdt.document_name
 			 , peia.budgetary_control_val_status
 
 -- ##############################################################
