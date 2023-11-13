@@ -1,5 +1,8 @@
 /*
 File Name: sa-requests-history.sql
+Version: Oracle Fusion Cloud
+Author: Throwing Cheese
+URL: https://github.com/throwing-cheese/oracle-fusion-cloud-sql-scripts
 
 Queries:
 
@@ -210,6 +213,47 @@ select * from fusion_ora_ess.request_property where requestid = 123456
 -- REQUEST HISTORY - SCHEDULED
 -- ##############################################################
 
+/*
+Where the adhocschedule contains the <ical-expression> tag
+It is usually the case that the job was run by a user account ending in "APPID" e.g. FUSION_APPS_HCM_ESS_APPID
+As per:
+https://community.oracle.com/customerconnect/discussion/comment/888413#Comment_888413
+
+- %APPID - These are internal application users, their purpose is to authorize an application to exchange/access another application. 
+- These users do not actually have functional access to your data (eg you cannot login with any of these users to access business flows).
+- The user is an internal account for Fusion Applications functionality.
+- These accounts are not visible in Security Console.
+- These accounts are owned by Oracle software.
+- Most those users are used by program, no human know their password.
+
+Re. CREATED_BY in PER_USERS for those %APPID user accounts:
+
+- The create_by user in the table is the user who brought the data from ldap server into per_users table
+- not the user who create the APPID user in ldap server.
+- the create_by user in ldap server will be an system user, but cloud customer does not have access to ldap server
+- for example, the user who run retrieve latest ldap changes process, will bring data into per_users table, and that user can be the create_by user in the table
+
+Other <ical-expression> jobs are submitted by the "FAAdmin" user
+
+FndExtMgrDigestPurgeJob - Job for purging Extension Manager old Digests
+FndIDCSSyncNotifyServiceJob - Job for FA IDCS Users Sync
+FndOSCSBulkIngestJob - Job for processing errored rows to Oracle Search Cloud Service
+FndOSCSAvailabilityJob - Job to check Search Cloud Service availability
+FndOSCSAttachmentIngestJob - Job for ingesting attachments to Oracle Search Cloud Service
+BPMSMCAttachmentUploadServiceJob - Job to Upload Attachments of BPM Archive Tasks.
+BPMSMCTranslationServiceJob - Job to Process Translation of BPM Archive Tasks.
+BPMSMCDataExtractServiceJob - Job to Extract Workflow Tasks for Archive.
+
+Also, some jobs are submitted by "regular" non system users where the <ical-expression> tag is populated in adhocschedule
+
+Main job seems to be the "EssBipJob" under the "BI Publisher" Product name, so these are scheduled BI Publisher jobs.
+
+Therefore, to return non <ical-expression> jobs, add this line:
+
+and instr(replace(utl_raw.cast_to_varchar2(adhocschedule),chr(0),''),'<ical-expression>') = 0 -- exclude jobs run by system %APPID accounts, plus the "EssBipJob" BI Publiser job
+*/
+
+
 		select rh.requestid
 			 , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
 			 , rh.instanceparentid -- the parent process in that instance run
@@ -242,14 +286,15 @@ select * from fusion_ora_ess.request_property where requestid = 123456
 		   and rh.state = 1
 		   and flv_state.meaning = 'Wait'
 		   and rh.adhocschedule is not null
+		   and instr(replace(utl_raw.cast_to_varchar2(adhocschedule),chr(0),''),'<ical-expression>') = 0 -- exclude jobs run by system %APPID accounts, plus the "EssBipJob" BI Publiser job
 		   -------------------------- ids --------------------------
 		   -- and rh.requestid = 123456
 		   -- and rh.requestid between 123456 and 123490
 		   -- and rh.requestid in (5000811, 5000817, 5000822, 5000825)
 		   -------------------------- definition --------------------------
-		   -- and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) not in ('RebuildLearningItemSearchKeywordsJob')
+		   -- and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) = 'XLAFSNAPRPT'
 		   -------------------------- users --------------------------
-		   -- and fu.username = 'USER123'
+		   -- and rh.username not like '%APPID'
 		   -- and rh.username not in ('FIN_SCHEDULE','FAAdmin','FUSION_APPS_PRC_SOA_APPID')
 		   -- and rh.username in ('APXIIMPT_BIP')
 		   -------------------------- misc --------------------------
@@ -272,7 +317,6 @@ select * from fusion_ora_ess.request_property where requestid = 123456
 		   -- and to_char(rh.processstart, 'DD') in ('01','02','03','04','05','06')
 		   -- and to_char(rh.processstart, 'HH24') in ('01')
 		   -- and round((cast(sys_extract_utc (rh.processend) as date) - cast(sys_extract_utc (rh.processstart) as date)) * 1440,2) > 200
-		   -- and rh.product = 'IEX'
 	  order by rh.requestid desc
 
 -- ##############################################################
@@ -829,11 +873,11 @@ Error when I try to run the SQL: ORA-01031: insufficient privileges
 
 /*
 BI Publisher (Report Job History)
-https://xyz.oraclecloud.com/analytics/saw.dll?bipublisherEntry&Action=history
+https://zz.oraclecloud.com/analytics/saw.dll?bipublisherEntry&Action=history
 
 Report Job ID: EXTERNALPROCESSID
 Report Job Name: REQUESTID
 */
 
-select * from fusion_ora_ess.request_history_view where requestid = 5292473
-select * from fusion_ora_ess.request_history where requestid = 5292473
+select * from fusion_ora_ess.request_history_view where requestid = 123
+select * from fusion_ora_ess.request_history where requestid = 123
