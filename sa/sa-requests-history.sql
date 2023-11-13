@@ -248,7 +248,7 @@ Also, some jobs are submitted by "regular" non system users where the <ical-expr
 
 Main job seems to be the "EssBipJob" under the "BI Publisher" Product name, so these are scheduled BI Publisher jobs.
 
-Therefore, to return non <ical-expression> jobs, add this line:
+Therefore, to exclude <ical-expression> jobs, add this line:
 
 and instr(replace(utl_raw.cast_to_varchar2(adhocschedule),chr(0),''),'<ical-expression>') = 0 -- exclude jobs run by system %APPID accounts, plus the "EssBipJob" BI Publiser job
 */
