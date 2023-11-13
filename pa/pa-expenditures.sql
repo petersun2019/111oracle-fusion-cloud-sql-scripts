@@ -475,8 +475,6 @@ When Transfer is done, transferring Raw Cost from 1 Project to another - this ha
 			 , peia.created_by
 			 , count(peia.expenditure_item_id) item_count
 			 , sum(peia.project_raw_cost) project_raw_cost
-			 , min(peia.project_raw_cost) project_raw_cost_min
-			 , max(peia.project_raw_cost) project_raw_cost_max
 			 , sum(peia.project_burdened_cost) project_burdened_cost
 			 , sum(peia.quantity) quantity
 			 , to_char(min(peia.creation_date),'yyyy-mm-dd') min_item_created
@@ -1263,12 +1261,11 @@ with overheads as
 
 		select peia.system_linkage_function cost_fcn
 			 , pslt_fcn.meaning cost_fcn_meaning
-			 , peia.src_system_linkage_function src_fcn
+			 , pslt_src.meaning src_fcn
 			 , ptst.user_transaction_source trx_source
+			 , trx_types.transaction_type_name source_trx_type
 			 , peia.budgetary_control_val_status
 			 , sum(peia.project_raw_cost) project_raw_cost
-			 , min(peia.project_raw_cost) project_raw_cost_min
-			 , max(peia.project_raw_cost) project_raw_cost_max
 			 , sum(peia.project_burdened_cost) project_burdened_cost
 			 , sum(peia.quantity) quantity
 			 , to_char(min(peia.creation_date),'yyyy-mm-dd') min_item_created
@@ -1284,10 +1281,13 @@ with overheads as
 	 left join pjf_txn_sources_tl ptst on peia.transaction_source_id = ptst.transaction_source_id and ptst.language = userenv('lang')
 	 left join pjf_system_linkages_tl pslt_fcn on pslt_fcn.function = peia.system_linkage_function and pslt_fcn.language = userenv('lang')
 	 left join pjf_system_linkages_tl pslt_src on pslt_src.function = peia.src_system_linkage_function and pslt_src.language = userenv('lang')
+	 left join inv_transaction_types_tl trx_types on trx_types.transaction_type_id = peia.base_txn_type_id and trx_types.language = userenv('lang')
+	 left join pjf_system_linkages_tl pslt_src_fcn on pslt_src_fcn.function = peia.src_system_linkage_function and pslt_src_fcn.language = userenv('lang')
 	  group by peia.system_linkage_function
 			 , pslt_fcn.meaning
-			 , peia.src_system_linkage_function
+			 , pslt_src.meaning
 			 , ptst.user_transaction_source
+			 , trx_types.transaction_type_name
 			 , peia.budgetary_control_val_status
 
 -- ##############################################################
