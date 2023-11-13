@@ -1,5 +1,8 @@
 /*
 File Name: sa-requests-properties-single-param-values.sql
+Version: Oracle Fusion Cloud
+Author: Throwing Cheese
+URL: https://github.com/throwing-cheese/oracle-fusion-cloud-sql-scripts
 
 The REQUEST_PROPERTY table can be used to access parameter values used when submitting a request
 
