@@ -20,6 +20,7 @@ Queries:
 -- SUMMARY WITHOUT LEGAL ENTITY SUMMARY AND WITHOUT ACCOUNTING LINES
 -- SUMMARY WITHOUT LEGAL ENTITY SUMMARY AND WITH ACCOUNTING LINES
 -- SUMMARY BY ENTITY CODE, EVENT TYPE, PERIOD, GL TRANSFER STATUS AND ACCOUNTING ENTRY STATUS
+-- SUMMARY BY APPLICATION, ENTITY_CODE, STATUSES, EVENT CLASS AND TYPE
 -- DETAILS NOT AT XLA LINE LEVEL
 
 */
@@ -97,8 +98,6 @@ Queries:
 	 left join xla_event_classes_tl xecl on xecl.entity_code = xetl.entity_code and xecl.event_class_code = xetl.event_class_code and xecl.application_id = xetl.application_id and xecl.language = userenv('lang')
 		 where 1 = 1
 		   and 1 = 1
-		   and xte.transaction_number in ('351001877')
-		   and to_char(xte.creation_date, 'yyyy-mm-dd') = '2023-10-21'
 	  order by to_char(xah.accounting_date, 'yyyy-mm-dd') desc
 
 -- ##############################################################
@@ -268,24 +267,12 @@ Queries:
 		select fat.application_name app
 			 , xte.entity_code
 			 , gl.name ledger
-			 , flv2.meaning event_status
-			 , flv3.meaning event_process_status
 			 , xe.event_type_code
 			 , xah.je_category_name
-			 , xal.accounting_class_code
-			 , flv1.meaning accounting_class
 			 , min(to_char(xe.creation_date, 'yyyy-mm-dd')) min_created
 			 , max(to_char(xe.creation_date, 'yyyy-mm-dd')) max_created
-			 , min(to_char(xah.accounting_date, 'yyyy-mm-dd')) min_acct_date
-			 , max(to_char(xah.accounting_date, 'yyyy-mm-dd')) max_acct_date
-			 , min(to_char(xal.accounting_date, 'yyyy-mm-dd')) min_line_acct_date
-			 , max(to_char(xal.accounting_date, 'yyyy-mm-dd')) max_line_acct_date
 			 , min('#' || xte.source_id_int_1) min_source_id_int_1
 			 , max('#' || xte.source_id_int_1) max_source_id_int_1
-			 , min('#' || xte.source_id_int_2) min_source_id_int_2
-			 , max('#' || xte.source_id_int_2) max_source_id_int_2
-			 , min('#' || xte.source_id_int_3) min_source_id_int_3
-			 , max('#' || xte.source_id_int_3) max_source_id_int_3
 			 , min('#' || xte.transaction_number) min_transaction_number
 			 , max('#' || xte.transaction_number) max_transaction_number
 			 , sum(xal.entered_dr) dr_sum
@@ -297,21 +284,14 @@ Queries:
 		  join xla_events xe on xe.entity_id = xte.entity_id and xte.application_id = xe.application_id
 		  join xla_ae_headers xah on xah.entity_id = xe.entity_id and xah.event_id = xe.event_id and xah.application_id = xe.application_id
 		  join xla_ae_lines xal on xal.application_id = xah.application_id and xal.ae_header_id = xah.ae_header_id
-		  join fnd_lookup_values_vl flv1 on xal.accounting_class_code = flv1.lookup_code and flv1.lookup_type = 'XLA_ACCOUNTING_CLASS'
-		  join fnd_lookup_values_vl flv2 on xe.event_status_code = flv2.lookup_code and flv2.lookup_type = 'XLA_EVENT_STATUS'
-		  join fnd_lookup_values_vl flv3 on xe.process_status_code = flv3.lookup_code and flv3.lookup_type = 'XLA_EVENT_PROCESS_STATUS'
 		  join gl_ledgers gl on gl.ledger_id = xal.ledger_id
 		 where 1 = 1
 		   and 1 = 1
 	  group by fat.application_name
 			 , xte.entity_code
 			 , gl.name
-			 , flv2.meaning
-			 , flv3.meaning
 			 , xe.event_type_code
 			 , xah.je_category_name
-			 , xal.accounting_class_code
-			 , flv1.meaning
 
 -- ##############################################################
 -- SUMMARY NOT BY PERIOD WITH XLA_DISTRIBUTION_LINKS
@@ -404,9 +384,6 @@ Queries:
 		  join fnd_lookup_values_vl flv3 on xe.process_status_code = flv3.lookup_code and flv3.lookup_type = 'XLA_EVENT_PROCESS_STATUS'
 		  join gl_ledgers gl on gl.ledger_id = xte.ledger_id
 		 where 1 = 1
-		   -- and xetl.name = 'Invoice Price Adjustment'
-		   -- and xecl.name = 'Invoice Price Adjustment'
-		   and xetl.event_type_code = 'MANUAL_COST_ADJUSTMENT'
 		   and 1 = 1
 	  group by fat.application_name
 			 , gl.name
@@ -507,6 +484,58 @@ Queries:
 			 , xah.period_name
 			 , xah.gl_transfer_status_code
 			 , xah.accounting_entry_status_code
+
+-- ##############################################################
+-- SUMMARY BY APPLICATION, ENTITY_CODE, STATUSES, EVENT CLASS AND TYPE
+-- ##############################################################
+
+		select fat.application_name
+			 , xte.entity_code
+			 , flv2.meaning event_status
+			 , flv3.meaning event_process_status
+			 , xe.event_type_code
+			 , xah.gl_transfer_status_code
+			 , xah.accounting_entry_status_code
+			 , xah.je_category_name
+			 , xecl.name event_class
+			 , xecl.event_class_code
+			 , xetl.name event_type
+			 , xetl.event_type_code xetl_event_type_code
+			 , min(to_char(xte.creation_date, 'yyyy-mm-dd')) min_xte_created
+			 , max(to_char(xte.creation_date, 'yyyy-mm-dd')) max_xte_created
+			 , min('#' || xte.source_id_int_1) min_id_1
+			 , max('#' || xte.source_id_int_1) max_id_1
+			 , min('#' || xte.transaction_number) min_trx
+			 , max('#' || xte.transaction_number) max_trx
+			 , min(xe.request_id) min_xe_request_id
+			 , max(xe.request_id) max_xe_request_id
+			 , min(xah.request_id) min_xah_request_id
+			 , max(xah.request_id) max_xah_request_id
+			 , count(distinct xte.entity_id) xte_count
+			 , count(distinct xe.event_id) xe_count
+			 , count(distinct xah.ae_header_id) xah_count
+		  from xla_transaction_entities xte
+	 left join fnd_application_tl fat on xte.application_id = fat.application_id and fat.language = userenv('lang')
+	 left join xla_events xe on xe.entity_id = xte.entity_id and xte.application_id = xe.application_id
+	 left join xla_ae_headers xah on xah.entity_id = xe.entity_id and xah.event_id = xe.event_id and xah.application_id = xe.application_id
+	 left join fnd_lookup_values_vl flv2 on xe.event_status_code = flv2.lookup_code and flv2.lookup_type = 'XLA_EVENT_STATUS'
+	 left join fnd_lookup_values_vl flv3 on xe.process_status_code = flv3.lookup_code and flv3.lookup_type = 'XLA_EVENT_PROCESS_STATUS'
+	 left join xla_event_types_tl xetl on xetl.event_type_code = xe.event_type_code and xetl.application_id = xe.application_id and xetl.language = userenv('lang')
+	 left join xla_event_classes_tl xecl on xecl.entity_code = xetl.entity_code and xecl.event_class_code = xetl.event_class_code and xecl.application_id = xetl.application_id and xecl.language = userenv('lang')
+		 where 1 = 1
+		   and 1 = 1
+	  group by fat.application_name
+			 , xte.entity_code
+			 , flv2.meaning
+			 , flv3.meaning
+			 , xe.event_type_code
+			 , xah.gl_transfer_status_code
+			 , xah.accounting_entry_status_code
+			 , xah.je_category_name
+			 , xecl.name
+			 , xecl.event_class_code
+			 , xetl.name
+			 , xetl.event_type_code
 
 -- ##############################################################
 -- DETAILS NOT AT XLA LINE LEVEL
