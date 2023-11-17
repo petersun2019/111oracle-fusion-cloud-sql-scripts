@@ -50,11 +50,12 @@ Queries:
 -- INVOICE HEADERS - BASIC
 -- ##############################################################
 
-		select '#' || aia.invoice_id invoice_id
-			 , '#' || aia.invoice_num invoice_num
+		select aia.invoice_id invoice_id
+			  '#' || aia.invoice_num invoice_num
 			 , (replace(replace(aia.description,chr(10),''),chr(13),' ')) description
 			 , hou.name operating_unit
 			 , decode(ap_invoices_utility_pkg.get_approval_status(aia.invoice_id,aia.invoice_amount,aia.payment_status_flag,aia.invoice_type_lookup_code), 'FULL' , 'Fully Applied', 'NEVER APPROVED' , 'Never Validated', 'NEEDS REAPPROVAL', 'Needs Revalidation', 'CANCELLED' , 'Cancelled', 'UNPAID' , 'Unpaid', 'AVAILABLE' , 'Available', 'UNAPPROVED' , 'Unvalidated', 'APPROVED' , 'Validated', 'PERMANENT' , 'Permanent Prepayment', null) inv_hdr_status
+			 , aia.attribute7
 			 , aia.source
 			 , flv_source.meaning source_description
 			 , aia.invoice_amount
@@ -98,8 +99,8 @@ Queries:
 -- INVOICE HEADERS AND LINES
 -- ##############################################################
 
-		select '#' || aia.invoice_id hdr_inv_id
-			 , '#' || aia.invoice_num invoice_num
+		select aia.invoice_id hdr_inv_id
+			  '#' || aia.invoice_num invoice_num
 			 , hou.name operating_unit
 			 , ap_invoices_utility_pkg.get_approval_status(aia.invoice_id,aia.invoice_amount,aia.payment_status_flag,aia.invoice_type_lookup_code) status_1
 			 , decode(ap_invoices_utility_pkg.get_approval_status(aia.invoice_id,aia.invoice_amount,aia.payment_status_flag,aia.invoice_type_lookup_code), 'FULL' , 'Fully Applied', 'NEVER APPROVED' , 'Never Validated', 'NEEDS REAPPROVAL', 'Needs Revalidation', 'CANCELLED' , 'Cancelled', 'UNPAID' , 'Unpaid', 'AVAILABLE' , 'Available', 'UNAPPROVED' , 'Unvalidated', 'APPROVED' , 'Validated', 'PERMANENT' , 'Permanent Prepayment', null) inv_hdr_status
@@ -165,13 +166,13 @@ Queries:
 -- INVOICE HEADERS, LINES AND DISTRIBUTIONS
 -- ##############################################################
 
-		select '#' || aia.invoice_id invoice_id
-			 , '#' || aia.invoice_num invoice_num
+		select aia.invoice_id invoice_id
+			  '#' || aia.invoice_num invoice_num
 			 -- , gllv.legal_entity_name legal_entity_1
 			 -- , xep.name legal_entity_2
 			 , hou.name operating_unit
 			 , aia.invoice_type_lookup_code
-			 -- , '#' || aia.requester_id requester_id
+			 -- , aia.requester_id requester_id
 			 -- , aia.source
 			 , flv_source.meaning source_description
 			 -- , (replace(replace(aia.description,chr(10),''),chr(13),' ')) inv_description
@@ -280,7 +281,7 @@ Queries:
 -- INVOICE HEADERS - LONGER VERSION
 -- ##############################################################
 
-		select '#' || aia.invoice_id invoice_id
+		select aia.invoice_id invoice_id
 			 , '#' || aia.invoice_num invoice_num
 			 , hou.name operating_unit
 			 , (select min(segment1) from po_headers_all pha join po_distributions_all pda on pha.po_header_id = pda.po_header_id join ap_invoice_distributions_all aida on aida.invoice_id = aia.invoice_id and pda.po_distribution_id = aida.po_distribution_id) po
@@ -351,8 +352,8 @@ Queries:
 -- INVOICE HEADERS - TERMS
 -- ##############################################################
 
-		select '#' || aia.invoice_id invoice_id
-			 , '#' || aia.invoice_num invoice_num
+		select aia.invoice_id invoice_id
+			  '#' || aia.invoice_num invoice_num
 			 , hou.name operating_unit
 			 , aia.invoice_type_lookup_code
 			 , aia.source
@@ -398,7 +399,7 @@ Queries:
 -- ##############################################################
 
 		select distinct aia.invoice_id
-			 , '#' || aia.invoice_num invoice_num
+			  '#' || aia.invoice_num invoice_num
 			 , aia.invoice_amount inv_amt
 			 , aia.total_tax_amount tax_amt
 			 , aia.amount_paid
@@ -414,13 +415,20 @@ Queries:
 			 , prha.requisition_number
 			 , prha.created_by req_created_by
 			 , aida.line_type_lookup_code
+			 , aia.last_update_date inv_updated
+			 , aila.last_update_date inv_line_updated
+			 , aida.last_update_date line_dist_updated
+			 , pha.last_update_date po_updated
+			 , pla.last_update_date po_line_updated
+			 , pda.last_update_date po_dist_updated
 		  from ap_invoices_all aia
 	 left join poz_suppliers_v psv on aia.vendor_id = psv.vendor_id
 	 left join poz_supplier_sites_all_m pssam on psv.vendor_id = pssam.vendor_id and aia.vendor_site_id = pssam.vendor_site_id
 	 left join hr_operating_units hou on aia.org_id = hou.organization_id
 	 left join xle_entity_profiles xep on aia.legal_entity_id = xep.legal_entity_id
 	 left join gl_sets_of_books gsob on aia.set_of_books_id = gsob.set_of_books_id
-	 left join ap_invoice_distributions_all aida on aia.invoice_id = aida.invoice_id
+		  join ap_invoice_lines_all aila on aia.invoice_id = aila.invoice_id
+		  join ap_invoice_distributions_all aida on aia.invoice_id = aida.invoice_id and aila.line_number = aida.invoice_line_number
 	 left join po_distributions_all pda on pda.po_distribution_id = aida.po_distribution_id
 	 left join po_lines_all pla on pla.po_line_id = pda.po_line_id
 	 left join po_headers_all pha on pla.po_header_id = pha.po_header_id
@@ -440,7 +448,7 @@ Returns data about requester on invoice line
 Requester ID on Invoice Line is same as Preparer ID on REQ Line
 */
 
-		select distinct '#' || aia.invoice_id invoice_id
+		select distinct aia.invoice_id invoice_id
 			 , '#' || aia.invoice_num invoice_num
 			 , aia.invoice_amount inv_amt
 			 , aia.total_tax_amount tax_amt
@@ -531,7 +539,7 @@ order by aia.creation_date desc
 -- INVOICE HEADERS - INVOICE - PO - REQ - HOLD - BUYER
 -- ##############################################################
 
-		select distinct '#' || aia.invoice_id
+		select distinct aia.invoice_id
 			 , '#' || aia.invoice_num invoice_num
 			 , aia.creation_date invoice_created
 			 , psv.vendor_name supplier
@@ -592,7 +600,7 @@ order by aia.creation_date desc
 -- TAX INFO 1
 -- ##############################################################
 
-		select '#' || aia.invoice_id invoice_id
+		select aia.invoice_id invoice_id
 			 , '#' || aia.invoice_num invoice_num
 			 , hou.name org
 			 , aia.invoice_type_lookup_code
@@ -638,7 +646,7 @@ order by aia.creation_date desc
 Cost Centre Manager part only works if the Cost Centre in the Chart of Accounts is held in Segment2
 */
 
-		select '#' || aia.invoice_id invoice_id
+		select aia.invoice_id invoice_id
 			 , aia.source
 			 , flv_source.meaning source_description
 			 , '#' || aia.invoice_num invoice_num
@@ -677,10 +685,10 @@ Cost Centre Manager part only works if the Cost Centre in the Chart of Accounts 
 		   and zlv.cancel_flag = 'N' -- tax line is not cancelled
 		   and aia.cancelled_date is null -- invoice is not cancelled
 		   and 1 = 1
-	  group by '#' || aia.invoice_id
+	  group by aia.invoice_id
 			 , aia.source
 			 , flv_source.meaning
-			 , '#' || aia.invoice_num
+			 , aia.invoice_num
 			 , aia.created_by
 			 , aia.payment_status_flag
 			 , to_char(aia.creation_date, 'yyyy-mm-dd hh24:mi:ss')
@@ -707,9 +715,7 @@ The process inserts a record for each approver assigned to review an invoice.
 This table corresponds to the invoice approval history window.
 */
 
-select * from ap_inv_aprvl_hist_all where invoice_id in (962732, 1031525)
-
-		select '#' || aia.invoice_id invoice_id
+		select aia.invoice_id invoice_id
 			 , '#' || aia.invoice_num invoice_num
 			 , aia.doc_sequence_value voucher
 			 , hou.name operating_unit
@@ -718,7 +724,7 @@ select * from ap_inv_aprvl_hist_all where invoice_id in (962732, 1031525)
 			 , aia.attribute7
 			 , aia.approval_status
 			 , aia.wfapproval_status
-			 , '#' || aia.requester_id requester_id
+			 , aia.requester_id requester_id
 			 , flv_source.meaning source_description
 			 , (replace(replace(aia.description,chr(10),''),chr(13),' ')) description
 			 , psv.vendor_name supplier
@@ -764,8 +770,8 @@ select * from ap_inv_aprvl_hist_all where invoice_id in (962732, 1031525)
 			 , max(to_char(aiaha.creation_date, 'yyyy-mm-dd hh24:mi:ss')) wf_created_max
 			 , min(to_char(aia.creation_date, 'yyyy-mm-dd hh24:mi:ss')) inv_created_min
 			 , max(to_char(aia.creation_date, 'yyyy-mm-dd hh24:mi:ss')) inv_created_max
-			 , min('#' || aia.invoice_num) inv_min
-			 , max('#' || aia.invoice_num) inv_max
+			 , min(aia.invoice_num) inv_min
+			 , max(aia.invoice_num) inv_max
 			 , sum(aia.invoice_amount) inv_amt
 			 , sum(aia.total_tax_amount) tax_amt
 			 , sum(aia.amount_paid)
@@ -795,7 +801,7 @@ select * from ap_inv_aprvl_hist_all where invoice_id in (962732, 1031525)
 		   and aia.invoice_id not in (select invoice_id from ap_inv_aprvl_hist_all where invoice_id = aia.invoice_id and response not in ('WITHDRAWN','INITIATED','ORA_AUTO APPROVED'))
 		   and aia.invoice_id in (select invoice_id from ap_inv_aprvl_hist_all where invoice_id = aia.invoice_id)
 		   and aia.invoice_num = 'INV123'
-	  group by '#' || aia.invoice_num
+	  group by aia.invoice_num
 			 , psv.vendor_name
 			 , pssam.vendor_site_code
 	    having count(*) between 10 and 20
@@ -805,7 +811,7 @@ select * from ap_inv_aprvl_hist_all where invoice_id in (962732, 1031525)
 -- INVOICE HEADERS - WITH PO VALUE 1
 -- ##############################################################
 
-		select '#' || aia.invoice_id invoice_id
+		select aia.invoice_id invoice_id
 			 , '#' || aia.invoice_num invoice_num
 			 , hou.name operating_unit
 			 , aia.invoice_type_lookup_code
@@ -840,8 +846,8 @@ select * from ap_inv_aprvl_hist_all where invoice_id in (962732, 1031525)
 		   and aia.payment_status_flag = 'Y'
 		   and ap_invoices_pkg.get_posting_status(aia.invoice_id) = 'Y'
 		   and aia.invoice_num = '123'
-	  group by '#' || aia.invoice_id
-			 , '#' || aia.invoice_num
+	  group by aia.invoice_id
+			 , aia.invoice_num
 			 , hou.name
 			 , aia.invoice_type_lookup_code
 			 , aia.source
@@ -866,7 +872,7 @@ select * from ap_inv_aprvl_hist_all where invoice_id in (962732, 1031525)
 -- ##############################################################
 
 		with my_data as
-	   (select '#' || aia.invoice_id invoice_id
+	   (select aia.invoice_id invoice_id
 			 , '#' || aia.invoice_num invoice_num
 			 , (select min(pha.po_header_id) from po_headers_all pha join po_distributions_all pda on pha.po_header_id = pda.po_header_id join ap_invoice_distributions_all aida on aida.invoice_id = aia.invoice_id and pda.po_distribution_id = aida.po_distribution_id) po_header_id
 			 , hou.name operating_unit
@@ -996,8 +1002,8 @@ SQL to compare Invoice Date with Received Date
 			   end inv_date_vs_received_date
 			 , min(to_char(aia.creation_date, 'yyyy-mm-dd hh24:mi:ss')) created_min
 			 , max(to_char(aia.creation_date, 'yyyy-mm-dd hh24:mi:ss')) created_max
-			 , min('#' || aia.invoice_num) inv_min
-			 , max('#' || aia.invoice_num) inv_max
+			 , min(aia.invoice_num) inv_min
+			 , max(aia.invoice_num) inv_max
 			 , sum(aia.invoice_amount) inv_amt
 			 , sum(aia.total_tax_amount) tax_amt
 			 , sum(aia.amount_paid)
@@ -1029,8 +1035,8 @@ SQL to compare Invoice Date with Received Date
 			 , count(distinct aia.invoice_id) invoice_count
 			 , min(to_char(aia.creation_date, 'yyyy-mm-dd hh24:mi:ss')) min_inv_created
 			 , max(to_char(aia.creation_date, 'yyyy-mm-dd hh24:mi:ss')) max_inv_created
-			 , min('#' || aia.invoice_num) inv_min
-			 , max('#' || aia.invoice_num) inv_max
+			 , min(aia.invoice_num) inv_min
+			 , max(aia.invoice_num) inv_max
 			 , max(aia.request_id)
 		  from ap_invoices_all aia
 	  group by aia.wfapproval_status
@@ -1040,12 +1046,12 @@ SQL to compare Invoice Date with Received Date
 -- ##############################################################
 
 		select hou.name operating_unit
-			 , '#' || aia.source
+			 , aia.source
 			 , flv_source.meaning source_description
 			 , min(to_char(aia.creation_date, 'yyyy-mm-dd hh24:mi:ss')) min_inv_created
 			 , max(to_char(aia.creation_date, 'yyyy-mm-dd hh24:mi:ss')) max_inv_created
-			 , min('#' || aia.invoice_num) inv_min
-			 , max('#' || aia.invoice_num) inv_max
+			 , min(aia.invoice_num) inv_min
+			 , max(aia.invoice_num) inv_max
 			 , count(*)
 		  from ap_invoices_all aia
 		  join hr_operating_units hou on aia.org_id = hou.organization_id
@@ -1054,7 +1060,7 @@ SQL to compare Invoice Date with Received Date
 		   -- and aia.source = 'Manual Invoice Entry'
 		   and 1 = 1
 	  group by hou.name
-			 , '#' || aia.source
+			 , aia.source
 			 , flv_source.meaning
 
 -- ##############################################################
@@ -1085,8 +1091,8 @@ SQL to compare Invoice Date with Received Date
 		select aia.invoice_type_lookup_code
 			 , min(to_char(aia.creation_date, 'yyyy-mm-dd hh24:mi:ss')) min_creation_date
 			 , max(to_char(aia.creation_date, 'yyyy-mm-dd hh24:mi:ss')) max_creation_date
-			 , min('#' || aia.invoice_num) inv_min
-			 , max('#' || aia.invoice_num) inv_max
+			 , min(aia.invoice_num) inv_min
+			 , max(aia.invoice_num) inv_max
 			 , max(request_id)
 			 , count(*)
 		  from ap_invoices_all aia
@@ -1099,8 +1105,8 @@ SQL to compare Invoice Date with Received Date
 		select count(*)
 			 , min(to_char(aia.creation_date, 'yyyy-mm-dd hh24:mi:ss')) min_creation_date
 			 , max(to_char(aia.creation_date, 'yyyy-mm-dd hh24:mi:ss')) max_creation_date
-			 , min('#' || aia.invoice_num) inv_min
-			 , max('#' || aia.invoice_num) inv_max
+			 , min(aia.invoice_num) inv_min
+			 , max(aia.invoice_num) inv_max
 		  from ap_invoices_all aia
 
 -- ##############################################################
@@ -1116,8 +1122,8 @@ SQL to compare Invoice Date with Received Date
 			 , decode(ap_invoices_utility_pkg.get_approval_status(aia.invoice_id,aia.invoice_amount,aia.payment_status_flag,aia.invoice_type_lookup_code), 'FULL' , 'Fully Applied', 'NEVER APPROVED' , 'Never Validated', 'NEEDS REAPPROVAL', 'Needs Revalidation', 'CANCELLED' , 'Cancelled', 'UNPAID' , 'Unpaid', 'AVAILABLE' , 'Available', 'UNAPPROVED' , 'Unvalidated', 'APPROVED' , 'Validated', 'PERMANENT' , 'Permanent Prepayment', null) status
 			 , min(to_char(aia.creation_date, 'yyyy-mm-dd')) min_creation_date
 			 , max(to_char(aia.creation_date, 'yyyy-mm-dd')) max_creation_date
-			 , min('#' || aia.invoice_num) inv_min
-			 , max('#' || aia.invoice_num) inv_max
+			 , min(aia.invoice_num) inv_min
+			 , max(aia.invoice_num) inv_max
 			 , count(*) inv_count
 		  from ap_invoices_all aia
 		  join hr_operating_units hou on aia.org_id = hou.organization_id
@@ -1142,8 +1148,8 @@ SQL to compare Invoice Date with Received Date
 			 , gsob.name set_of_books
 			 , min(to_char(aia.creation_date, 'yyyy-mm-dd')) min_creation_date
 			 , max(to_char(aia.creation_date, 'yyyy-mm-dd')) max_creation_date
-			 , min('#' || aia.invoice_num) inv_min
-			 , max('#' || aia.invoice_num) inv_max
+			 , min(aia.invoice_num) inv_min
+			 , max(aia.invoice_num) inv_max
 			 , count(*) inv_count
 		  from ap_invoices_all aia
 		  join hr_operating_units hou on aia.org_id = hou.organization_id
@@ -1166,8 +1172,8 @@ SQL to compare Invoice Date with Received Date
 			 -- , flv.created_by source_created_by
 			 , min(to_char(aia.creation_date, 'yyyy-mm-dd')) min_creation_date
 			 , max(to_char(aia.creation_date, 'yyyy-mm-dd')) max_creation_date
-			 , min('#' || aia.invoice_num) inv_min
-			 , max('#' || aia.invoice_num) inv_max
+			 , min(aia.invoice_num) inv_min
+			 , max(aia.invoice_num) inv_max
 			 , count(*) inv_count
 		  from ap_invoices_all aia
 		  -- join fnd_lookup_values_vl flv on flv.lookup_code = aia.source and flv.lookup_type = 'SOURCE' and flv.view_application_id = 200
@@ -1187,8 +1193,8 @@ SQL to compare Invoice Date with Received Date
 			 , pssam.vendor_site_code site
 			 , min(to_char(aia.creation_date, 'yyyy-mm-dd')) min_creation_date
 			 , max(to_char(aia.creation_date, 'yyyy-mm-dd')) max_creation_date
-			 , min('#' || aia.invoice_num) inv_min
-			 , max('#' || aia.invoice_num) inv_max
+			 , min(aia.invoice_num) inv_min
+			 , max(aia.invoice_num) inv_max
 			 , count(aia.invoice_id) invoice_count
 		  from ap_invoices_all aia
 		  join poz_suppliers_v psv on aia.vendor_id = psv.vendor_id
@@ -1206,8 +1212,8 @@ SQL to compare Invoice Date with Received Date
 			 , flv_source.meaning source
 			 , min(to_char(aia.creation_date, 'yyyy-mm-dd')) min_creation_date
 			 , max(to_char(aia.creation_date, 'yyyy-mm-dd')) max_creation_date
-			 , min('#' || aia.invoice_num) inv_min
-			 , max('#' || aia.invoice_num) inv_max
+			 , min(aia.invoice_num) inv_min
+			 , max(aia.invoice_num) inv_max
 			 , count(distinct aia.invoice_id) invoice_count
 			 , count(*) dists_count
 		  from ap_invoices_all aia
@@ -1224,7 +1230,7 @@ SQL to compare Invoice Date with Received Date
 -- INVOICE COUNT - LINES
 -- ##############################################################
 
-		select '#' || aia.invoice_id invoice_id
+		select aia.invoice_id invoice_id
 			 , '#' || aia.invoice_num invoice_num
 			 , aia.source
 			 , flv_source.meaning source_description
@@ -1241,8 +1247,8 @@ SQL to compare Invoice Date with Received Date
 		  join poz_suppliers_v psv on aia.vendor_id = psv.vendor_id
 		  join poz_supplier_sites_all_m pssam on psv.vendor_id = pssam.vendor_id and aia.vendor_site_id = pssam.vendor_site_id
 		  join fnd_lookup_values_vl flv_source on flv_source.lookup_code = aia.source and flv_source.lookup_type = 'SOURCE' and flv_source.view_application_id = 200
-	  group by '#' || aia.invoice_id
-			 , '#' || aia.invoice_num
+	  group by aia.invoice_id
+			 , aia.invoice_num
 			 , aia.source
 			 , flv_source.meaning
 			 , psv.vendor_name
@@ -1258,7 +1264,7 @@ SQL to compare Invoice Date with Received Date
 -- INVOICE COUNT - LINES AND DISTRIBUTIONS
 -- ##############################################################
 
-		select '#' || aia.invoice_id invoice_id
+		select aia.invoice_id invoice_id
 			 , '#' || aia.invoice_num invoice_num
 			 , aia.source
 			 , flv_source.meaning source_description
@@ -1278,8 +1284,8 @@ SQL to compare Invoice Date with Received Date
 		  join poz_supplier_sites_all_m pssam on psv.vendor_id = pssam.vendor_id and aia.vendor_site_id = pssam.vendor_site_id
 		  join fnd_lookup_values_vl flv_source on flv_source.lookup_code = aia.source and flv_source.lookup_type = 'SOURCE' and flv_source.view_application_id = 200
 		 where aia.invoice_id in (123,234,345)
-	  group by '#' || aia.invoice_id
-			 , '#' || aia.invoice_num
+	  group by aia.invoice_id
+			 , aia.invoice_num
 			 , aia.source
 			 , flv_source.meaning
 			 , psv.vendor_name
@@ -1299,8 +1305,8 @@ SQL to compare Invoice Date with Received Date
 			 , aila.created_by line_created_by
 			 , min(to_char(aila.creation_date, 'yyyy-mm-dd hh24:mi:ss')) min_created
 			 , min(to_char(aila.creation_date, 'yyyy-mm-dd hh24:mi:ss')) max_created
-			 , min('#' || aia.invoice_num) min_inv
-			 , max('#' || aia.invoice_num) max_inv
+			 , min(aia.invoice_num) min_inv
+			 , max(aia.invoice_num) max_inv
 			 , min(psv.vendor_name) min_supplier
 			 , max(psv.vendor_name) max_supplier
 			 , min(prha.requisition_number) min_req
@@ -1341,8 +1347,8 @@ SQL to compare Invoice Date with Received Date
 			 , decode(ap_invoices_utility_pkg.get_approval_status(aia.invoice_id,aia.invoice_amount,aia.payment_status_flag,aia.invoice_type_lookup_code), 'FULL' , 'Fully Applied', 'NEVER APPROVED' , 'Never Validated', 'NEEDS REAPPROVAL', 'Needs Revalidation', 'CANCELLED' , 'Cancelled', 'UNPAID' , 'Unpaid', 'AVAILABLE' , 'Available', 'UNAPPROVED' , 'Unvalidated', 'APPROVED' , 'Validated', 'PERMANENT' , 'Permanent Prepayment', null) inv_hdr_status
 			 , min(to_char(aia.creation_date, 'yyyy-mm-dd hh24:mi:ss')) created_min
 			 , max(to_char(aia.creation_date, 'yyyy-mm-dd hh24:mi:ss')) created_max
-			 , min('#' || aia.invoice_num) inv_min
-			 , max('#' || aia.invoice_num) inv_max
+			 , min(aia.invoice_num) inv_min
+			 , max(aia.invoice_num) inv_max
 			 , sum(aia.invoice_amount) inv_amt
 			 , sum(aia.total_tax_amount) tax_amt
 			 , sum(aia.amount_paid)
@@ -1374,8 +1380,8 @@ SQL to compare Invoice Date with Received Date
 			 , aila.tax_rate
 			 , min(to_char(aia.creation_date, 'yyyy-mm-dd hh24:mi:ss')) inv_created_min
 			 , max(to_char(aia.creation_date, 'yyyy-mm-dd hh24:mi:ss')) inv_created_max
-			 , min('#' || aia.invoice_num) inv_min
-			 , max('#' || aia.invoice_num) inv_max
+			 , min(aia.invoice_num) inv_min
+			 , max(aia.invoice_num) inv_max
 			 , count(*)
 		  from ap_invoices_all aia
 		  join hr_operating_units hou on aia.org_id = hou.organization_id
@@ -1398,8 +1404,8 @@ SQL to compare Invoice Date with Received Date
 		select aia.attribute7
 			 , min(to_char(aia.creation_date, 'yyyy-mm-dd hh24:mi:ss')) inv_created_min
 			 , max(to_char(aia.creation_date, 'yyyy-mm-dd hh24:mi:ss')) inv_created_max
-			 , min('#' || aia.invoice_num) inv_min
-			 , max('#' || aia.invoice_num) inv_max
+			 , min(aia.invoice_num) inv_min
+			 , max(aia.invoice_num) inv_max
 			 , count(*)
 		  from ap_invoices_all aia
 		 where 1 = 1
@@ -1413,7 +1419,7 @@ SQL to compare Invoice Date with Received Date
 
 		select '#' || aia.invoice_num invoice_num
 			 , '#' || fad.pk1_value pk1_value
-			 , '#' || aia.invoice_id invoice_id
+			 , aia.invoice_id invoice_id
 			 , psv.vendor_name supplier
 			 , to_char(aia.creation_date, 'yyyy-mm-dd hh24:mi:ss') inv_created
 			 , to_char(fad.creation_date, 'yyyy-mm-dd hh24:mi:ss') att_created
