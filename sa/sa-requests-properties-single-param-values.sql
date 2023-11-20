@@ -32,6 +32,7 @@ Queries:
 -- TransactionPrintProgramEss - Print Receivables Transactions
 -- APCSTTRF - Transfer Costs to Cost Management
 -- ReceiptAccrualProcessMasterEssJobDef - Create Receipt Accounting Distributions
+-- TaxBoxReturnPreparation - Tax Box Return Preparation Report
 
 */
 
@@ -66,7 +67,7 @@ Queries:
 		  join request_property rp on rp.requestid = rh.requestid
 		  join fusion_ora_ess.request_history_view rhv on rhv.requestid = rh.requestid
 		 where 1 = 1
-		   -- and rh.requestid in (123)
+		   -- and rh.requestid in (123456)
 		   -- and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('LoadSegValAndHierData')
 	  order by rh.requestid desc
 			 , rp.name
@@ -145,7 +146,7 @@ submit.argument17: ParentID - ID of parent Create Accounting job
 			   and rp.name in ('submit.argument3','submit.argument5','submit.argument17')
 			   and flv_state.meaning = 'Succeeded'
 			   -- and rh.processstart > sysdate - 1 -- last day
-			   and rh.requestid in (6347193, 6347253)
+			   -- and rh.requestid in (123456)
 			   and 1 = 1)
 	select * from (
 			select id
@@ -317,12 +318,12 @@ display.attribute27.value: Ledger
 			   and rp.name in ('display.attribute6.value','display.attribute8.value','display.attribute27.value','display.attribute26.value')
 			   -- and rp.name in ('display.attribute26.value') and rp.value = 'Payroll'
 			   and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute8.value' and rp2.value = 'F') -- final
-			   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute26.value' and rp2.value = 'Cost Management')
+			   and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute26.value' and rp2.value = 'Project Costing')
 			   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute27.value' and rp2.value = 'XX Ledger')
-			   -- and rh.requestid in (4821699,4821690,4821344,4821343,4821015,4820997,4820737,4820698,4820604,4820383)
+			   -- and rh.requestid in (123456)
 			   -- and rh.username = 'USER123'
-			   and to_char(rh.processstart, 'YYYY') = '2023'
-			   and to_char(rh.processstart, 'MM') = '10'
+			   -- and to_char(rh.processstart, 'YYYY') = '2023'
+			   -- and to_char(rh.processstart, 'MM') = '10'
 			   and rh.processend is not null
 		  order by rh.requestid desc
 				 , rp.name
@@ -358,12 +359,12 @@ with my_data as (
 		   and rp.name in ('display.attribute6.value','display.attribute8.value','display.attribute27.value','display.attribute26.value')
 		   -- and rp.name in ('display.attribute26.value') and rp.value = 'Payroll'
 		   and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute8.value' and rp2.value = 'F') -- final
-		   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute26.value' and rp2.value = 'Receipt Accounting')
+		   and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute26.value' and rp2.value = 'Project Costing')
 		   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute27.value' and rp2.value = 'XX Ledger')
-		   -- and rh.requestid in (4821699,4821690,4821344,4821343,4821015,4820997,4820737,4820698,4820604,4820383)
+		   -- and rh.requestid in (123456)
 		   -- and rh.username = 'USER123'
-		   -- and to_char(rh.processstart, 'YYYY') = '2023'
-		   -- and to_char(rh.processstart, 'MM') = '10'
+		   and to_char(rh.processstart, 'YYYY') = '2023'
+		   and to_char(rh.processstart, 'MM') >= '11'
 		   and rh.processend is not null
 		   and flv_state.meaning = 'Warning'
 		   and 1 = 1)
@@ -386,9 +387,76 @@ select * from (
 pivot
 (
    max(value_)
-   for name in ('display.attribute26.value' application,'display.attribute27.value' ledger,'display.attribute6.value' end_date,'display.attribute8.value' mode_)
+   for name in ('display.attribute26.value' application
+			   ,'display.attribute27.value' ledger
+			   ,'display.attribute6.value' end_date
+			   ,'display.attribute8.value' mode_)
 )
 order by id desc
+
+-- ##############################################################
+-- XLAFSNAPRPT - Create Accounting + XLAFSNAPRPTRPT - Create Accounting Execution Report
+-- ##############################################################
+
+/*
+display.attribute6.value: End Date
+display.attribute8.value: Mode
+display.attribute26.value: Application
+display.attribute27.value: Ledger
+*/
+
+			select rh.requestid id
+				 , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
+				 , rh.instanceparentid -- the parent process in that instance run
+				 -- , tbl_execution_report.execution_report_id
+				 , flv_state.meaning status
+				 , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
+				 , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
+				 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
+				 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
+				 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
+				 , rh.product
+				 , rh.username
+				 , rp.name
+				 , rp.value value_
+				 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
+				 , regexp_replace(substr(rh.error_warning_message, instr(rh.error_warning_message, 'process identifier '), 200), '[^0-9]', '') error_report_id
+				 , rhv.lastscheduleinstanceid
+			  from request_history rh
+			  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
+			  join request_property rp on rp.requestid = rh.requestid
+			  join fusion_ora_ess.request_history_view rhv on rhv.requestid = rh.requestid
+		 left join (select rh.requestid execution_report_id
+						 , rp.value create_accounting_job_id
+					  from request_history rh
+					  join request_property rp on to_number(rp.requestid) = to_number(rh.requestid)
+					 where substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('XLAFSNAPRPTRPT')
+					   and rp.name in ('submit.argument1')) tbl_execution_report on to_number(tbl_execution_report.create_accounting_job_id) = rh.requestid
+			 where 1 = 1
+			   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('XLAFSNAPRPT')
+			   and rp.name in ('display.attribute6.value','display.attribute8.value','display.attribute27.value','display.attribute26.value')
+			   -- and rp.name in ('display.attribute26.value') and rp.value = 'Payroll'
+			   and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute8.value' and rp2.value = 'F') -- final
+			   and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute26.value' and rp2.value = 'Project Costing')
+			   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute27.value' and rp2.value = 'XX Ledger')
+			   -- and rh.requestid in (123456)
+			   -- and rh.username = 'USER123'
+			   -- and to_char(rh.processstart, 'YYYY') = '2023'
+			   -- and to_char(rh.processstart, 'MM') = '10'
+			   and flv_state.meaning = 'Warning'
+			   and rh.processend is not null -- job has completed
+		  order by rh.requestid desc
+				 , rp.name
+
+
+					select rh.requestid execution_report_id
+						 , rp.value create_accounting_job_id
+						 , to_number(rp.value) d1
+					  from request_history rh
+					  join request_property rp on to_number(rp.requestid) = to_number(rh.requestid)
+					 where substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('XLAFSNAPRPTRPT')
+					   and rp.name in ('submit.argument1')
+					   and rh.requestid = 1784173
 
 -- ##############################################################
 -- XLAFSNAPRPTRPT - Create Accounting Execution Report 1
@@ -422,7 +490,7 @@ This SQL can be used to find the Execution Report that was generated for the Req
 		 where 1 = 1
 		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('XLAFSNAPRPTRPT')
 		   and rp.name in ('submit.argument1')
-		   and rp.value = '3505105' -- request ID of parent Create Accounting Job
+		   -- and rp.value = '3505105' -- request ID of parent Create Accounting Job
 	  order by rh.requestid desc
 			 , rp.name
 
@@ -458,16 +526,16 @@ This query returns the parent ID for the Execution Report along with the module 
 				  and rp.name in ('display.attribute26.value')
 				  and flv_state.meaning = 'Warning'
 				  and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute8.value' and rp2.value = 'F') -- final
-				  and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute26.value' and rp2.value = 'Receipt Accounting')
-				  and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute27.value' and rp2.value = 'XX Ledger')
+				  and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute26.value' and rp2.value = 'Payables')
+				  -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute27.value' and rp2.value = 'XX Ledger')
 				  and to_char(rh.processstart, 'YYYY') = '2023'
-				  and to_char(rh.processstart, 'MM') = '05'
+				  and to_char(rh.processstart, 'MM') = '11'
 				  -- and to_char(rh.processstart, 'DD') = '11'
 				  and 1 = 1) tbl_parent on '#' || tbl_parent.requestid = '#' || rp.value
 		 where 1 = 1
 		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('XLAFSNAPRPTRPT')
 		   and rp.name in ('submit.argument1')
-		   -- and rh.requestid in (3636695,3647691,3647896,3647907,3647916,3650156)
+		   -- and rh.requestid in (123456)
 	  order by rh.requestid desc
 			 , rp.name
 
@@ -676,7 +744,7 @@ Returns the Chart of Accounts Segment the job ran against (e.g. XX_GL_COST_CENTR
 		   and rp.name in ('submit.argument8')
 		   and rp.value = 'PAMS'
 		   and to_char(rh.processend, 'yyyy-mm-dd') = '2023-06-02'
-		   -- and rh.requestid in (1234)
+		   -- and rh.requestid in (123456)
 	  order by rh.requestid desc
 			 , rp.name
 
@@ -704,7 +772,7 @@ Returns the Chart of Accounts Segment the job ran against (e.g. XX_GL_COST_CENTR
 		 where 1 = 1
 		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('APXAPRVL')
 		   and rp.name in ('submit.argument16.attributeValue') -- #XCC Ledger
-		   -- and rh.requestid in (1234)
+		   -- and rh.requestid in (123456)
 	  order by rh.requestid desc
 			 , rp.name
 
@@ -740,7 +808,7 @@ submit.argument9: Business Unit ID
 		 where 1 = 1
 		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('StrategyAutomatedProcess')
 		   and rp.name in ('submit.argument11','submit.argument12','submit.argument13','submit.argument14','submit.argument9') -- #XCC Ledger
-		   -- and rh.requestid in (1234)
+		   -- and rh.requestid in (123456)
 	  order by rh.requestid desc
 			 , rp.name
 
@@ -774,7 +842,7 @@ display.attribute5.value: Expenditure Item Through Date
 		 where 1 = 1
 		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('GenerateBurdenTransactionsJob')
 		   and rp.name in ('parentRequest','display.attribute1.value','display.attribute5.value')
-		   -- and rh.requestid in (1234)
+		   -- and rh.requestid in (123456)
 	  order by rh.requestid desc
 			 , rp.name
 
@@ -783,7 +851,9 @@ display.attribute5.value: Expenditure Item Through Date
 -- ##############################################################
 
 /*
+submit.argument2 - Business Unit ID
 submit.argument4 - Batch Name
+submit.argument6 - Transaction Source ID
 */
 
 		select rh.requestid id
@@ -800,14 +870,16 @@ submit.argument4 - Batch Name
 			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
 			 , rp.name
 			 , rp.value value_
+			 , case when rp.name = 'submit.argument6' then (select user_transaction_source from pjf_txn_sources_tl ptst where ptst.transaction_source_id = rp.value and ptst.language = userenv('lang')) end trx_source
+			 , case when rp.name = 'submit.argument2' then (select bu_name from fun_all_business_units_v fabuv where fabuv.bu_id = rp.value) end business_unit
 		  from request_history rh
 		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
 		  join request_property rp on rp.requestid = rh.requestid
 		 where 1 = 1
 		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('ImportAndProcessTxnsJob')
-		   and rp.name in ('submit.argument4')
-		   -- and rh.requestid in (4548165)
-		   and rh.username = 'USER123'
+		   and rp.name in ('submit.argument2','submit.argument4','submit.argument6')
+		   -- and rh.requestid in (123456)
+		   -- and rh.username = 'USER123'
 	  order by rh.requestid desc
 			 , rp.name
 
@@ -842,7 +914,7 @@ submit.argument2: Ledger
 		 where 1 = 1
 		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('AccountingPeriodClose')
 		   and rp.name in ('submit.argument5')
-		   -- and rh.requestid in (4481753, 4481746)
+		   -- and rh.requestid in (123456)
 		   -- and rh.username = 'USER123'
 		   and rh.requestid in (select rp.requestid id from request_property rp where substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('AccountingPeriodClose') and rp.name in ('submit.argument5') and rp.value = 'Mar-23')
 		   and rh.requestid in (select rp.requestid id from request_property rp where substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('AccountingPeriodClose') and rp.name in ('submit.argument2') and rp.value = 'XCC Ledger')
@@ -880,7 +952,7 @@ submit.argument4: GL_OPEN
 		 where 1 = 1
 		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('AccountingPeriodOpen')
 		   and rp.name in ('submit.argument4')
-		   -- and rh.requestid in (4508957)
+		   -- and rh.requestid in (123456)
 		   -- and rh.username = 'USER123'
 		   and rh.requestid in (select rp.requestid id from request_property rp where substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('AccountingPeriodOpen') and rp.name in ('submit.argument3') and rp.value = 'Mar-23')
 		   -- and rh.requestid in (select rp.requestid id from request_property rp where substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('AccountingPeriodClose') and rp.name in ('submit.argument2') and rp.value = 'XX Ledger')
@@ -952,7 +1024,7 @@ display.attribute27.value: Default Invoice Template
 		 where 1 = 1
 		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('TransactionPrintProgramEss')
 		   and rp.name in ('display.attribute1.value','display.attribute27.value')
-		   -- and rh.requestid in (4481753, 4481746)
+		   -- and rh.requestid in (123456)
 	  order by rh.requestid desc
 			 , rp.name
 
@@ -985,11 +1057,7 @@ display.attribute3.value: 2023-03-31
 		 where 1 = 1
 		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('APCSTTRF')
 		   and rp.name in ('display.attribute2.value','display.attribute3.value')
-		   -- and rp.name in ('display.attribute26.value') and rp.value = 'Payroll'
-		   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute8.value' and rp2.value = 'F') -- final
-		   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute26.value' and rp2.value = 'Receipt Accounting')
-		   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute27.value' and rp2.value = 'XX Ledger')
-		   -- and rh.requestid in (4488735)
+		   -- and rh.requestid in (123456)
 		   -- and rh.username = 'USER123'
 		   -- and to_char(rh.processstart, 'YYYY') = '2023'
 		   -- and to_char(rh.processstart, 'MM') = '01'
@@ -1022,11 +1090,7 @@ with my_data as (
 		 where 1 = 1
 		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('APCSTTRF')
 		   and rp.name in ('display.attribute2.value','display.attribute3.value')
-		   -- and rp.name in ('display.attribute26.value') and rp.value = 'Payroll'
-		   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute8.value' and rp2.value = 'F') -- final
-		   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute26.value' and rp2.value = 'Receipt Accounting')
-		   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute27.value' and rp2.value = 'XX Ledger')
-		   -- and rh.requestid in (4488735)
+		   -- and rh.requestid in (123456)
 		   -- and rh.username = 'USER123'
 		   -- and to_char(rh.processstart, 'YYYY') = '2023'
 		   -- and to_char(rh.processstart, 'MM') = '01'
@@ -1049,7 +1113,8 @@ select * from (
 pivot 
 (
    max(value_)
-   for name in ('display.attribute2.value' business_unit,'display.attribute3.value' end_date)
+   for name in ('display.attribute2.value' business_unit
+			   ,'display.attribute3.value' end_date)
 )
 order by id desc
 
@@ -1081,11 +1146,7 @@ submit.argument1: BU
 		 where 1 = 1
 		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('ReceiptAccrualProcessMasterEssJobDef')
 		   and rp.name in ('submit.argument1')
-		   -- and rp.name in ('display.attribute26.value') and rp.value = 'Payroll'
-		   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute8.value' and rp2.value = 'F') -- final
-		   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute26.value' and rp2.value = 'Receipt Accounting')
-		   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute27.value' and rp2.value = 'XX Ledger')
-		   -- and rh.requestid in (4488735)
+		   -- and rh.requestid in (123456)
 		   -- and rh.username = 'USER123'
 		   -- and to_char(rh.processstart, 'YYYY') = '2023'
 		   -- and to_char(rh.processstart, 'MM') = '01'
@@ -1118,11 +1179,7 @@ with my_data as (
 		 where 1 = 1
 		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('ReceiptAccrualProcessMasterEssJobDef')
 		   and rp.name in ('submit.argument1')
-		   -- and rp.name in ('display.attribute26.value') and rp.value = 'Payroll'
-		   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute8.value' and rp2.value = 'F') -- final
-		   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute26.value' and rp2.value = 'Receipt Accounting')
-		   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute27.value' and rp2.value = 'XX Ledger')
-		   -- and rh.requestid in (4488735)
+		   -- and rh.requestid in (123456)
 		   and rh.username like '%@%'
 		   -- and to_char(rh.processstart, 'YYYY') = '2023'
 		   -- and to_char(rh.processstart, 'MM') = '01'
@@ -1148,3 +1205,110 @@ pivot
    for name in ('submit.argument1' bu)
 )
 order by id desc
+
+-- ##############################################################
+-- TaxBoxReturnPreparation - Tax Box Return Preparation Report
+-- ##############################################################
+
+/*
+submit.argument1: Reporting Identifier ID (links to jg_zz_vat_rep_entities.VAT_REPORTING_ENTITY_ID to get ENTITY_IDENTIFIER)
+submit.argument2: Source (e.g. Input tax (P2P), Output tax (O2C), ALL)
+submit.argument3: Tax Calendar Period
+*/
+
+		select rh.requestid id
+			 , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
+			 , rh.instanceparentid -- the parent process in that instance run
+			 , flv_state.meaning status
+			 , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
+			 , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
+			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
+			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
+			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
+			 , rh.product
+			 , rh.username
+			 , rp.name
+			 , rp.value value_
+			 , case when rp.name = 'submit.argument1' then (select entity_identifier from jg_zz_vat_rep_entities where vat_reporting_entity_id = rp.value) end reporting_identifier
+			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
+		  from request_history rh
+		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
+		  join request_property rp on rp.requestid = rh.requestid
+		 where 1 = 1
+		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('TaxBoxReturnPreparation')
+		   and rp.name in ('submit.argument1','submit.argument3','submit.argument10')
+		   -- and rh.requestid in (123456)
+		   -- and rh.username = 'USER123'
+		   -- and to_char(rh.processstart, 'YYYY') = '2023'
+		   -- and to_char(rh.processstart, 'MM') = '01'
+		   and rh.processend is not null
+	  order by rh.requestid desc
+			 , rp.name
+
+/*
+pivot
+*/
+
+with all_data as (
+with my_data as (
+		select rh.requestid id
+			 , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
+			 , rh.instanceparentid -- the parent process in that instance run
+			 , flv_state.meaning status
+			 , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
+			 , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
+			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
+			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
+			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
+			 , rh.product
+			 , rh.username
+			 , rp.name
+			 , rp.value value_
+			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
+		  from request_history rh
+		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
+		  join request_property rp on rp.requestid = rh.requestid
+		 where 1 = 1
+		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('TaxBoxReturnPreparation')
+		   and rp.name in ('submit.argument1','submit.argument2','submit.argument3')
+		   -- and rh.requestid in (123456)
+		   -- and rh.username = 'USER123'
+		   -- and to_char(rh.processstart, 'YYYY') = '2023'
+		   -- and to_char(rh.processstart, 'MM') = '01'
+		   and rh.processend is not null
+		   and 1 = 1)
+select * from (
+		select id
+			 , absparentid
+			 , instanceparentid
+			 , status
+			 , process_start
+			 , process_end
+			 , username
+			 , definition
+			 , product
+			 , name
+			 , value_
+			 , error_warning_message
+		  from my_data)
+pivot 
+(
+   max(value_)
+   for name in ('submit.argument1' reporting_identifier
+			  , 'submit.argument2' reporting_source
+			  , 'submit.argument3' tax_period)
+))
+		select all_data.id
+			 , all_data.absparentid
+			 , all_data.instanceparentid
+			 , all_data.status
+			 , all_data.process_start
+			 , all_data.process_end
+			 , all_data.username
+			 , all_data.definition
+			 , all_data.product
+			 , all_data.error_warning_message
+			 , all_data.reporting_identifier
+			 , all_data.reporting_source
+			 , all_data.tax_period
+	  order by all_data.id desc
