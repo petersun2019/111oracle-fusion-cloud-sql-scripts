@@ -27,9 +27,13 @@ select * from jg_zz_vat_final_reports order by creation_date desc
 		select p.reporting_status_id
 			 , r.final_report_id
 			 , p.source
+			 , trx_src.meaning input_output
 			 , substr(p.tax_registration_number,3) tax_registration_number1
 			 , p.tax_registration_number tax_registration_number
-			 , p.vat_reporting_entity_id
+			 -- , p.vat_reporting_entity_id
+			 , e.entity_identifier
+			 , hp.party_name
+			 , hp.party_number
 			 , p.tax_calendar_year
 			 , p.tax_calendar_name
 			 , p.tax_calendar_period
@@ -44,13 +48,19 @@ select * from jg_zz_vat_final_reports order by creation_date desc
 			 , r.request_id final_tax_box_return_process_id
 			 , to_char(p.period_start_date,'dd/mm/yyyy') as period_start_date
 			 , to_char(p.period_end_date,'dd/mm/yyyy') as period_end_date
-			 , to_char(p.creation_date,'dd/mm/yyyy') as creation_date
 			 , to_char(p.last_update_date,'dd/mm/yyyy') as last_update_date
 			 , to_char(p.last_update_date,'dd/mm/yyyy hh24:mi:ss') as last_update_date2
-			 , p.mapping_vat_rep_entity_id
+			 -- , p.mapping_vat_rep_entity_id
 			 , p.credit_balance_amt
+			 , to_char(p.creation_date,'dd/mm/yyyy') as rep_status_creation_date
+			 , p.created_by rep_status_created_by
+			 , to_char(r.creation_date,'dd/mm/yyyy') as final_report_creation_date
+			 , r.created_by final_report_created_by
 		  from jg_zz_vat_rep_status p
+		  join jg_zz_vat_rep_entities e on e.vat_reporting_entity_id = p.vat_reporting_entity_id
+		  join hz_parties hp on hp.party_id = e.party_id
 	 left join jg_zz_vat_final_reports r on p.reporting_status_id = r.reporting_status_id
+	 left join fnd_lookup_values_vl trx_src on p.source = trx_src.lookup_code and trx_src.lookup_type = 'ZX_TRL_PRODUCT_CODE'
 		 where 1 = 1
 		   and 1 = 1
 	  order by r.final_report_id desc
