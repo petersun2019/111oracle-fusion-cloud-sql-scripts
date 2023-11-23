@@ -51,7 +51,7 @@ Queries:
 -- ##############################################################
 
 		select aia.invoice_id invoice_id
-			  '#' || aia.invoice_num invoice_num
+			 , '#' || aia.invoice_num invoice_num
 			 , (replace(replace(aia.description,chr(10),''),chr(13),' ')) description
 			 , hou.name operating_unit
 			 , decode(ap_invoices_utility_pkg.get_approval_status(aia.invoice_id,aia.invoice_amount,aia.payment_status_flag,aia.invoice_type_lookup_code), 'FULL' , 'Fully Applied', 'NEVER APPROVED' , 'Never Validated', 'NEEDS REAPPROVAL', 'Needs Revalidation', 'CANCELLED' , 'Cancelled', 'UNPAID' , 'Unpaid', 'AVAILABLE' , 'Available', 'UNAPPROVED' , 'Unvalidated', 'APPROVED' , 'Validated', 'PERMANENT' , 'Permanent Prepayment', null) inv_hdr_status
@@ -100,7 +100,7 @@ Queries:
 -- ##############################################################
 
 		select aia.invoice_id hdr_inv_id
-			  '#' || aia.invoice_num invoice_num
+			 , '#' || aia.invoice_num invoice_num
 			 , hou.name operating_unit
 			 , ap_invoices_utility_pkg.get_approval_status(aia.invoice_id,aia.invoice_amount,aia.payment_status_flag,aia.invoice_type_lookup_code) status_1
 			 , decode(ap_invoices_utility_pkg.get_approval_status(aia.invoice_id,aia.invoice_amount,aia.payment_status_flag,aia.invoice_type_lookup_code), 'FULL' , 'Fully Applied', 'NEVER APPROVED' , 'Never Validated', 'NEEDS REAPPROVAL', 'Needs Revalidation', 'CANCELLED' , 'Cancelled', 'UNPAID' , 'Unpaid', 'AVAILABLE' , 'Available', 'UNAPPROVED' , 'Unvalidated', 'APPROVED' , 'Validated', 'PERMANENT' , 'Permanent Prepayment', null) inv_hdr_status
@@ -167,7 +167,7 @@ Queries:
 -- ##############################################################
 
 		select aia.invoice_id invoice_id
-			  '#' || aia.invoice_num invoice_num
+			 , '#' || aia.invoice_num invoice_num
 			 -- , gllv.legal_entity_name legal_entity_1
 			 -- , xep.name legal_entity_2
 			 , hou.name operating_unit
@@ -353,7 +353,7 @@ Queries:
 -- ##############################################################
 
 		select aia.invoice_id invoice_id
-			  '#' || aia.invoice_num invoice_num
+			 , '#' || aia.invoice_num invoice_num
 			 , hou.name operating_unit
 			 , aia.invoice_type_lookup_code
 			 , aia.source
@@ -399,7 +399,7 @@ Queries:
 -- ##############################################################
 
 		select distinct aia.invoice_id
-			  '#' || aia.invoice_num invoice_num
+			 , '#' || aia.invoice_num invoice_num
 			 , aia.invoice_amount inv_amt
 			 , aia.total_tax_amount tax_amt
 			 , aia.amount_paid
