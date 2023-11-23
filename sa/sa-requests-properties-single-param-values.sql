@@ -76,36 +76,8 @@ completionText: Completion text
 submit.argument3: ApplicationID
 submit.argument5: EndDate
 submit.argument17: ParentID - ID of parent Create Accounting job
-*/
 
-		select rh.requestid id
-			 -- , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
-			 -- , rh.instanceparentid -- the parent process in that instance run
-			 , flv_state.meaning status
-			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
-			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
-			 -- , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
-			 -- , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
-			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
-			 , rh.product
-			 , rh.username
-			 , rp.name
-			 , rp.value value_
-			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
-		  from request_history rh
-		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
-		  join request_property rp on rp.requestid = rh.requestid
-		 where 1 = 1
-		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('XLAGLTRN')
-		   and rp.name in ('completionText','submit.argument3','submit.argument5','submit.argument17')
-		   -- and flv_state.meaning = 'Warning'
-		   -- and rh.requestid = 123456
-		   and 1 = 1
-	  order by rh.requestid desc
-			 , rp.name
-
-/*
-one row per job using PIVOT
+One row per job using PIVOT
 https://stackoverflow.com/questions/64390380/rows-to-columns-using-pivot-function-oracle
 */
 
@@ -168,37 +140,8 @@ display.attribute11.value: TransfertoGeneralLedger
 display.attribute12.value: PostinGeneralLedger
 display.attribute26.value: Ledger
 display.attribute27.value: BU
-*/
 
-		select rh.requestid id
-			 -- , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
-			 -- , rh.instanceparentid -- the parent process in that instance run
-			 , flv_state.meaning status
-			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
-			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
-			 -- , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
-			 -- , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
-			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
-			 , rh.product
-			 , rh.username
-			 , rp.name
-			 , rp.value value_
-			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
-			 , regexp_replace(substr(rh.error_warning_message, instr(rh.error_warning_message, 'process identifier '), 200), '[^0-9]', '') error_report_id
-		  from request_history rh
-		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
-		  join request_property rp on rp.requestid = rh.requestid
-		 where 1 = 1
-		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('CreateAccounting')
-		   and rp.name in ('completionText','display.attribute6.value','display.attribute8.value','display.attribute10.value','display.attribute11.value','display.attribute12.value','display.attribute26.value','display.attribute27.value')
-		   and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute8.value' and rp2.value = 'Final') -- final mode
-		   -- and flv_state.meaning = 'Warning'
-		   -- and rh.requestid = 123456
-	  order by rh.requestid desc
-			 , rp.name
-
-/*
-one row per job using PIVOT
+One row per job using PIVOT
 https://stackoverflow.com/questions/64390380/rows-to-columns-using-pivot-function-oracle
 */
 
@@ -265,40 +208,8 @@ display.attribute6.value: End Date
 display.attribute8.value: Mode
 display.attribute26.value: Application
 display.attribute27.value: Ledger
-*/
 
-		select rh.requestid id
-			 -- , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
-			 -- , rh.instanceparentid -- the parent process in that instance run
-			 , flv_state.meaning status
-		 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
-		 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
-		 -- , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
-		 -- , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
-			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
-			 , rh.product
-			 , rh.username
-			 , rp.name
-			 , rp.value value_
-			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
-			 , regexp_replace(substr(rh.error_warning_message, instr(rh.error_warning_message, 'process identifier '), 200), '[^0-9]', '') error_report_id
-		  from request_history rh
-		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
-		  join request_property rp on rp.requestid = rh.requestid
-		 where 1 = 1
-		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('XLAFSNAPRPT')
-		   and rp.name in ('completionText','display.attribute6.value','display.attribute8.value','display.attribute26.value','display.attribute27.value')
-		   -- and rp.name in ('display.attribute26.value') and rp.value = 'Payroll'
-		   and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute8.value' and rp2.value = 'F') -- final
-		   and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute26.value' and rp2.value = 'Project Costing')
-		   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute27.value' and rp2.value = 'XX Ledger')
-		   and flv_state.meaning = 'Warning'
-		   -- and rh.requestid = 123456
-	  order by rh.requestid desc
-			 , rp.name
-
-/*
-one row per job using PIVOT
+One row per job using PIVOT
 https://stackoverflow.com/questions/64390380/rows-to-columns-using-pivot-function-oracle
 */
 
@@ -403,35 +314,8 @@ The ID value returned by the SQL will be the Request ID of the Create Accounting
 completionText: Completion text
 display.attribute2.value: XX BU
 display.attribute3.value: 2023-03-31
-*/
 
-		select rh.requestid id
-			 -- , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
-			 -- , rh.instanceparentid -- the parent process in that instance run
-			 , flv_state.meaning status
-			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
-			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
-			 -- , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
-			 -- , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
-			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
-			 , rh.product
-			 , rh.username
-			 , rp.name
-			 , rp.value value_
-			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
-		  from request_history rh
-		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
-		  join request_property rp on rp.requestid = rh.requestid
-		 where 1 = 1
-		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('APCSTTRF')
-		   and rp.name in ('completionText','display.attribute2.value','display.attribute3.value')
-		   -- and flv_state.meaning = 'Warning'
-		   -- and rh.requestid = 123456
-	  order by rh.requestid desc
-			 , rp.name
-
-/*
-one row per job using PIVOT
+One row per job using PIVOT
 https://stackoverflow.com/questions/64390380/rows-to-columns-using-pivot-function-oracle
 */
 
@@ -487,35 +371,8 @@ order by id desc
 /*
 completionText: Completion text
 submit.argument1: BU
-*/
 
-		select rh.requestid id
-			 -- , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
-			 -- , rh.instanceparentid -- the parent process in that instance run
-			 , flv_state.meaning status
-			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
-			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
-			 -- , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
-			 -- , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
-			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
-			 , rh.product
-			 , rh.username
-			 , rp.name
-			 , rp.value value_
-			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
-		  from request_history rh
-		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
-		  join request_property rp on rp.requestid = rh.requestid
-		 where 1 = 1
-		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('ReceiptAccrualProcessMasterEssJobDef')
-		   and rp.name in ('completionText','submit.argument1')
-		   -- and flv_state.meaning = 'Warning'
-		   -- and rh.requestid = 123456
-	  order by rh.requestid desc
-			 , rp.name
-
-/*
-one row per job using PIVOT
+One row per job using PIVOT
 https://stackoverflow.com/questions/64390380/rows-to-columns-using-pivot-function-oracle
 */
 
@@ -573,36 +430,8 @@ display.attribute1.value: Reporting Identifier Name, not ID
 display.attribute2.value: Source value (e.g. "Input tax", "Output tax" etc).
 display.attribute3.value: Tax Calendar Period
 display.attribute4.value: Reallocate
-*/
 
-		select rh.requestid id
-			 -- , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
-			 -- , rh.instanceparentid -- the parent process in that instance run
-			 , flv_state.meaning status
-			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
-			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
-			 -- , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
-			 -- , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
-			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
-			 , rh.product
-			 , rh.username
-			 , rp.name
-			 , rp.value value_
-			 , case when rp.name = 'submit.argument1' then (select entity_identifier from jg_zz_vat_rep_entities where vat_reporting_entity_id = rp.value) end reporting_identifier
-			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
-		  from request_history rh
-		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
-		  join request_property rp on rp.requestid = rh.requestid
-		 where 1 = 1
-		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('TaxBoxAllocationProcess')
-		   and rp.name in ('completionText','display.attribute1.value','display.attribute2.value','display.attribute3.value','display.attribute4.value')
-		   -- and flv_state.meaning = 'Warning'
-		   -- and rh.requestid = 123456
-	  order by rh.requestid desc
-			 , rp.name
-
-/*
-one row per job using PIVOT
+One row per job using PIVOT
 https://stackoverflow.com/questions/64390380/rows-to-columns-using-pivot-function-oracle
 */
 
@@ -662,36 +491,8 @@ completionText: Completion text
 submit.argument3: Reporting Identifier ID (links to jg_zz_vat_rep_entities.VAT_REPORTING_ENTITY_ID to get ENTITY_IDENTIFIER)
 submit.argument4: Tax Calendar Period
 submit.argument5: Source value
-*/
 
-		select rh.requestid id
-			 -- , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
-			 -- , rh.instanceparentid -- the parent process in that instance run
-			 , flv_state.meaning status
-			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
-			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
-			 -- , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
-			 -- , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
-			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
-			 , rh.product
-			 , rh.username
-			 , rp.name
-			 , rp.value value_
-			 , case when rp.name = 'submit.argument1' then (select entity_identifier from jg_zz_vat_rep_entities where vat_reporting_entity_id = rp.value) end reporting_identifier
-			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
-		  from request_history rh
-		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
-		  join request_property rp on rp.requestid = rh.requestid
-		 where 1 = 1
-		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('EmeaVatSelectionProcess')
-		   and rp.name in ('completionText','submit.argument3','submit.argument4','submit.argument5')
-		   -- and flv_state.meaning = 'Warning'
-		   -- and rh.requestid = 123456
-	  order by rh.requestid desc
-			 , rp.name
-
-/*
-one row per job using PIVOT
+One row per job using PIVOT
 https://stackoverflow.com/questions/64390380/rows-to-columns-using-pivot-function-oracle
 */
 
@@ -750,36 +551,8 @@ completionText: Completion text
 submit.argument1: Reporting Identifier ID (links to jg_zz_vat_rep_entities.VAT_REPORTING_ENTITY_ID to get ENTITY_IDENTIFIER)
 submit.argument2: Source (e.g. Input tax (P2P), Output tax (O2C), ALL)
 submit.argument3: Tax Calendar Period
-*/
 
-		select rh.requestid id
-			 -- , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
-			 -- , rh.instanceparentid -- the parent process in that instance run
-			 , flv_state.meaning status
-			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
-			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
-			 -- , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
-			 -- , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
-			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
-			 , rh.product
-			 , rh.username
-			 , rp.name
-			 , rp.value value_
-			 , case when rp.name = 'submit.argument1' then (select entity_identifier from jg_zz_vat_rep_entities where vat_reporting_entity_id = rp.value) end reporting_identifier
-			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
-		  from request_history rh
-		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
-		  join request_property rp on rp.requestid = rh.requestid
-		 where 1 = 1
-		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('TaxBoxAllocationListing')
-		   and rp.name in ('completionText','submit.argument1','submit.argument3','submit.argument10')
-		   -- and flv_state.meaning = 'Warning'
-		   -- and rh.requestid = 123456
-	  order by rh.requestid desc
-			 , rp.name
-
-/*
-one row per job using PIVOT
+One row per job using PIVOT
 https://stackoverflow.com/questions/64390380/rows-to-columns-using-pivot-function-oracle
 */
 
@@ -838,36 +611,8 @@ completionText: Completion text
 submit.argument1: Reporting Identifier ID (links to jg_zz_vat_rep_entities.VAT_REPORTING_ENTITY_ID to get ENTITY_IDENTIFIER)
 submit.argument2: Source (e.g. Input tax (P2P), Output tax (O2C), ALL)
 submit.argument3: Tax Calendar Period
-*/
 
-		select rh.requestid id
-			 -- , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
-			 -- , rh.instanceparentid -- the parent process in that instance run
-			 , flv_state.meaning status
-			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
-			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
-			 -- , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
-			 -- , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
-			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
-			 , rh.product
-			 , rh.username
-			 , rp.name
-			 , rp.value value_
-			 , case when rp.name = 'submit.argument1' then (select entity_identifier from jg_zz_vat_rep_entities where vat_reporting_entity_id = rp.value) end reporting_identifier
-			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
-		  from request_history rh
-		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
-		  join request_property rp on rp.requestid = rh.requestid
-		 where 1 = 1
-		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('TaxBoxReturnPreparation')
-		   and rp.name in ('completionText','submit.argument1','submit.argument3','submit.argument10')
-		   -- and flv_state.meaning = 'Warning'
-		   -- and rh.requestid = 123456
-	  order by rh.requestid desc
-			 , rp.name
-
-/*
-one row per job using PIVOT
+One row per job using PIVOT
 https://stackoverflow.com/questions/64390380/rows-to-columns-using-pivot-function-oracle
 */
 
@@ -926,36 +671,8 @@ completionText: Completion Text
 display.attribute1.value: Reporting Identifier Name, not ID
 display.attribute2.value: Tax Calendar Period
 display.attribute3.value: Source value (e.g. "Input tax", "Output tax" etc).
-*/
 
-		select rh.requestid id
-			 -- , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
-			 -- , rh.instanceparentid -- the parent process in that instance run
-			 , flv_state.meaning status
-			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
-			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
-			 -- , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
-			 -- , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
-			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
-			 , rh.product
-			 , rh.username
-			 , rp.name
-			 , rp.value value_
-			 , case when rp.name = 'submit.argument1' then (select entity_identifier from jg_zz_vat_rep_entities where vat_reporting_entity_id = rp.value) end reporting_identifier
-			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
-		  from request_history rh
-		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
-		  join request_property rp on rp.requestid = rh.requestid
-		 where 1 = 1
-		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('EmeaVatFinalReportingProcess')
-		   and rp.name in ('completionText','display.attribute1.value','display.attribute2.value','display.attribute3.value')
-		   -- and flv_state.meaning = 'Warning'
-		   -- and rh.requestid = 123456
-	  order by rh.requestid desc
-			 , rp.name
-
-/*
-one row per job using PIVOT
+One row per job using PIVOT
 https://stackoverflow.com/questions/64390380/rows-to-columns-using-pivot-function-oracle
 */
 
@@ -1060,37 +777,8 @@ submit.argument6.attributeValue: File Name
 ImportJobName: e.g. "/oracle/apps/ess/financials/generalLedger/ledgers/ledgerDefinitions;ValidateAndLoadBudgets"
 REQUEST_SUBMITTED_FROM_UI: Y - e.g. was submitted via front-end
 submit.argument2: Document ID value - links to UCM "REVISIONS" table's "DID" column
-*/
 
-		select rh.requestid id
-			 -- , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
-			 -- , rh.instanceparentid -- the parent process in that instance run
-			 , flv_state.meaning status
-			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
-			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
-			 -- , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
-			 -- , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
-			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
-			 , rh.product
-			 , rh.username
-			 , rp.name
-			 , rp.value value_
-			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
-		  from request_history rh
-		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
-		  join request_property rp on rp.requestid = rh.requestid
-		 where 1 = 1
-		   and rp.name in ('completionText','submit.argument5.attributeValue','submit.argument6.attributeValue','ImportJobName','REQUEST_SUBMITTED_FROM_UI','submit.argument2')
-		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('InterfaceLoaderController')
-		   -- and regexp_like(rp.name, '[0-9]') -- parameter contains a number
-		   -- and regexp_like(rp.name, '^[[:digit:]]+$') and rp.value is not null -- parameter name only contains numbers and is not null - if uncomment this line and comment out line starting with "and rp.name in ('completionText..." that might return related interface table name for the job
-		   -- and flv_state.meaning = 'Warning'
-		   -- and rh.requestid = 123456
-	  order by rh.requestid desc
-			 , rp.name
-
-/*
-one row per job using PIVOT
+One row per job using PIVOT
 https://stackoverflow.com/questions/64390380/rows-to-columns-using-pivot-function-oracle
 */
 
@@ -1150,35 +838,8 @@ order by id desc
 completionText: Completion Text
 submit.argument1: Payment File Name
 submit.argument2: Remittance Advice Format Name
-*/
 
-		select rh.requestid id
-			 -- , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
-			 -- , rh.instanceparentid -- the parent process in that instance run
-			 , flv_state.meaning status
-			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
-			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
-			 -- , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
-			 -- , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
-			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
-			 , rh.product
-			 , rh.username
-			 , rp.name
-			 , rp.value value_
-			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
-		  from request_history rh
-		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
-		  join request_property rp on rp.requestid = rh.requestid
-		 where 1 = 1
-		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('IBY_FD_SRA_FORMAT')
-		   and rp.name in ('completionText','submit.argument1','submit.argument2')
-		   -- and flv_state.meaning = 'Warning'
-		   -- and rh.requestid = 123456
-	  order by rh.requestid desc
-			 , rp.name
-
-/*
-one row per job using PIVOT
+One row per job using PIVOT
 https://stackoverflow.com/questions/64390380/rows-to-columns-using-pivot-function-oracle
 */
 
@@ -1241,38 +902,8 @@ submit.argument2: Accounting Date
 submit.argument4: Source
 submit.argument6: Purge
 submit.argument7: Summarize Report
-*/
 
-		select rh.requestid id
-			 -- , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
-			 -- , rh.instanceparentid -- the parent process in that instance run
-			 , flv_state.meaning status
-			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
-			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
-			 -- , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
-			 -- , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
-			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
-			 , rh.product
-			 , rh.username
-			 , rp.name
-			 , rp.value value_
-			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
-			 , case when rp.name = 'submit.argument1' then (select bu_name from fun_all_business_units_v bu where bu.bu_id = rp.value) end business_unit
-			 , case when rp.name = 'submit.argument8' then (select name from gl_ledgers gl where gl.ledger_id = rp.value) end ledger
-		  from request_history rh
-		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
-		  join request_property rp on rp.requestid = rh.requestid
-		 where 1 = 1
-		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('APXPRIMPT')
-		   and rp.name in ('completionText','REQUEST_SUBMITTED_FROM_UI','submit.argument1','submit.argument12','submit.argument11','submit.argument2','submit.argument4','submit.argument6','submit.argument7')
-		   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'submit.argument4' and rp2.value = 'IMAGE') -- optional - uncomment to return import jobs for a specific source - e.g. IMAGE
-		   -- and flv_state.meaning = 'Warning'
-		   -- and rh.requestid = 123456
-	  order by rh.requestid desc
-			 , rp.name
-
-/*
-one row per job using PIVOT
+One row per job using PIVOT
 https://stackoverflow.com/questions/64390380/rows-to-columns-using-pivot-function-oracle
 */
 
@@ -1338,35 +969,8 @@ Returns the Chart of Accounts Segment the job ran against (e.g. XX_GL_COST_CENTR
 completionText: Completion Text
 submit.argument2: Chart of Accounts Segment Name
 submit.argument4: Request ID of parent "Load Interface File for Import" job
-*/
 
-		select rh.requestid id
-			 -- , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
-			 -- , rh.instanceparentid -- the parent process in that instance run
-			 , flv_state.meaning status
-			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
-			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
-			 -- , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
-			 -- , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
-			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
-			 , rh.product
-			 , rh.username
-			 , rp.name
-			 , rp.value value_
-			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
-		  from request_history rh
-		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
-		  join request_property rp on rp.requestid = rh.requestid
-		 where 1 = 1
-		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('LoadSegValAndHierData')
-		   and rp.name in ('completionText','submit.argument2','submit.argument4')
-		   -- and flv_state.meaning = 'Warning'
-		   -- and rh.requestid = 123456
-	  order by rh.requestid desc
-			 , rp.name
-
-/*
-one row per job using PIVOT
+One row per job using PIVOT
 https://stackoverflow.com/questions/64390380/rows-to-columns-using-pivot-function-oracle
 */
 
@@ -1432,35 +1036,8 @@ FlowParam_userName: Flow User Name
 FlowParam_taskType: Task Type
 FlowParam_executionMode: Execution Mode
 FlowParam_pay.start_date: Start Date
-*/
 
-		select rh.requestid id
-			 -- , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
-			 -- , rh.instanceparentid -- the parent process in that instance run
-			 , flv_state.meaning status
-			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
-			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
-			 -- , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
-			 -- , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
-			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
-			 , rh.product
-			 , rh.username
-			 , rp.name
-			 , rp.value value_
-			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
-		  from request_history rh
-		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
-		  join request_property rp on rp.requestid = rh.requestid
-		 where 1 = 1
-		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('FlowEssJobDefn')
-		   and rp.name in ('completionText','FlowParam_flowId','FlowParam_flowInstanceId','FlowParam_flowTaskId','FlowParam_flowTaskInstanceId','FlowParam_requestId','FlowParam_flowInstanceName','FlowParam_flowTaskName','FlowParam_userName','FlowParam_taskType','FlowParam_executionMode','FlowParam_pay.start_date')
-		   -- and flv_state.meaning = 'Warning'
-		   -- and rh.requestid = 123456
-	  order by rh.requestid desc
-			 , rp.name
-
-/*
-one row per job using PIVOT
+One row per job using PIVOT
 https://stackoverflow.com/questions/64390380/rows-to-columns-using-pivot-function-oracle
 */
 
@@ -1536,36 +1113,8 @@ display.attribute16.value: Business Unit
 submit.argument8: Source
 submit.argument15.attributeValue: Ledger
 submit.argument16.attributeValue: Business Unit
-*/
 
-		select rh.requestid id
-			 -- , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
-			 -- , rh.instanceparentid -- the parent process in that instance run
-			 , flv_state.meaning status
-			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
-			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
-			 -- , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
-			 -- , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
-			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
-			 , rh.product
-			 , rh.username
-			 , rp.name
-			 , rp.value value_
-			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
-		  from request_history rh
-		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
-		  join request_property rp on rp.requestid = rh.requestid
-		 where 1 = 1
-		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('APXIIMPT')
-		   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'submit.argument8' and rp2.value = 'IMAGE') -- uncomment to return a specific source
-		   and rp.name in ('completionText','display.attribute4.value','display.attribute8.value','display.attribute9.value','display.attribute10.value','display.attribute11.value','display.attribute13.value','display.attribute14.value','display.attribute15.value','display.attribute16.value','submit.argument8','submit.argument15.attributeValue','submit.argument16.attributeValue')
-		   -- and flv_state.meaning = 'Warning'
-		   -- and rh.requestid = 123456
-	  order by rh.requestid desc
-			 , rp.name
-
-/*
-one row per job using PIVOT
+One row per job using PIVOT
 https://stackoverflow.com/questions/64390380/rows-to-columns-using-pivot-function-oracle
 */
 
@@ -1641,35 +1190,8 @@ submit.argument3: From Invoice Date
 submit.argument4: To Invoice Date
 submit.argument6: Pay Group
 submit.argument8: Entered By
-*/
 
-		select rh.requestid id
-			 -- , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
-			 -- , rh.instanceparentid -- the parent process in that instance run
-			 , flv_state.meaning status
-			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
-			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
-			 -- , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
-			 -- , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
-			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
-			 , rh.product
-			 , rh.username
-			 , rp.name
-			 , rp.value value_
-			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
-		  from request_history rh
-		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
-		  join request_property rp on rp.requestid = rh.requestid
-		 where 1 = 1
-		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('APXAPRVL')
-		   and rp.name in ('completionText','display.attribute7.value','display.attribute14.value','display.attribute17.value','display.attribute18.value','submit.argument2','submit.argument3','submit.argument4','submit.argument6','submit.argument8')
-		   -- and flv_state.meaning = 'Warning'
-		   -- and rh.requestid = 123456
-	  order by rh.requestid desc
-			 , rp.name
-
-/*
-one row per job using PIVOT
+One row per job using PIVOT
 https://stackoverflow.com/questions/64390380/rows-to-columns-using-pivot-function-oracle
 */
 
@@ -1737,35 +1259,8 @@ submit.argument12: not known but seems to be a request ID
 submit.argument13: e.g. #First Reminder
 submit.argument14: Draft or Final (B = Final?)
 submit.argument9: Business Unit ID
-*/
 
-		select rh.requestid id
-			 -- , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
-			 -- , rh.instanceparentid -- the parent process in that instance run
-			 , flv_state.meaning status
-			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
-			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
-			 -- , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
-			 -- , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
-			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
-			 , rh.product
-			 , rh.username
-			 , rp.name
-			 , rp.value value_
-			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
-		  from request_history rh
-		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
-		  join request_property rp on rp.requestid = rh.requestid
-		 where 1 = 1
-		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('StrategyAutomatedProcess')
-		   and rp.name in ('completionText','submit.argument11','submit.argument12','submit.argument13','submit.argument14','submit.argument9')
-		   -- and flv_state.meaning = 'Warning'
-		   -- and rh.requestid = 123456
-	  order by rh.requestid desc
-			 , rp.name
-
-/*
-one row per job using PIVOT
+One row per job using PIVOT
 https://stackoverflow.com/questions/64390380/rows-to-columns-using-pivot-function-oracle
 */
 
@@ -1826,35 +1321,8 @@ completionText: Completion text
 parentRequest: Parent Request
 display.attribute1.value: Business Unit
 display.attribute5.value: Expenditure Item Through Date
-*/
 
-		select rh.requestid id
-			 -- , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
-			 -- , rh.instanceparentid -- the parent process in that instance run
-			 , flv_state.meaning status
-			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
-			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
-			 -- , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
-			 -- , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
-			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
-			 , rh.product
-			 , rh.username
-			 , rp.name
-			 , rp.value value_
-			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
-		  from request_history rh
-		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
-		  join request_property rp on rp.requestid = rh.requestid
-		 where 1 = 1
-		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('GenerateBurdenTransactionsJob')
-		   and rp.name in ('completionText','parentRequest','display.attribute1.value','display.attribute5.value')
-		   -- and flv_state.meaning = 'Warning'
-		   -- and rh.requestid = 123456
-	  order by rh.requestid desc
-			 , rp.name
-
-/*
-one row per job using PIVOT
+One row per job using PIVOT
 https://stackoverflow.com/questions/64390380/rows-to-columns-using-pivot-function-oracle
 */
 
@@ -1913,37 +1381,8 @@ completionText: Completion text
 submit.argument2 - Business Unit ID
 submit.argument4 - Batch Name
 submit.argument6 - Transaction Source ID
-*/
 
-		select rh.requestid id
-			 -- , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
-			 -- , rh.instanceparentid -- the parent process in that instance run
-			 , flv_state.meaning status
-			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
-			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
-			 -- , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
-			 -- , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
-			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
-			 , rh.product
-			 , rh.username
-			 , rp.name
-			 , rp.value value_
-			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
-			 , case when rp.name = 'submit.argument6' then (select user_transaction_source from pjf_txn_sources_tl ptst where ptst.transaction_source_id = rp.value and ptst.language = userenv('lang')) end trx_source
-			 , case when rp.name = 'submit.argument2' then (select bu_name from fun_all_business_units_v fabuv where fabuv.bu_id = rp.value) end business_unit
-		  from request_history rh
-		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
-		  join request_property rp on rp.requestid = rh.requestid
-		 where 1 = 1
-		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('ImportAndProcessTxnsJob')
-		   and rp.name in ('completionText','submit.argument2','submit.argument4','submit.argument6')
-		   -- and flv_state.meaning = 'Warning'
-		   -- and rh.requestid = 123456
-	  order by rh.requestid desc
-			 , rp.name
-
-/*
-one row per job using PIVOT
+One row per job using PIVOT
 https://stackoverflow.com/questions/64390380/rows-to-columns-using-pivot-function-oracle
 */
 
@@ -2003,37 +1442,8 @@ submit.argument2: ledger
 submit.argument5: period_name
 submit.argument8: online_flag
 submit.argument9: close_type
-*/
 
-		select rh.requestid id
-			 -- , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
-			 -- , rh.instanceparentid -- the parent process in that instance run
-			 , flv_state.meaning status
-			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
-			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
-			 -- , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
-			 -- , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
-			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
-			 , rh.product
-			 , rh.username
-			 , rp.name
-			 , rp.value value_
-			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
-		  from request_history rh
-		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
-		  join request_property rp on rp.requestid = rh.requestid
-		 where 1 = 1
-		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('AccountingPeriodClose')
-		   and rp.name in ('completionText','submit.argument2','submit.argument5','submit.argument8','submit.argument9')
-		   -- and rh.requestid in (select rp.requestid id from request_property rp where substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('AccountingPeriodClose') and rp.name in ('submit.argument5') and rp.value = 'Mar-23')
-		   -- and rh.requestid in (select rp.requestid id from request_property rp where substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('AccountingPeriodClose') and rp.name in ('submit.argument2') and rp.value = 'XCC Ledger')
-		   -- and flv_state.meaning = 'Warning'
-		   -- and rh.requestid = 123456
-	  order by rh.requestid desc
-			 , rp.name
-
-/*
-one row per job using PIVOT
+One row per job using PIVOT
 https://stackoverflow.com/questions/64390380/rows-to-columns-using-pivot-function-oracle
 */
 
@@ -2096,36 +1506,8 @@ submit.argument1: LEDGER_ID_1
 submit.argument2: LEDGER_ID_2
 submit.argument3: period_name
 submit.argument4: close_type
-*/
 
-		select rh.requestid id
-			 -- , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
-			 -- , rh.instanceparentid -- the parent process in that instance run
-			 , flv_state.meaning status
-			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
-			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
-			 -- , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
-			 -- , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
-			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
-			 , rh.product
-			 , rh.username
-			 , rp.name
-			 , rp.value value_
-			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
-		  from request_history rh
-		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
-		  join request_property rp on rp.requestid = rh.requestid
-		 where 1 = 1
-		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('AccountingPeriodOpen')
-		   and rp.name in ('completionText','submit.argument1','submit.argument2','submit.argument3','submit.argument4')
-		   -- and rh.requestid in (select rp.requestid id from request_property rp where substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('AccountingPeriodOpen') and rp.name in ('submit.argument3') and rp.value = 'Mar-23')
-		   -- and flv_state.meaning = 'Warning'
-		   -- and rh.requestid = 123456
-	  order by rh.requestid desc
-			 , rp.name
-
-/*
-one row per job using PIVOT
+One row per job using PIVOT
 https://stackoverflow.com/questions/64390380/rows-to-columns-using-pivot-function-oracle
 */
 
@@ -2185,35 +1567,8 @@ order by id desc
 completionText: Completion text
 display.attribute1.value: XX BU
 display.attribute27.value: Default Invoice Template
-*/
 
-		select rh.requestid id
-			 -- , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
-			 -- , rh.instanceparentid -- the parent process in that instance run
-			 , flv_state.meaning status
-			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
-			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
-			 -- , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
-			 -- , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
-			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
-			 , rh.product
-			 , rh.username
-			 , rp.name
-			 , rp.value value_
-			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
-		  from request_history rh
-		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
-		  join request_property rp on rp.requestid = rh.requestid
-		 where 1 = 1
-		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('TransactionPrintProgramEss')
-		   and rp.name in ('completionText','display.attribute1.value','display.attribute27.value')
-		   -- and flv_state.meaning = 'Warning'
-		   -- and rh.requestid = 123456
-	  order by rh.requestid desc
-			 , rp.name
-
-/*
-one row per job using PIVOT
+One row per job using PIVOT
 https://stackoverflow.com/questions/64390380/rows-to-columns-using-pivot-function-oracle
 */
 
