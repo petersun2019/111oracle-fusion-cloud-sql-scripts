@@ -92,6 +92,7 @@ Queries:
 		  join fnd_lookup_values_vl flv_source on flv_source.lookup_code = aia.source and flv_source.lookup_type = 'SOURCE' and flv_source.view_application_id = 200
 	 left join ap_batches_all aba on aba.batch_id = aia.batch_id
 		 where 1 = 1
+		   -- and aia.invoice_amount = aia.total_tax_amount -- VAT Only Invoice
 		   and 1 = 1
 	  order by aia.invoice_id desc
 
