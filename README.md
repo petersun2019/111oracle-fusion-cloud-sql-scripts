@@ -65,6 +65,9 @@ If you have any problems with the scripts, [please log an issue](https://github.
 	+---cmr
 	|       cmr-details-via-po.sql
 	|       cmr-distributions.sql
+ 	|       
+	+---cst
+	|       cst.sql
 	|       
 	+---dba
 	|       dba-schema-browser.sql
