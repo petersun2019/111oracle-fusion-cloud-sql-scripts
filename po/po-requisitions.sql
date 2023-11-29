@@ -344,7 +344,7 @@ select * from por_req_distributions_all where requisition_line_id = 123
 		  join egp_categories_tl ect on ect.category_id = ecb.category_id and ect.language = userenv('lang')
 	 left join por_requisition_lines_all prla on prla.category_id = ecb.category_id
 	 left join por_requisition_headers_all prha on prha.requisition_header_id = prla.requisition_header_id
-	 left join fun_all_business_units_v bu on bu.bu_id = prha.req_bu_id and bu.bu_name = 'XX BU'
+	 left join fun_all_business_units_v bu on bu.bu_id = prha.req_bu_id
 		 where xmsv.mapping_set_code = 'XX_SUBJECTIVE_MAPPING' -- THIS IS DIFFERENT FOR EACH CUSTOMER
 		   and nvl(xmsv.effective_end_date, sysdate + 1) > sysdate
 		   and ecb.enabled_flag = 'Y'
