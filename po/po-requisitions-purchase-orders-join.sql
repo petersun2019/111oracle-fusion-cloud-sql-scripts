@@ -7,6 +7,7 @@ URL: https://github.com/throwing-cheese/oracle-fusion-cloud-sql-scripts
 Queries:
 
 -- REQUISITION TO PURCHASE ORDER JOIN
+-- REQUISITION TO PURCHASE ORDER JOIN - SUMMARY
 -- PURCHASE ORDER TO REQUISITION JOIN
 
 */
@@ -15,8 +16,9 @@ Queries:
 -- REQUISITION TO PURCHASE ORDER JOIN
 -- ##############################################################
 
-		select '#' || prha.requisition_number req
-			 , '#' || prha.requisition_header_id req_id
+		select prha.requisition_number req
+			 , prha.requisition_header_id req_id
+			 , bu.bu_name bu
 			 , prha.document_status req_status
 			 , to_char(prha.creation_date,'yyyy-mm-dd hh24:mi:ss') req_created
 			 , to_char(prha.approved_date,'yyyy-mm-dd hh24:mi:ss') req_approved
@@ -28,8 +30,8 @@ Queries:
 			 , prla.quantity
 			 , prla.item_source
 			 , prla.smart_form_id
-			 , '#' || pha.segment1 po
-			 , '#' || pha.po_header_id po_id
+			 , pha.segment1 po
+			 , pha.po_header_id po_id
 			 , pha.document_status po_status
 			 , to_char(pha.creation_date,'yyyy-mm-dd hh24:mi:ss') po_created
 			 , to_char(pha.approved_date,'yyyy-mm-dd hh24:mi:ss') po_approved
@@ -38,6 +40,7 @@ Queries:
 		  from por_requisition_headers_all prha
 		  join por_requisition_lines_all prla on prha.requisition_header_id = prla.requisition_header_id
 		  join por_req_distributions_all prda on prla.requisition_line_id = prda.requisition_line_id
+		  join fun_all_business_units_v bu on bu.bu_id = prha.req_bu_id
 	 left join po_distributions_all pda on pda.req_distribution_id = prda.distribution_id
 	 left join po_lines_all pla on pda.po_line_id = pla.po_line_id
 	 left join po_headers_all pha on pha.po_header_id = pla.po_header_id
@@ -47,11 +50,52 @@ Queries:
 	  order by prha.requisition_header_id desc
 
 -- ##############################################################
+-- REQUISITION TO PURCHASE ORDER JOIN - SUMMARY
+-- ##############################################################
+
+		select prha.requisition_number req
+			 , bu.bu_name bu
+			 , prha.document_status req_status
+			 , to_char(prha.creation_date,'yyyy-mm-dd hh24:mi:ss') req_created
+			 , to_char(prha.approved_date,'yyyy-mm-dd hh24:mi:ss') req_approved
+			 , prha.created_by
+			 , pha.segment1 po
+			 , pha.document_status po_status
+			 , to_char(pha.creation_date,'yyyy-mm-dd hh24:mi:ss') po_created
+			 , to_char(pha.approved_date,'yyyy-mm-dd hh24:mi:ss') po_approved
+			 , pha.created_by po_created_by
+			 , pha.document_creation_method doc_method
+			 , count(*) line_count
+		  from por_requisition_headers_all prha
+		  join por_requisition_lines_all prla on prha.requisition_header_id = prla.requisition_header_id
+		  join por_req_distributions_all prda on prla.requisition_line_id = prda.requisition_line_id
+		  join po_distributions_all pda on pda.req_distribution_id = prda.distribution_id
+		  join fun_all_business_units_v bu on bu.bu_id = prha.req_bu_id
+		  join po_lines_all pla on pda.po_line_id = pla.po_line_id
+		  join po_headers_all pha on pha.po_header_id = pla.po_header_id
+		  join egp_categories_tl cat on prla.category_id = cat.category_id
+		 where 1 = 1
+		   and 1 = 1
+	  group by prha.requisition_number
+			 , bu.bu_name
+			 , prha.document_status
+			 , to_char(prha.creation_date,'yyyy-mm-dd hh24:mi:ss')
+			 , to_char(prha.approved_date,'yyyy-mm-dd hh24:mi:ss')
+			 , prha.created_by
+			 , pha.segment1 po
+			 , pha.document_status
+			 , to_char(pha.creation_date,'yyyy-mm-dd hh24:mi:ss')
+			 , to_char(pha.approved_date,'yyyy-mm-dd hh24:mi:ss')
+			 , pha.created_by
+			 , pha.document_creation_method
+	  order by to_char(prha.creation_date,'yyyy-mm-dd hh24:mi:ss') desc
+
+-- ##############################################################
 -- PURCHASE ORDER TO REQUISITION JOIN
 -- ##############################################################
 
-		select '#' || pha.segment1 po
-			 , '#' || pha.po_header_id po_header_id
+		select pha.segment1 po
+			 , pha.po_header_id po_header_id
 			 , pha.type_lookup_code
 			 , pha.document_creation_method
 			 , pha.document_status po_status
