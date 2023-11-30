@@ -7,11 +7,14 @@ URL: https://github.com/throwing-cheese/oracle-fusion-cloud-sql-scripts
 Queries:
 
 -- TABLE DUMPS
--- VAT REPORTING DETAILS
+-- VAT REPORTING DETAILS 1
+-- VAT REPORTING DETAILS 2
 -- SQL FROM SR
 -- ZX_DIST_TAX_BOX_ASSGNMNTS
 -- JE_ZZ_VAT_REP_TRX_T - VERSION 1
 -- JE_ZZ_VAT_REP_TRX_T - VERSION 2 (SMALLER VERSION)
+-- BOX NUMBER ATTEMPT 1 - DETAILED LEVEL
+-- BOX NUMBER ATTEMPT 2 - SUMMARY LEVEL
 -- JG_ZZ_VAT_TRX_DETAILS - VERSION 1
 -- JG_ZZ_VAT_TRX_DETAILS - VERSION 2
 -- TAX BOX SETUP
@@ -30,72 +33,72 @@ select * from je_zz_vat_rep_trx_t order by creation_date desc
 -- VAT REPORTING DETAILS 1
 -- ##################################################################
 
-		select p.reporting_status_id
-			 , r.final_report_id
-			 , p.source
+		select jzvrs.reporting_status_id
+			 , jzvfr.final_report_id
+			 , jzvrs.source
 			 , trx_src.meaning input_output
-			 , p.tax_registration_number tax_registration_number
-			 -- , p.vat_reporting_entity_id
-			 , e.entity_identifier
+			 , jzvrs.tax_registration_number tax_registration_number
+			 -- , jzvrs.vat_reporting_entity_id
+			 , jzvre.entity_identifier
 			 , hp.party_name
-			 , p.tax_calendar_year
-			 , p.tax_calendar_name
-			 , p.tax_calendar_period
-			 , p.selection_status_flag
-			 , to_char(p.selection_process_date,'dd/mm/yyyy') as selection_process_date
-			 , p.allocation_status_flag
-			 , to_char(p.allocation_process_date,'dd/mm/yyyy') as allocation_process_date
-			 , p.final_reporting_status_flag
-			 , to_char(p.final_reporting_process_date,'dd/mm/yyyy') as final_reporting_process_date
-			 , p.final_reporting_process_id
-			 , p.request_id finalize_tax_process_id
-			 , r.request_id final_tax_box_return_process_id
-			 , to_char(p.period_start_date,'dd/mm/yyyy') as period_start_date
-			 , to_char(p.period_end_date,'dd/mm/yyyy') as period_end_date
-			 , to_char(p.last_update_date,'dd/mm/yyyy') as last_update_date
-			 , to_char(p.last_update_date,'dd/mm/yyyy hh24:mi:ss') as last_update_date2
-			 -- , p.mapping_vat_rep_entity_id
-			 , p.credit_balance_amt
-			 , to_char(p.creation_date,'dd/mm/yyyy') as rep_status_creation_date
-			 , p.created_by rep_status_created_by
-			 , to_char(r.creation_date,'dd/mm/yyyy') as final_report_creation_date
-			 , r.created_by final_report_created_by
-		  from jg_zz_vat_rep_status p
-		  join jg_zz_vat_rep_entities e on e.vat_reporting_entity_id = p.vat_reporting_entity_id
-		  join hz_parties hp on hp.party_id = e.party_id
-	 left join jg_zz_vat_final_reports r on p.reporting_status_id = r.reporting_status_id
-	 left join fnd_lookup_values_vl trx_src on p.source = trx_src.lookup_code and trx_src.lookup_type = 'ZX_TRL_PRODUCT_CODE'
+			 , jzvrs.tax_calendar_year
+			 , jzvrs.tax_calendar_name
+			 , jzvrs.tax_calendar_period
+			 , jzvrs.selection_status_flag
+			 , to_char(jzvrs.selection_process_date,'dd/mm/yyyy') as selection_process_date
+			 , jzvrs.allocation_status_flag
+			 , to_char(jzvrs.allocation_process_date,'dd/mm/yyyy') as allocation_process_date
+			 , jzvrs.final_reporting_status_flag
+			 , to_char(jzvrs.final_reporting_process_date,'dd/mm/yyyy') as final_reporting_process_date
+			 , jzvrs.final_reporting_process_id
+			 , jzvrs.request_id finalize_tax_process_id
+			 , jzvfr.request_id final_tax_box_return_process_id
+			 , to_char(jzvrs.period_start_date,'dd/mm/yyyy') as period_start_date
+			 , to_char(jzvrs.period_end_date,'dd/mm/yyyy') as period_end_date
+			 , to_char(jzvrs.last_update_date,'dd/mm/yyyy') as last_update_date
+			 , to_char(jzvrs.last_update_date,'dd/mm/yyyy hh24:mi:ss') as last_update_date2
+			 -- , jzvrs.mapping_vat_rep_entity_id
+			 , jzvrs.credit_balance_amt
+			 , to_char(jzvrs.creation_date,'dd/mm/yyyy') as rep_status_creation_date
+			 , jzvrs.created_by rep_status_created_by
+			 , to_char(jzvfr.creation_date,'dd/mm/yyyy') as final_report_creation_date
+			 , jzvfr.created_by final_report_created_by
+		  from jg_zz_vat_rep_status jzvrs
+		  join jg_zz_vat_rep_entities jzvre on jzvre.vat_reporting_entity_id = jzvrs.vat_reporting_entity_id
+		  join hz_parties hp on hp.party_id = jzvre.party_id
+	 left join jg_zz_vat_final_reports jzvfr on jzvrs.reporting_status_id = jzvfr.reporting_status_id
+	 left join fnd_lookup_values_vl trx_src on jzvrs.source = trx_src.lookup_code and trx_src.lookup_type = 'ZX_TRL_PRODUCT_CODE'
 		 where 1 = 1
 		   and 1 = 1
-	  order by r.final_report_id desc
+	  order by jzvfr.final_report_id desc
 
 -- ##################################################################
 -- VAT REPORTING DETAILS 2
 -- ##################################################################
 
 		select hp.party_name
-			 , p.tax_calendar_period
+			 , jzvrs.tax_calendar_period
 			 , trx_src.meaning input_output
-			 , p.tax_registration_number tax_registration_number
-			 , p.selection_status_flag
-			 , to_char(p.selection_process_date,'dd/mm/yyyy') as selection_process_date
-			 , p.allocation_status_flag
-			 , to_char(p.allocation_process_date,'dd/mm/yyyy') as allocation_process_date
-			 , p.final_reporting_status_flag
-			 , to_char(p.final_reporting_process_date,'dd/mm/yyyy') as final_reporting_process_date
-			 , to_char(p.last_update_date,'dd/mm/yyyy hh24:mi:ss') as last_update_date
-			 , to_char(p.creation_date,'dd/mm/yyyy') as rep_status_creation_date
-			 , p.created_by rep_status_created_by
-			 , to_char(r.creation_date,'dd/mm/yyyy') as final_report_creation_date
-			 , r.created_by final_report_created_by
-		  from jg_zz_vat_rep_status p
-		  join jg_zz_vat_rep_entities e on e.vat_reporting_entity_id = p.vat_reporting_entity_id
-		  join hz_parties hp on hp.party_id = e.party_id
-	 left join jg_zz_vat_final_reports r on p.reporting_status_id = r.reporting_status_id
-	 left join fnd_lookup_values_vl trx_src on p.source = trx_src.lookup_code and trx_src.lookup_type = 'ZX_TRL_PRODUCT_CODE'
+			 , jzvrs.tax_registration_number tax_registration_number
+			 , jzvrs.selection_status_flag
+			 , to_char(jzvrs.selection_process_date,'dd/mm/yyyy') as selection_process_date
+			 , jzvrs.allocation_status_flag
+			 , to_char(jzvrs.allocation_process_date,'dd/mm/yyyy') as allocation_process_date
+			 , jzvrs.final_reporting_status_flag
+			 , to_char(jzvrs.final_reporting_process_date,'dd/mm/yyyy') as final_reporting_process_date
+			 , to_char(jzvrs.last_update_date,'dd/mm/yyyy hh24:mi:ss') as last_update_date
+			 , to_char(jzvrs.creation_date,'dd/mm/yyyy') as rep_status_creation_date
+			 , jzvrs.created_by rep_status_created_by
+			 , to_char(jzvfr.creation_date,'dd/mm/yyyy') as final_report_creation_date
+			 , jzvfr.created_by final_report_created_by
+		  from jg_zz_vat_rep_status jzvrs
+		  join jg_zz_vat_rep_entities jzvre on jzvre.vat_reporting_entity_id = jzvrs.vat_reporting_entity_id
+		  join hz_parties hp on hp.party_id = jzvre.party_id
+	 left join jg_zz_vat_final_reports jzvfr on jzvrs.reporting_status_id = jzvfr.reporting_status_id
+	 left join fnd_lookup_values_vl trx_src on jzvrs.source = trx_src.lookup_code and trx_src.lookup_type = 'ZX_TRL_PRODUCT_CODE'
 		 where 1 = 1
 		   and 1 = 1
-	  order by r.final_report_id desc
+	  order by jzvfr.final_report_id desc
 
 -- ##################################################################
 -- SQL FROM SR
@@ -210,6 +213,123 @@ This temporary table contains reporting information related to tax, that must be
 			 , rpt_status.final_reporting_status_flag
 			 , rpt_status.final_reporting_process_id
 			 , rpt_status.final_reporting_process_date
+
+-- ##################################################################
+-- BOX NUMBER ATTEMPT 1 - DETAILED LEVEL
+-- ##################################################################
+
+/*
+https://community.oracle.com/customerconnect/discussion/comment/813626#Comment_813626
+Where to find employee W2 Box 1 and Box 5 Data?
+tax box allocation listing data model dataset q_return
+*/
+
+		select je_info_n21 tax_dist_id
+			 , je_info_n29 box_id
+			 , je_info_v16 box_type
+			 , je_info_v13 l_source
+			 , je_info_n2 trx_line_number
+			 , je_info_v3 code
+			 , je_info_n20 total_amt
+			 , je_info_v26 currency
+			 , decode(jzvrs.final_reporting_status_flag,'S','REPORTED','UNREPORTED') final_reporting_status
+			 , je_info_v1 financial_document_type
+			 , je_info_v18 doc_seq
+			 , je_info_v7 doc_number
+			 , je_info_v2 inv_number
+			 , je_info_n1 inv_line
+			 , je_info_v11 billing_tp_name
+			 , je_info_v12 shipping
+			 , to_char(je_info_d1,'yyyy-mm-dd') tax_point_date
+			 , to_char(je_info_d1,'mm-yy') period
+			 , je_info_n3 tax_rate
+			 , je_info_n10 amount
+			 , je_info_v15 info
+			 , je_info_n15 unique_identifier
+			 , je_info_v20 box_number
+			 , je_info_v21 rec_flag
+			 , je_info_n27 box_type_line
+			 , je_info_v24 report_type_name
+			 , je_info_v25 g_source
+			 , decode(je_info_v19,'REC_TAX_BOX',je_info_n16,0) rec_tax_amt
+			 , decode(je_info_v19,'NON_REC_TAX_BOX',decode(je_info_v14,'O2C',decode(je_info_v1,'NON_REC_ADJUSTMENT',je_info_n17,'NON_REC_RECEIPTS',je_info_n17,0),je_info_n17),0) nrec_tax_amt
+			 , decode(je_info_v19,'REC_TAXABLE_BOX',je_info_n18,0) rec_taxable_amt
+			 , decode(je_info_v19,'NON_REC_TAXABLE_BOX',decode(je_info_v14,'O2C',decode(je_info_v1,'NON_REC_ADJUSTMENT',je_info_n19,'NON_REC_RECEIPTS',je_info_n19,0),je_info_n19),0) nrec_taxable_amt
+			 , decode(je_info_v19,'TOTAL_BOX',je_info_n20,0) total_amount
+			 , decode(je_info_v19,'REC_TAX_BOX',1,'NON_REC_TAX_BOX',2,'REC_TAXABLE_BOX',3,'NON_REC_TAXABLE_BOX',4,'TOTAL_BOX',5 ) box_type_no
+			 , decode(je_info_v19,'REC_TAX_BOX',je_info_n16,'NON_REC_TAX_BOX',je_info_n17,'REC_TAXABLE_BOX',je_info_n18,'NON_REC_TAXABLE_BOX',je_info_n19,'TOTAL_BOX',je_info_n20 ) amount_box
+			 , je_INFO_V10 box_number_description
+			 , je_INFO_V32 sign_flag
+			 , je_info_v34 trx_currency -- As per bug#30851865
+		from je_zz_vat_rep_trx_t gt
+		join jg_zz_vat_rep_status jzvrs on gt.reporting_batch_id = jzvrs.reporting_status_id
+	   where jzvrs.source not in ('GL','AR','AP')
+
+
+-- ##################################################################
+-- BOX NUMBER ATTEMPT 2 - SUMMARY LEVEL
+-- ##################################################################
+
+/*
+Seems like JE_INFO_N20 = JE_INFO_N16 + JE_INFO_N18 + JE_INFO_N19
+*/
+
+			select transaction_source
+				 , decode(jzvrs.final_reporting_status_flag,'S','REPORTED','UNREPORTED') final_reporting_status
+				 , je_info_v1 financial_document_type
+				 , je_info_v3 code
+				 , je_info_v13 l_source
+				 , je_info_v16 box_type
+				 , je_info_v18 doc_seq
+				 , je_info_v19 tax_box
+				 , je_info_v20 box_num
+				 , je_info_v22 l_org
+				 , je_info_v24 report_type_name
+				 , to_char(je_info_d1,'mm-yyyy') d1
+				 , to_char(je_info_d1,'yyyy') d1_year
+				 , to_char(je_info_d2,'mm-yyyy') d2
+				 , to_char(je_info_d2,'yyyy') d2_year
+				 , gt.request_id
+				 , sum(je_info_n10) sum_n10
+				 , sum(je_info_n15) sum_n15
+				 , sum(je_info_n16) sum_n16
+				 , sum(je_info_n17) sum_n17
+				 , sum(je_info_n18) sum_n18
+				 , sum(je_info_n19) sum_n19
+				 , sum(je_info_n20) sum_n20
+				 , min(to_char(gt.creation_date, 'yyyy-mm-dd hh24:mi:ss')) min_trx_created
+				 , max(to_char(gt.creation_date, 'yyyy-mm-dd hh24:mi:ss')) max_trx_created
+				 , min(gt.created_by) min_created_by
+				 , max(gt.created_by) max_created_by
+				 , min(to_char(gt.last_update_date, 'yyyy-mm-dd hh24:mi:ss')) min_trx_updated
+				 , max(to_char(gt.last_update_date, 'yyyy-mm-dd hh24:mi:ss')) max_trx_updated
+				 , min(gt.last_updated_by) min_updated_by
+				 , max(gt.last_updated_by) max_updated_by
+				 , min('#' || je_info_v7) min_doc_number
+				 , max('#' || je_info_v7) max_doc_number
+				 , min('#' || je_info_v2) min_inv_num
+				 , max('#' || je_info_v2) max_inv_num
+				 , count(*) ct
+			  from je_zz_vat_rep_trx_t gt
+			  join jg_zz_vat_rep_status jzvrs on gt.reporting_batch_id = jzvrs.reporting_status_id
+			 where 1 = 1
+			   and jzvrs.source not in ('GL','AR','AP')
+		  group by transaction_source
+				 , decode(jzvrs.final_reporting_status_flag,'S','REPORTED','UNREPORTED')
+				 , je_info_v1
+				 , je_info_v3
+				 , je_info_v13
+				 , je_info_v16
+				 , je_info_v18
+				 , je_info_v19
+				 , je_info_v20
+				 , je_info_v22
+				 , je_info_v24
+				 , to_char(je_info_d1,'mm-yyyy')
+				 , to_char(je_info_d1,'yyyy')
+				 , to_char(je_info_d2,'mm-yyyy')
+				 , to_char(je_info_d2,'yyyy')
+				 , gt.request_id
 
 -- ##################################################################
 -- JG_ZZ_VAT_TRX_DETAILS - VERSION 1
