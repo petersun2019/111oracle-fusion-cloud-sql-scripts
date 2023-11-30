@@ -37,7 +37,8 @@ select * from por_req_distributions_all where requisition_line_id = 123
 -- ##############################################################
 
 		select prha.requisition_number req
-			 , '#' || prha.requisition_header_id
+			 , prha.requisition_header_id
+			 , bu.bu_name bu
 			 , to_char(prha.creation_date,'yyyy-mm-dd hh24:mi:ss') req_created
 			 , to_char(prha.last_update_date,'yyyy-mm-dd hh24:mi:ss') req_updated
 			 , to_char(prha.approved_date,'yyyy-mm-dd hh24:mi:ss') approved_date
@@ -46,9 +47,9 @@ select * from por_req_distributions_all where requisition_line_id = 123
 			 , prha.document_status
 			 , prha.created_by
 			 , ppnfv1.full_name req_preparer
-			 , '#' || ppnfv1.person_id req_preparer_id
+			 , ppnfv1.person_id req_preparer_id
 			 , ppnfv2.full_name req_requester
-			 , '#' || ppnfv2.person_id req_requester_id
+			 , ppnfv2.person_id req_requester_id
 		  from por_requisition_headers_all prha
 		  join por_requisition_lines_all prla on prha.requisition_header_id = prla.requisition_header_id
 		  join por_req_distributions_all prda on prla.requisition_line_id = prda.requisition_line_id
@@ -58,6 +59,7 @@ select * from por_req_distributions_all where requisition_line_id = 123
 		  join hr_locations_all hla on prla.deliver_to_location_id = hla.location_id
 		  join per_person_names_f_v ppnfv1 on ppnfv1.person_id = prha.preparer_id
 		  join per_person_names_f_v ppnfv2 on ppnfv2.person_id = prla.requester_id
+		  join fun_all_business_units_v bu on bu.bu_id = prha.req_bu_id
 		 where 1 = 1
 		   and 1 = 1
 	  order by prha.requisition_header_id desc
@@ -67,16 +69,17 @@ select * from por_req_distributions_all where requisition_line_id = 123
 -- ##############################################################
 
 		select prha.requisition_number req
-			 , '#' || prha.requisition_header_id
+			 , prha.requisition_header_id
+			 , bu.bu_name bu
 			 , to_char(prha.creation_date,'yyyy-mm-dd hh24:mi:ss') req_created
 			 , to_char(prha.last_update_date,'yyyy-mm-dd hh24:mi:ss') req_updated
 			 , to_char(prha.approved_date,'yyyy-mm-dd hh24:mi:ss') approved_date
 			 , prha.document_status
 			 , prha.created_by
 			 , ppnfv1.full_name req_preparer
-			 , '#' || ppnfv1.person_id req_preparer_id
+			 , ppnfv1.person_id req_preparer_id
 			 , ppnfv2.full_name req_requester
-			 , '#' || ppnfv2.person_id req_requester_id
+			 , ppnfv2.person_id req_requester_id
 			 , sum(nvl(prla.quantity,prla.amount)*nvl(prla.unit_price,1)) value
 			 , count(*) lines
 			 , count(distinct prla.category_id) distinct_categories
@@ -90,19 +93,21 @@ select * from por_req_distributions_all where requisition_line_id = 123
 		  join hr_locations_all hla on prla.deliver_to_location_id = hla.location_id
 		  join per_person_names_f_v ppnfv1 on ppnfv1.person_id = prha.preparer_id
 		  join per_person_names_f_v ppnfv2 on ppnfv2.person_id = prla.requester_id
+		  join fun_all_business_units_v bu on bu.bu_id = prha.req_bu_id
 		 where 1 = 1
 		   and 1 = 1
 	  group by prha.requisition_number
-			 , '#' || prha.requisition_header_id
+			 , prha.requisition_header_id
+			 , bu.bu_name
 			 , to_char(prha.creation_date,'yyyy-mm-dd hh24:mi:ss')
 			 , to_char(prha.last_update_date,'yyyy-mm-dd hh24:mi:ss')
 			 , to_char(prha.approved_date,'yyyy-mm-dd hh24:mi:ss')
 			 , prha.document_status
 			 , prha.created_by
 			 , ppnfv1.full_name
-			 , '#' || ppnfv1.person_id
+			 , ppnfv1.person_id
 			 , ppnfv2.full_name
-			 , '#' || ppnfv2.person_id
+			 , ppnfv2.person_id
 	  order by to_char(prha.creation_date,'yyyy-mm-dd hh24:mi:ss') desc
 
 -- ##############################################################
@@ -110,6 +115,7 @@ select * from por_req_distributions_all where requisition_line_id = 123
 -- ##############################################################
 
 		select distinct prha.requisition_number
+			 , bu.bu_name bu
 			 , cat.category_name
 			 , to_char(catb.creation_date,'yyyy-mm-dd') cat_created
 			 , to_char(prha.creation_date,'yyyy-mm-dd') req_created
@@ -142,6 +148,7 @@ select * from por_req_distributions_all where requisition_line_id = 123
 		  join egp_categories_b catb on cat.category_id = catb.category_id
 		  join hr_locations_all hla on prla.deliver_to_location_id = hla.location_id
 		  join po_action_history pah on pah.object_id = prha.requisition_header_id and pah.object_sub_type_code = 'PURCHASE' and pah.object_type_code = 'REQ' and pah.action_code = 'REJECT' and pah.note = 'Approvals encountered an error.'
+		  join fun_all_business_units_v bu on bu.bu_id = prha.req_bu_id
 		 where 1 = 1
 		   and prha.document_status = 'REJECTED'
 		   and 1 = 1
@@ -152,7 +159,7 @@ select * from por_req_distributions_all where requisition_line_id = 123
 -- ##############################################################
 
 		select prha.requisition_number
-			 , '#' || prha.requisition_header_id requisition_header_id
+			 , prha.requisition_header_id
 			 , prha.document_status
 			 , bu.bu_name bu
 			 , haou.name org
@@ -167,8 +174,8 @@ select * from por_req_distributions_all where requisition_line_id = 123
 			 , prla.unit_price
 			 , prla.amount
 			 , prla.line_number req_line
-			 , '#' || prla.source_doc_header_id source_doc_header_id
-			 , '#' || prla.source_doc_line_id source_doc_line_id
+			 , prla.source_doc_header_id
+			 , prla.source_doc_line_id
 			 , prla.requisition_line_id
 			 , gcc.segment1
 			 , gcc.segment2
@@ -176,6 +183,8 @@ select * from por_req_distributions_all where requisition_line_id = 123
 			 , gcc.segment4
 			 , gcc.segment5
 			 , (replace(replace(prla.item_description,chr(10),''),chr(13),' ')) item_description
+			 , esib.item_number
+			 , esit.description inv_item_descr
 		  from por_requisition_headers_all prha
 		  join por_requisition_lines_all prla on prha.requisition_header_id = prla.requisition_header_id
 		  join por_req_distributions_all prda on prla.requisition_line_id = prda.requisition_line_id
@@ -186,6 +195,8 @@ select * from por_req_distributions_all where requisition_line_id = 123
 		  join poz_suppliers_v psv on prla.vendor_id = psv.vendor_id 
 	 left join hr_all_organization_units haou on prda.pjc_organization_id = haou.organization_id
 	 left join fun_all_business_units_v bu on bu.bu_id = prha.req_bu_id
+	 left join egp_system_items_b esib on esib.inventory_item_id = prla.item_id and esib.organization_id = prla.destination_organization_id
+	 left join egp_system_items_tl esit on esit.inventory_item_id = esib.inventory_item_id and esit.organization_id = esib.organization_id and esit.language = userenv('lang')
 		 where 1 = 1
 		   and 1 = 1
 	  order by to_char(prha.creation_date,'yyyy-mm-dd') desc
@@ -194,81 +205,86 @@ select * from por_req_distributions_all where requisition_line_id = 123
 -- REQUISITION HEADERS AND LINES (WITH PO TABLE JOINS)
 -- ##############################################################
 
-			select prha.requisition_number
-				 , '#' || prha.requisition_header_id requisition_header_id
-				 , prha.document_status
-				 , bu.bu_name bu
-				 , psv.vendor_name supplier
-				 , pssam.vendor_site_code site
-				 , cat.category_name
-				 , cat.creation_date cat_created
-				 , to_char(prha.creation_date,'yyyy-mm-dd') req_created
-				 , to_char(prha.approved_date, 'yyyy-mm-dd') req_approved
-				 , prha.created_by
-				 , prha.funds_status header_funds_status
-				 , prha.funds_chk_fail_warn_flag
-				 , prha.funds_override_approver_id
-				 , prha.insufficient_funds_flag
-				 , prha.lifecycle_status
-				 , hla.location_code
-				 , prla.quantity
-				 , prla.unit_price
-				 , prla.amount
-				 , prla.line_status
-				 , prla.funds_status line_funds_status
-				 , prla.line_number req_line
-				 , '#' || prla.source_doc_header_id source_doc_header_id
-				 , '#' || prla.source_doc_line_id source_doc_line_id
-				 , '#' || prla.requisition_line_id requisition_line_id
-				 , gcc.segment1
-				 , gcc.segment2
-				 , gcc.segment3
-				 , gcc.segment4
-				 , gcc.segment5
-				 , gcc.segment6
-				 , (replace(replace(prla.item_description,chr(10),''),chr(13),' ')) item_description
-				 , ppav.segment1 proj_number
-				 , ptv.task_number
-				 , ptv.task_name
-				 , ptv.chargeable_flag
-				 , ppav.name proj_name
-				 , to_char(ppav.start_date, 'yyyy-mm-dd') proj_start_date
-				 , to_char(ppav.completion_date, 'yyyy-mm-dd') proj_completion_date
-				 , to_char(ppav.closed_date, 'yyyy-mm-dd') proj_closed_date
-				 , to_char(ptv.start_date, 'yyyy-mm-dd') task_start_date
-				 , to_char(ptv.completion_date, 'yyyy-mm-dd') task_completion_date
-				 , ppav.project_status_code
-				 , petl.expenditure_type_name
-				 , haou.name exp_org
-				 , to_char(prda.pjc_expenditure_item_date, 'yyyy-mm-dd') expenditure_item_date
-				 , prda.funds_status dist_funds_status
-				 , to_char(prda.budget_date, 'yyyy-mm-dd') budget_date
-				 , '#############' po____________
-				 , pha.segment1 po_num
-				 , pha.amount_released
-				 , pha.blanket_total_amount
-				 , pha.amount_limit
-				 , pla.component_amount_released
-				 , pla.amount_released pla_amount_released
-			  from por_requisition_headers_all prha
-		 left join por_requisition_lines_all prla on prha.requisition_header_id = prla.requisition_header_id
-		 left join por_req_distributions_all prda on prla.requisition_line_id = prda.requisition_line_id
-		 left join gl_code_combinations gcc on prda.code_combination_id = gcc.code_combination_id
-		 left join egp_categories_tl cat on prla.category_id = cat.category_id
-		 left join egp_categories_b catb on cat.category_id = catb.category_id
-		 left join hr_locations_all hla on prla.deliver_to_location_id = hla.location_id
-		 left join poz_suppliers_v psv on prla.vendor_id = psv.vendor_id 
-		 left join poz_supplier_sites_all_m pssam on psv.vendor_id = pssam.vendor_id and prla.vendor_site_id = pssam.vendor_site_id
-		 left join pjf_projects_all_vl ppav on prda.pjc_project_id = ppav.project_id
-		 left join pjf_tasks_v ptv on ppav.project_id = ptv.project_id and prda.pjc_task_id = ptv.task_id
-		 left join pjf_exp_types_tl petl on prda.pjc_expenditure_type_id = petl.expenditure_type_id
-		 left join hr_all_organization_units haou on prda.pjc_organization_id = haou.organization_id
-		 left join fun_all_business_units_v bu on bu.bu_id = prha.req_bu_id
-		 left join po_headers_all pha on pha.po_header_id = prla.source_doc_header_id
-		 left join po_lines_all pla on pla.po_line_id = prla.source_doc_line_id
-			 where 1 = 1
-			   and 1 = 1
-		  order by to_char(prha.creation_date,'yyyy-mm-dd') desc
+		select prha.requisition_number
+			 , prha.requisition_header_id
+			 , prha.document_status
+			 , bu.bu_name bu
+			 , psv.vendor_name supplier
+			 , pssam.vendor_site_code site
+			 , cat.category_name
+			 , cat.creation_date cat_created
+			 , to_char(prha.creation_date,'yyyy-mm-dd') req_created
+			 , to_char(prha.approved_date, 'yyyy-mm-dd') req_approved
+			 , prha.created_by
+			 , prha.funds_status header_funds_status
+			 , prha.funds_chk_fail_warn_flag
+			 , prha.funds_override_approver_id
+			 , prha.insufficient_funds_flag
+			 , prha.lifecycle_status
+			 , hla.location_code
+			 , prla.quantity
+			 , prla.unit_price
+			 , prla.amount
+			 , prla.line_status
+			 , prla.funds_status line_funds_status
+			 , prla.line_number req_line
+			 , prla.source_doc_header_id
+			 , prla.source_doc_line_id
+			 , prla.requisition_line_id
+			 , gcc.segment1
+			 , gcc.segment2
+			 , gcc.segment3
+			 , gcc.segment4
+			 , gcc.segment5
+			 , gcc.segment6
+			 , (replace(replace(prla.item_description,chr(10),''),chr(13),' ')) item_description
+			 , esib.item_number
+			 , esit.description inv_item_descr
+			 , '#' project_info____
+			 , ppav.segment1 proj_number
+			 , ptv.task_number
+			 , ptv.task_name
+			 , ptv.chargeable_flag
+			 , ppav.name proj_name
+			 , to_char(ppav.start_date, 'yyyy-mm-dd') proj_start_date
+			 , to_char(ppav.completion_date, 'yyyy-mm-dd') proj_completion_date
+			 , to_char(ppav.closed_date, 'yyyy-mm-dd') proj_closed_date
+			 , to_char(ptv.start_date, 'yyyy-mm-dd') task_start_date
+			 , to_char(ptv.completion_date, 'yyyy-mm-dd') task_completion_date
+			 , ppav.project_status_code
+			 , petl.expenditure_type_name
+			 , haou.name exp_org
+			 , to_char(prda.pjc_expenditure_item_date, 'yyyy-mm-dd') expenditure_item_date
+			 , prda.funds_status dist_funds_status
+			 , to_char(prda.budget_date, 'yyyy-mm-dd') budget_date
+			 , '#' po___
+			 , pha.segment1 po_num
+			 , pha.amount_released
+			 , pha.blanket_total_amount
+			 , pha.amount_limit
+			 , pla.component_amount_released
+			 , pla.amount_released pla_amount_released
+		  from por_requisition_headers_all prha
+	 left join por_requisition_lines_all prla on prha.requisition_header_id = prla.requisition_header_id
+	 left join por_req_distributions_all prda on prla.requisition_line_id = prda.requisition_line_id
+	 left join gl_code_combinations gcc on prda.code_combination_id = gcc.code_combination_id
+	 left join egp_categories_tl cat on prla.category_id = cat.category_id
+	 left join egp_categories_b catb on cat.category_id = catb.category_id
+	 left join hr_locations_all hla on prla.deliver_to_location_id = hla.location_id
+	 left join poz_suppliers_v psv on prla.vendor_id = psv.vendor_id 
+	 left join poz_supplier_sites_all_m pssam on psv.vendor_id = pssam.vendor_id and prla.vendor_site_id = pssam.vendor_site_id
+	 left join pjf_projects_all_vl ppav on prda.pjc_project_id = ppav.project_id
+	 left join pjf_tasks_v ptv on ppav.project_id = ptv.project_id and prda.pjc_task_id = ptv.task_id
+	 left join pjf_exp_types_tl petl on prda.pjc_expenditure_type_id = petl.expenditure_type_id
+	 left join hr_all_organization_units haou on prda.pjc_organization_id = haou.organization_id
+	 left join fun_all_business_units_v bu on bu.bu_id = prha.req_bu_id
+	 left join po_headers_all pha on pha.po_header_id = prla.source_doc_header_id
+	 left join po_lines_all pla on pla.po_line_id = prla.source_doc_line_id
+	 left join egp_system_items_b esib on esib.inventory_item_id = prla.item_id and esib.organization_id = prla.destination_organization_id
+	 left join egp_system_items_tl esit on esit.inventory_item_id = esib.inventory_item_id and esit.organization_id = esib.organization_id and esit.language = userenv('lang')
+		 where 1 = 1
+		   and 1 = 1
+	  order by to_char(prha.creation_date,'yyyy-mm-dd') desc
 
 -- ##############################################################
 -- REQUISIONS MAPPED TO CATEGORY ACCOUNT CODE
@@ -303,7 +319,7 @@ select * from por_req_distributions_all where requisition_line_id = 123
 				 where mapping_set_code = 'XX_SUBJECTIVE_MAPPING' -- THIS IS DIFFERENT FOR EACH CUSTOMER
 				   and nvl(xmsv.effective_end_date, sysdate + 1) > sysdate) mapping on mapping.input_value_constant1 = cat.category_id
 		 where 1 = 1
-		   -- and to_char(prha.creation_date,'yyyy-mm-dd')> '2021-04-01'
+		   and 1 = 1
 	  order by to_char(prha.creation_date,'yyyy-mm-dd') desc
 
 -- ##############################################################
@@ -323,8 +339,10 @@ select * from por_req_distributions_all where requisition_line_id = 123
 		  from xla_mapping_set_values xmsv
 		  join egp_categories_b ecb on xmsv.input_value_constant1 = ecb.category_id
 		  join egp_categories_tl ect on ect.category_id = ecb.category_id and ect.language = userenv('lang')
-		 where xmsv.mapping_set_code = 'XX_SUBJECTIVE_MAPPING' -- THIS IS DIFFERENT FOR EACH CUSTOMER
+		 where 1 = 1
+		   and xmsv.mapping_set_code = 'XX_SUBJECTIVE_MAPPING' -- THIS IS DIFFERENT FOR EACH CUSTOMER
 		   and nvl(xmsv.effective_end_date, sysdate + 1) > sysdate
+		   -- and xmsv.value_constant in ('123')
 		   and 1 = 1
 
 -- ##############################################################
@@ -345,7 +363,8 @@ select * from por_req_distributions_all where requisition_line_id = 123
 	 left join por_requisition_lines_all prla on prla.category_id = ecb.category_id
 	 left join por_requisition_headers_all prha on prha.requisition_header_id = prla.requisition_header_id
 	 left join fun_all_business_units_v bu on bu.bu_id = prha.req_bu_id
-		 where xmsv.mapping_set_code = 'XX_SUBJECTIVE_MAPPING' -- THIS IS DIFFERENT FOR EACH CUSTOMER
+		 where 1 = 1
+		   and xmsv.mapping_set_code = 'XX_SUBJECTIVE_MAPPING' -- THIS IS DIFFERENT FOR EACH CUSTOMER
 		   and nvl(xmsv.effective_end_date, sysdate + 1) > sysdate
 		   and ecb.enabled_flag = 'Y'
 		   and ecb.disable_date is null
@@ -369,22 +388,83 @@ Preparer and requestor may be different if the person (preparer) is preparing a 
 */
 
 		select prha.requisition_number req
-			 , '#' || prha.requisition_header_id requisition_header_id
+			 , prha.requisition_header_id
+			 , bu.bu_name bu
 			 , to_char(prha.creation_date, 'yyyy-mm-dd hh24:mi:ss') creation_date
 			 , prla.line_number line
 			 , to_char(prla.creation_date, 'yyyy-mm-dd hh24:mi:ss') line_created
 			 , prha.created_by
-			 , '#' || pu.person_id created_by_person_id
+			 , pu.person_id created_by_person_id
 			 , ppnf_creation.full_name created_by_name
-			 , '#' || prha.preparer_id preparer_id
+			 , prha.preparer_id
 			 , ppnf_preparer.full_name p_name
 		  from por_requisition_headers_all prha
 		  join por_requisition_lines_all prla on prha.requisition_header_id = prla.requisition_header_id
 		  join per_users pu on pu.username = prha.created_by
+		  join fun_all_business_units_v bu on bu.bu_id = prha.req_bu_id
 	 left join per_person_names_f ppnf_creation on pu.person_id = ppnf_creation.person_id and ppnf_creation.name_type = 'GLOBAL' and sysdate between ppnf_creation.effective_start_date and ppnf_creation.effective_end_date
 	 left join per_person_names_f ppnf_preparer on prha.preparer_id = ppnf_preparer.person_id and ppnf_preparer.name_type = 'GLOBAL' and sysdate between ppnf_preparer.effective_start_date and ppnf_preparer.effective_end_date
 		 where 1 = 1
 		   and 1 = 1
+
+-- ##################################################################
+-- REQUISITION INTERFACE
+-- ##################################################################
+
+select * from por_req_headers_interface_all
+select * from por_req_lines_interface_all
+select * from por_req_lines_interface_all where item_number is not null
+select * from por_req_dists_interface_all
+
+		select prhia.req_header_interface_id
+			 , prhia.interface_header_key
+			 , prhia.process_flag
+			 , prhia.interface_source_code
+			 , prhia.document_status
+			 , prhia.batch_id
+			 , prhia.attribute2
+			 , prhia.req_bu_name
+			 , to_char(prhia.creation_date, 'yyyy-mm-dd hh24:mi:ss') creation_date
+			 , prhia.created_by
+			 , prhia.request_id
+			 , prhia.preparer_email_addr
+			 , prhia.description
+			 , '#' lines_____
+			 , prlia.attribute10
+			 , prlia.request_id line_request_id
+			 , prlia.load_request_id
+			 , prlia.quantity
+			 , prlia.category_name
+			 , prlia.line_type
+			 , prlia.destination_organization_code
+			 , prlia.deliver_to_location_code
+			 , prlia.suggested_vendor_name
+			 , prlia.suggested_vendor_site
+			 , prlia.item_number
+			 , prlia.item_description
+			 , '#' dists______
+			 , prdia.req_dist_interface_id
+			 , prdia.distribution_id
+			 , prdia.interface_distribution_key
+			 , '#' || prdia.charge_account_segment1 charge_account_segment1
+			 , '#' || prdia.charge_account_segment2 charge_account_segment2
+			 , '#' || prdia.charge_account_segment3 charge_account_segment3
+			 , '#' || prdia.charge_account_segment4 charge_account_segment4
+			 , '#' || prdia.charge_account_segment5 charge_account_segment5
+			 , '#' || prdia.charge_account_segment6 charge_account_segment6
+			 , prdia.percent percent_
+			 , prdia.distribution_quantity
+			 , prdia.pjc_project_number
+			 , prdia.pjc_project_name
+			 , prdia.pjc_task_number
+			 , prdia.pjc_expenditure_type_name
+			 , to_char(prdia.pjc_expenditure_item_date, 'yyyy-mm-dd') pjc_expenditure_item_date
+		  from por_req_headers_interface_all prhia
+		  join por_req_lines_interface_all prlia on prlia.req_header_interface_id = prhia.req_header_interface_id
+		  join por_req_dists_interface_all prdia on prdia.req_line_interface_id = prlia.req_line_interface_id
+		 where 1 = 1
+		   and 1 = 1
+	  order by prhia.creation_date desc
 
 -- ##############################################################
 -- COUNT BY CREATION DATE AND CREATED BY
@@ -416,6 +496,8 @@ Preparer and requestor may be different if the person (preparer) is preparing a 
 			 , count(*) ct
 		  from por_requisition_lines_all prla
 	 left join po_line_types_tl pltt on pltt.line_type_id = prla.line_type_id and pltt.language = userenv('lang')
+		 where 1 = 1
+		   and 1 = 1
 	  group by prla.product_type
 			 , pltt.line_type
 			 , prla.source_document_type
@@ -429,6 +511,7 @@ Preparer and requestor may be different if the person (preparer) is preparing a 
 
 		select prha.requisition_number req
 			 , prha.creation_date req_created
+			 , bu.bu_name bu
 			 , ppav.segment1 project
 			 , petl.expenditure_type_name
 			 , haou.name exp_org
@@ -437,6 +520,7 @@ Preparer and requestor may be different if the person (preparer) is preparing a 
 		  from por_requisition_headers_all prha
 		  join por_requisition_lines_all prla on prha.requisition_header_id = prla.requisition_header_id
 		  join por_req_distributions_all prda on prla.requisition_line_id = prda.requisition_line_id
+		  join fun_all_business_units_v bu on bu.bu_id = prha.req_bu_id
 		  join pjf_projects_all_vl ppav on prda.pjc_project_id = ppav.project_id
 		  join pjf_tasks_v ptv on ppav.project_id = ptv.project_id and prda.pjc_task_id = ptv.task_id
 		  join pjf_exp_types_tl petl on prda.pjc_expenditure_type_id = petl.expenditure_type_id
@@ -445,6 +529,7 @@ Preparer and requestor may be different if the person (preparer) is preparing a 
 		   and 1 = 1
 	  group by prha.requisition_number
 			 , prha.creation_date
+			 , bu.bu_name
 			 , ppav.segment1
 			 , petl.expenditure_type_name
 			 , haou.name
@@ -484,5 +569,7 @@ Preparer and requestor may be different if the person (preparer) is preparing a 
 			 , max(prha.created_by) max_created_by
 			 , count(*) requsition_count
 		  from por_requisition_headers_all prha
+		 where 1 = 1
+		   and 1 = 1
 	  group by to_char(prha.creation_date, 'yyyy-mm-dd')
 	  order by to_char(prha.creation_date, 'yyyy-mm-dd') desc
