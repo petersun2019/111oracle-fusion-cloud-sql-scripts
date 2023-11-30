@@ -42,7 +42,8 @@ select * from po_distributions_all where po_header_id = 123
 -- ##############################################################
 
 		select pha.segment1 po
-			 , '#' || pha.po_header_id po_id
+			 , pha.po_header_id po_id
+			 , prc_bu_id.bu_name
 			 , pha.type_lookup_code
 			 , pha.document_creation_method
 			 , psv.vendor_name supplier
@@ -63,13 +64,14 @@ select * from po_distributions_all where po_header_id = 123
 		  join poz_suppliers_v psv on pha.vendor_id = psv.vendor_id
 		  join poz_supplier_sites_all_m pssam on pha.vendor_site_id = pssam.vendor_site_id and pssam.vendor_id = psv.vendor_id
 		  join fnd_lookup_values_vl flv_po_status on flv_po_status.lookup_code = pha.document_status and flv_po_status.view_application_id = 201 and flv_po_status.lookup_type = 'ORDER_STATUS'
-	 left join hr_locations_all hla_ship on hla_ship.location_id = pha.ship_to_location_id
-	 left join hr_locations_all hla_bill on hla_bill.location_id = pha.ship_to_location_id
+		  join fun_all_business_units_v prc_bu_id on prc_bu_id.bu_id = pha.prc_bu_id
+		  join hr_locations_all hla_ship on hla_ship.location_id = pha.ship_to_location_id
+		  join hr_locations_all hla_bill on hla_bill.location_id = pha.ship_to_location_id
 		 where 1 = 1
 		   and 1 = 1
-		   and pha.segment1 = '123'
 	  group by pha.segment1
-			 , '#' || pha.po_header_id
+			 , pha.po_header_id
+			 , prc_bu_id.bu_name
 			 , pha.type_lookup_code
 			 , pha.document_creation_method
 			 , psv.vendor_name
@@ -89,7 +91,7 @@ select * from po_distributions_all where po_header_id = 123
 -- ##############################################################
 
 		select pha.segment1 po
-			 , '#' || pha.po_header_id po_id
+			 , pha.po_header_id po_id
 			 , pha.type_lookup_code
 			 , pha.document_creation_method
 			 , psv.vendor_name supplier
@@ -176,6 +178,8 @@ select * from po_distributions_all where po_header_id = 123
 					when plla.receipt_required_flag = 'Y' and plla.inspection_required_flag = 'Y' then '4-Way'
 			   end "Match Approval Level"
 			 , cat.category_name "Category Name"
+			 , esib.item_number
+			 , esit.description inv_item_descr
 		  from po_headers_all pha
 		  join xle_entity_profiles xep on pha.soldto_le_id = xep.legal_entity_id 
 		  join poz_suppliers_v psv on pha.vendor_id = psv.vendor_id
@@ -193,6 +197,8 @@ select * from po_distributions_all where po_header_id = 123
 	 left join po_lines_all agreement_lines on agreement_lines.po_line_id = pla.from_line_id
 	 left join ap_terms_tl att on att.term_id = pha.terms_id
 	 left join egp_categories_tl cat on pla.category_id = cat.category_id
+	 left join egp_system_items_b esib on esib.inventory_item_id = pla.item_id and esib.organization_id = plla.ship_to_organization_id
+	 left join egp_system_items_tl esit on esit.inventory_item_id = esib.inventory_item_id and esit.organization_id = esib.organization_id and esit.language = userenv('lang')
 		 where 1 = 1
 		   and 1 = 1
 
@@ -251,6 +257,8 @@ select * from po_distributions_all where po_header_id = 123
 					when plla.receipt_required_flag = 'Y' and plla.inspection_required_flag = 'Y' then '4-Way'
 			   end "Match Approval Level"
 			 , cat.category_name "Category Name"
+			 , esib.item_number
+			 , esit.description inv_item_descr
 			 , prha.requisition_number "Requisition"
 		  from po_headers_all pha
 		  join xle_entity_profiles xep on pha.soldto_le_id = xep.legal_entity_id 
@@ -273,6 +281,8 @@ select * from po_distributions_all where po_header_id = 123
 	 left join por_requisition_lines_all prla on prla.requisition_line_id = prda.requisition_line_id
 	 left join por_requisition_headers_all prha on prha.requisition_header_id = prla.requisition_header_id
 	 left join egp_categories_tl cat on pla.category_id = cat.category_id
+	 left join egp_system_items_b esib on esib.inventory_item_id = pla.item_id and esib.organization_id = plla.ship_to_organization_id
+	 left join egp_system_items_tl esit on esit.inventory_item_id = esib.inventory_item_id and esit.organization_id = esib.organization_id and esit.language = userenv('lang')
 		 where 1 = 1
 		   and 1 = 1
 
@@ -281,10 +291,11 @@ select * from po_distributions_all where po_header_id = 123
 -- ##############################################################
 
 		select pha.segment1 po
-			 , '#' || pha.po_header_id po_header_id
+			 , pha.po_header_id
 			 , pha.type_lookup_code
-			 , '#' || pha.vendor_id vendor_id
-			 , '#' || pla.po_line_id po_line_id
+			 , prc_bu_id.bu_name
+			 , pha.vendor_id
+			 , pla.po_line_id
 			 , pla.line_num
 			 , pla.quantity
 			 , pla.amount
@@ -325,6 +336,9 @@ select * from po_distributions_all where po_header_id = 123
 			 , nvl(case when (plla.quantity is null and pla.unit_price is null) then plla.amount_billed
 					when (plla.amount is null) then pla.unit_price * plla.quantity_billed
 			   end, 0) billed
+			 , cat.category_name "Category Name"
+			 , esib.item_number
+			 , esit.description inv_item_descr
 		  from po_headers_all pha
 		  join po_lines_all pla on pla.po_header_id = pha.po_header_id
 		  join po_line_locations_all plla on pla.po_line_id = plla.po_line_id and plla.po_header_id = pha.po_header_id
@@ -333,7 +347,11 @@ select * from po_distributions_all where po_header_id = 123
 		  join po_distributions_all pda on pda.po_line_id = pla.po_line_id and pda.po_header_id = pha.po_header_id
 		  join gl_code_combinations gcc1 on gcc1.code_combination_id = pda.code_combination_id
 		  join fnd_lookup_values_vl flv_po_status on flv_po_status.lookup_code = pha.document_status and flv_po_status.view_application_id = 201 and flv_po_status.lookup_type = 'ORDER_STATUS'
+		  join fun_all_business_units_v prc_bu_id on prc_bu_id.bu_id = pha.prc_bu_id
+		  join egp_categories_tl cat on pla.category_id = cat.category_id
 	 left join pjf_projects_all_vl ppav on pda.pjc_project_id = ppav.project_id
+	 left join egp_system_items_b esib on esib.inventory_item_id = pla.item_id and esib.organization_id = plla.ship_to_organization_id
+	 left join egp_system_items_tl esit on esit.inventory_item_id = esib.inventory_item_id and esit.organization_id = esib.organization_id and esit.language = userenv('lang')
 		 where 1 = 1
 		   and 1 = 1
 	  order by pha.last_update_date desc
@@ -345,6 +363,7 @@ select * from po_distributions_all where po_header_id = 123
 		select pha.segment1 po
 			 , '#' || pha.po_header_id po_id
 			 , pha.type_lookup_code
+			 , prc_bu_id.bu_name
 			 , psv.vendor_name supplier
 			 , pha.cancel_flag
 			 , pha.creation_date
@@ -363,6 +382,7 @@ select * from po_distributions_all where po_header_id = 123
 		  join poz_suppliers_v psv on pha.vendor_id = psv.vendor_id
 		  join poz_supplier_sites_all_m pssam on pha.vendor_site_id = pssam.vendor_site_id and pssam.vendor_id = psv.vendor_id
 		  join fnd_lookup_values_vl flv_po_status on flv_po_status.lookup_code = pha.document_status and flv_po_status.view_application_id = 201 and flv_po_status.lookup_type = 'ORDER_STATUS'
+		  join fun_all_business_units_v prc_bu_id on prc_bu_id.bu_id = pha.prc_bu_id
 		 where 1 = 1 
 		   and pha.type_lookup_code = 'CONTRACT'
 		   and 1 = 1
@@ -374,6 +394,7 @@ select * from po_distributions_all where po_header_id = 123
 
 		select po_head.segment1 po_number
 			 , po_head.comments po_description
+			 , prc_bu_id.bu_name
 			 , sum(po_line.unit_price*po_line.quantity) po_value
 			 , (select vendor_name from poz_suppliers_v where vendor_id = po_head.vendor_id) suppler_name
 			 , to_char(po_head.creation_date, 'yyyy-mm-dd') po_creation_date
@@ -381,12 +402,15 @@ select * from po_distributions_all where po_header_id = 123
 			 , sum(case when po_line.line_type_id = 1020 then 1 else 0 end) numb_service_lines
 			 , sum(case when upper (po_line.item_description) like '%CALL%OFF%' then 1 else 0 end) numb_call_off_lines
 		  from po_headers_all po_head
-			 , po_lines_all po_line
-		 where po_head.document_status = 'OPEN'
+		  join po_lines_all po_line on po_line.po_header_id = po_head.po_header_id
+		  join fun_all_business_units_v prc_bu_id on prc_bu_id.bu_id = pha.prc_bu_id
+		 where 1 =  1
+		   and po_head.document_status = 'OPEN'
 		   and po_head.approved_flag = 'Y'
-		   and po_line.po_header_id = po_head.po_header_id
+		   and 1 = 1
 	  group by po_head.segment1
 			 , po_head.comments
+			 , prc_bu_id.bu_name
 			 , po_head.vendor_id
 			 , to_char(po_head.creation_date, 'yyyy-mm-dd')
 		having sum(case when upper (comments) like '%CALL%OFF%' then 1 else 0 end) > 0
@@ -399,6 +423,7 @@ select * from po_distributions_all where po_header_id = 123
 
 		select pha.segment1 po
 			 , pha.type_lookup_code
+			 , prc_bu_id.bu_name
 			 , psv.vendor_name supplier
 			 , pha.cancel_flag
 			 , pha.creation_date
@@ -421,6 +446,7 @@ select * from po_distributions_all where po_header_id = 123
 		  join poz_suppliers_v psv on pha.vendor_id = psv.vendor_id
 		  join poz_supplier_sites_all_m pssam on pha.vendor_site_id = pssam.vendor_site_id and pssam.vendor_id = psv.vendor_id
 		  join fnd_lookup_values_vl flv_po_status on flv_po_status.lookup_code = pha.document_status and flv_po_status.view_application_id = 201 and flv_po_status.lookup_type = 'ORDER_STATUS'
+		  join fun_all_business_units_v prc_bu_id on prc_bu_id.bu_id = pha.prc_bu_id
 		 where 1 = 1
 		   and 1 = 1
 	  order by pha.last_update_date desc
@@ -432,6 +458,7 @@ select * from po_distributions_all where po_header_id = 123
 		select pha.segment1 po
 			 , '#' || pha.po_header_id po_id
 			 , pha.type_lookup_code
+			 , prc_bu_id.bu_name
 			 , psv.vendor_name supplier
 			 , pha.cancel_flag
 			 , pha.creation_date
@@ -455,11 +482,13 @@ select * from po_distributions_all where po_header_id = 123
 		  join poz_supplier_sites_all_m pssam on pha.vendor_site_id = pssam.vendor_site_id and pssam.vendor_id = psv.vendor_id
 		  join fnd_lookup_values_vl flv_po_status on flv_po_status.lookup_code = pha.document_status and flv_po_status.view_application_id = 201 and flv_po_status.lookup_type = 'ORDER_STATUS'
 		  join fnd_lookup_values_vl flv_match on flv_match.lookup_code = pla.matching_basis and flv_match.view_application_id = 200 and flv_match.lookup_type = 'MATCHING BASIS'
+		  join fun_all_business_units_v prc_bu_id on prc_bu_id.bu_id = pha.prc_bu_id
 		 where 1 = 1 
 		   and 1 = 1
 	  group by pha.segment1
 			 , '#' || pha.po_header_id
 			 , pha.type_lookup_code
+			 , prc_bu_id.bu_name
 			 , psv.vendor_name
 			 , pha.cancel_flag
 			 , pha.creation_date
@@ -484,6 +513,7 @@ select * from po_distributions_all where po_header_id = 123
 		select pha.segment1 po
 			 , '#' || pha.po_header_id po_id
 			 , pha.type_lookup_code po_type
+			 , prc_bu_id.bu_name
 			 , psv.vendor_name supplier
 			 , to_char(pha.creation_date, 'yyyy-mm-dd hh24:mi:ss') bpa_created
 			 , pha.created_by po_created_by
@@ -511,6 +541,7 @@ select * from po_distributions_all where po_header_id = 123
 		  join poz_suppliers_v psv on pha.vendor_id = psv.vendor_id
 		  join poz_supplier_sites_all_m pssam on pha.vendor_site_id = pssam.vendor_site_id and pssam.vendor_id = psv.vendor_id
 		  join fnd_lookup_values_vl flv_po_status on flv_po_status.lookup_code = pha.document_status and flv_po_status.view_application_id = 201 and flv_po_status.lookup_type = 'ORDER_STATUS'
+		  join fun_all_business_units_v prc_bu_id on prc_bu_id.bu_id = pha.prc_bu_id
 	 left join por_requisition_lines_all prla on prla.source_doc_header_id = pha.po_header_id and prla.source_doc_line_id = pla.po_line_id
 	 left join por_requisition_headers_all prha on prha.requisition_header_id = prla.requisition_header_id
 	 left join egp_categories_tl cat on pla.category_id = cat.category_id
