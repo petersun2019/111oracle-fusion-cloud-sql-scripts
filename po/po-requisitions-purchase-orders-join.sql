@@ -82,7 +82,7 @@ Queries:
 			 , to_char(prha.creation_date,'yyyy-mm-dd hh24:mi:ss')
 			 , to_char(prha.approved_date,'yyyy-mm-dd hh24:mi:ss')
 			 , prha.created_by
-			 , pha.segment1 po
+			 , pha.segment1
 			 , pha.document_status
 			 , to_char(pha.creation_date,'yyyy-mm-dd hh24:mi:ss')
 			 , to_char(pha.approved_date,'yyyy-mm-dd hh24:mi:ss')
