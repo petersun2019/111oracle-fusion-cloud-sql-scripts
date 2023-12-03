@@ -87,19 +87,15 @@ select * from fusion_ora_ess.request_property where requestid = 123456
 			 , rh.definition definition1
 			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition2
 			 , rh.jobtype
-			 -- , rh.product
+			 , rh.product
 			 , rh.username
-			 -- , rh.adhocschedule
-			 -- , to_timestamp(substr((substr(replace(utl_raw.cast_to_varchar2(adhocschedule),chr(0),''),instr(replace(utl_raw.cast_to_varchar2(adhocschedule),chr(0),''),'<start>') +length('<start>'),instr(replace(utl_raw.cast_to_varchar2(adhocschedule),chr(0),''),'</start>') - instr(replace(utl_raw.cast_to_varchar2(adhocschedule),chr(0),''),'<start>') -length('<start>'))),1,19), 'yyyy-mm-dd hh24:mi:ss') schedule_start
-			 -- , to_timestamp(substr((substr(replace(utl_raw.cast_to_varchar2(adhocschedule),chr(0),''),instr(replace(utl_raw.cast_to_varchar2(adhocschedule),chr(0),''),'<end>') +length('<end>'),instr(replace(utl_raw.cast_to_varchar2(adhocschedule),chr(0),''),'</end>') - instr(replace(utl_raw.cast_to_varchar2(adhocschedule),chr(0),''),'<end>') - length('<end>'))),1,19), 'yyyy-mm-dd hh24:mi:ss') schedule_end
-			 -- , substr(replace(utl_raw.cast_to_varchar2(adhocschedule),chr(0),''),instr(replace(utl_raw.cast_to_varchar2(adhocschedule),chr(0),''),'<frequency>') +length('<frequency>'),instr(replace(utl_raw.cast_to_varchar2(adhocschedule),chr(0),''),'</frequency>') - instr(replace(utl_raw.cast_to_varchar2(adhocschedule),chr(0),''),'<frequency>') -length('<frequency>')) frequency
-			 -- , substr(replace(utl_raw.cast_to_varchar2(adhocschedule),chr(0),''),instr(replace(utl_raw.cast_to_varchar2(adhocschedule),chr(0),''),'<interval>') +length('<interval>'),instr(replace(utl_raw.cast_to_varchar2(adhocschedule),chr(0),'') ,'</interval>')- instr(replace(utl_raw.cast_to_varchar2(adhocschedule),chr(0),'') ,'<interval>') -length('<interval>')) interval_
-			 -- , substr(replace(utl_raw.cast_to_varchar2(adhocschedule),chr(0),''),instr(replace(utl_raw.cast_to_varchar2(adhocschedule),chr(0),''),'<ical-expression>') +length('<ical-expression>'),instr(replace(utl_raw.cast_to_varchar2(adhocschedule),chr(0),'') ,'</ical-expression>')- instr(replace(utl_raw.cast_to_varchar2(adhocschedule),chr(0),'') ,'<ical-expression>') -length('<ical-expression>')) sched_data
-			 -- , replace(replace(replace(utl_raw.cast_to_varchar2(rh.adhocschedule),chr(0),''),chr(10),''),chr(13),'') adhocschedule_cast
+			 , rp.value completion_text
 			 -- , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
 			 -- , rh.error_warning_detail -- including this breaks excel export as it always has line breaks and things in it, even if you try and strip them out they always appear at the start of the field, whatever i try...
-		  from request_history rh
+			 -- , replace(replace(replace(utl_raw.cast_to_varchar2(rh.adhocschedule),chr(0),''),chr(10),''),chr(13),'') adhocschedule_cast -- schedule data in XML format
+	from request_history rh
 		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
+	 left join request_property rp on rp.requestid = rh.requestid and rp.name = 'completionText'
 		 where 1 = 1
 		   -------------------------- ids --------------------------
 		   -- and rh.requestid = 123456
@@ -108,7 +104,7 @@ select * from fusion_ora_ess.request_property where requestid = 123456
 		   -------------------------- definition --------------------------
 		   -- and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('APCSTTRF')
 		   -------------------------- users --------------------------
-		   and rh.username = 'THIS'
+		   -- and rh.username = 'THIS'
 		   -- and rh.username not in ('FIN_SCHEDULE','FAAdmin','FUSION_APPS_PRC_SOA_APPID')
 		   -- and rh.username in ('APXIIMPT_BIP')
 		   -------------------------- misc --------------------------
@@ -117,7 +113,7 @@ select * from fusion_ora_ess.request_property where requestid = 123456
 		   -- and rh.error_warning_detail is not null
 		   -- and rh.adhocschedule is not null
 		   -- and rh.adhocschedule is not null
-		   and rh.adhocschedule is null -- not scheduled
+		   -- and rh.adhocschedule is null -- not scheduled
 		   -------------------------- product --------------------------
 		   -- and rh.product = 'IEX'
 		   -- and rh.product like 'PJ%'
@@ -126,9 +122,9 @@ select * from fusion_ora_ess.request_property where requestid = 123456
 		   -- and rh.processstart > sysdate - 10
 		   -- and rh.completedtime is null
 		   -- and rh.scheduled is null
-		   and to_char(rh.processstart, 'YYYY') = '2023'
-		   and to_char(rh.processstart, 'MM') = '10'
-		   and to_char(rh.processstart, 'DD') = '03'
+		   -- and to_char(rh.processstart, 'YYYY') = '2023'
+		   -- and to_char(rh.processstart, 'MM') = '10'
+		   -- and to_char(rh.processstart, 'DD') = '03'
 		   -- and to_char(rh.processstart, 'HH24') = '03'
 		   -- and to_char(rh.processstart, 'HH24') > 22
 		   -- and to_char(rh.processstart, 'DD') in ('01','02','03','04','05','06')
@@ -151,36 +147,34 @@ select * from fusion_ora_ess.request_property where requestid = 123456
 			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
 			 , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
 			 , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
-			 , '#' || replace(substr(to_char(rh.processend-rh.processstart, 'DD HH24:MI:SS'), 0, instr(to_char(rh.processend-rh.processstart, 'DD HH24:MI:SS'), '.')-1),'+0000000','') duration -- dd_mm_hh_ss
-			 , round((cast(sys_extract_utc (rh.processend) as date) - cast(sys_extract_utc (rh.processstart) as date)) * 1440,2) total_minutes
-			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
-			 , replace(rh.definition, 'JobDefinition://', '') def1
-			 , rh.definition full_definition
-			 , regexp_substr(replace(rh.definition, 'JobDefinition://', ''), '[^/]+', 1, 1) segment1
+			 -- , '#' || replace(substr(to_char(rh.processend-rh.processstart, 'DD HH24:MI:SS'), 0, instr(to_char(rh.processend-rh.processstart, 'DD HH24:MI:SS'), '.')-1),'+0000000','') duration -- dd_mm_hh_ss
+			 -- , round((cast(sys_extract_utc (rh.processend) as date) - cast(sys_extract_utc (rh.processstart) as date)) * 1440,2) total_minutes
+			 , rh.definition definition1
+			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition2
+			 , rh.jobtype
 			 , rh.product
 			 , rh.username
+			 , rp.value completion_text
 			 , ppnf.full_name
 			 , ppx.person_number
 			 , nvl(pea.email_address, 'no-email') email_address
-			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
-			 , rh.error_warning_detail -- including this breaks excel export as it always has line breaks and things in it, even if you try and strip them out they always appear at the start of the field, whatever i try...
-			 , '#########################'
-			 , rhv.name rhv_name
-			 , rhv.lastscheduleinstanceid
+			 -- , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
+			 -- , rh.error_warning_detail -- including this breaks excel export as it always has line breaks and things in it, even if you try and strip them out they always appear at the start of the field, whatever i try...
+			 -- , replace(replace(replace(utl_raw.cast_to_varchar2(rh.adhocschedule),chr(0),''),chr(10),''),chr(13),'') adhocschedule_cast -- schedule data in XML format
 		  from request_history rh
 		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS' and flv_state.view_application_id = 0
 	left join per_users pu on rh.username = pu.username and pu.active_flag = 'Y' -- some user accounts have more than 1 row in user tables e.g. FAAdmin, so only select active user
 	left join per_people_x ppx on ppx.person_id = pu.person_id
 	left join per_person_names_f ppnf on ppx.person_id = ppnf.person_id and ppnf.name_type = 'GLOBAL' and sysdate between ppnf.effective_start_date and ppnf.effective_end_date
 	left join per_email_addresses pea on ppx.person_id = pea.person_id and pea.email_type = 'W1'
-	left join fusion_ora_ess.request_history_view rhv on rhv.requestid = rh.requestid
+	left join request_property rp on rp.requestid = rh.requestid and rp.name = 'completionText'
 		 where 1 = 1
 		   -------------------------- ids --------------------------
 		   -- and rh.requestid = 123456
 		   -- and rh.requestid between 123456 and 123490
 		   -- and rh.requestid in (123456,123457)
 		   -------------------------- definition --------------------------
-		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) not in ('RebuildLearningItemSearchKeywordsJob')
+		   -- and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) not in ('RebuildLearningItemSearchKeywordsJob')
 		   -------------------------- users --------------------------
 		   -- and fu.username = 'USER123'
 		   -- and rh.username not in ('FIN_SCHEDULE','FAAdmin','FUSION_APPS_PRC_SOA_APPID')
