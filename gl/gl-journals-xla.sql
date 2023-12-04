@@ -25,13 +25,13 @@ Queries:
 -- ##############################################################
 
 		select gl.name ledger
-			 , '#' || gjb.group_id group_id
+			 , gjb.group_id
 			 , fat.application_name
-			 , '#' || gjh.je_header_id je_header_id
-			 , '#' || gjh.parent_je_header_id
+			 , gjh.je_header_id
+			 , gjh.parent_je_header_id
 			 , nvl(gjh.reversed_je_header_id, null) reversed_je_header_id
 			 , to_char(gjb.creation_date, 'yyyy-mm-dd hh24:mi:ss') batch_created
-			 , '#' || gjb.je_batch_id je_batch_id
+			 , gjb.je_batch_id
 			 , gjb.created_by batch_created_by
 			 , to_char(gjh.creation_date, 'yyyy-mm-dd hh24:mi:ss') journal_created
 			 , gjh.created_by journal_created_by
@@ -44,6 +44,11 @@ Queries:
 			 , gjh.period_name period
 			 , gjh.name jnl_name
 			 , gjh.doc_sequence_value doc
+			 , gjb.running_total_cr batch_cr
+			 , gjb.running_total_dr batch_dr
+			 , gjh.running_total_cr jnl_cr
+			 , gjh.running_total_dr jnl_dr
+			 , '#' jnl_line_data___
 			 , to_char(gjl.creation_date, 'yyyy-mm-dd hh24:mi:ss') journal_line_created
 			 , to_char(gjl.effective_date, 'yyyy-mm-dd') gl_date_line
 			 , gjl.je_line_num line
@@ -59,6 +64,7 @@ Queries:
 			 , gjl.accounted_dr dr
 			 , gjl.accounted_cr cr
 			 , case when gjl.accounted_dr is not null then -1 * gjl.accounted_dr when gjl.accounted_cr is not null then gjl.accounted_cr end accounted_net
+			 , '#' sla_data___
 			 , '#' || xte.transaction_number transaction_number
 			 , '#' || xte.source_id_int_1 source_id_int_1
 			 , '#' || xte.source_id_int_2 source_id_int_2
@@ -107,6 +113,7 @@ Queries:
 	 left join xla_event_classes_tl xecl on xecl.entity_code = xetl.entity_code and xecl.event_class_code = xetl.event_class_code and xecl.application_id = xetl.application_id and xecl.language = userenv('lang')
 	 left join fnd_lookup_values_vl flv1 on xal.accounting_class_code = flv1.lookup_code and flv1.lookup_type = 'XLA_ACCOUNTING_CLASS'
 		 where 1 = 1
+		   and fat.application_name = 'Receipt Accounting'
 		   and 1 = 1
 
 -- ##############################################################
@@ -199,6 +206,8 @@ Queries:
 			 , max(xte.source_id_int_1) max_id_int_1
 			 , min(xte.transaction_number) min_trx_num
 			 , max(xte.transaction_number) max_trx_num
+			 , min(gjh.period_name) min_period
+			 , max(gjh.period_name) max_period
 			 , count(distinct gjb.je_batch_id) count_jnl_batches
 			 , count(distinct gjh.je_header_id) count_jnl_headers
 			 , count(*) count_lines
@@ -310,6 +319,9 @@ Queries:
 			 , max('#' || xte.transaction_number) max_trx_num
 			 , count(distinct gjb.je_batch_id) count_jnl_batches
 			 , count(distinct gjh.je_header_id) count_jnl_headers
+			 , count(xte.transaction_number) count_sla_transactions
+			 , min(gjh.period_name) min_period
+			 , max(gjh.period_name) max_period
 			 , count(*) count_lines
 		  from gl_je_headers gjh 
 		  join gl_je_batches gjb on gjh.je_batch_id = gjb.je_batch_id
@@ -321,8 +333,6 @@ Queries:
 		  join xla_ae_headers xah on xal.application_id = xah.application_id and xal.ae_header_id = xah.ae_header_id
 		  join xla_events xe on xah.application_id = xe.application_id and xah.event_id = xe.event_id
 		  join xla_transaction_entities xte on xe.application_id = xte.application_id and xe.entity_id = xte.entity_id
-		  join xla_event_types_tl xetl on xetl.event_type_code = xe.event_type_code and xetl.application_id = xe.application_id and xetl.language = userenv('lang')
-		  join xla_event_classes_tl xecl on xecl.entity_code = xetl.entity_code and xecl.event_class_code = xetl.event_class_code and xecl.application_id = xetl.application_id and xecl.language = userenv('lang')
 		  join gl_ledgers gl on gl.ledger_id = gjh.ledger_id
 		  join fnd_application_tl fat on fat.application_id = xte.application_id and fat.language = userenv('lang')
 		  join fnd_lookup_values_vl flv1 on xal.accounting_class_code = flv1.lookup_code and flv1.lookup_type = 'XLA_ACCOUNTING_CLASS'
@@ -362,7 +372,7 @@ Queries:
 	 left join xla_events xe on xah.application_id = xe.application_id and xah.event_id = xe.event_id
 	 left join xla_transaction_entities xte on xe.application_id = xte.application_id and xe.entity_id = xte.entity_id
 		 where 1 = 1
-		   and gjst.user_je_source_name = 'Receipt Accounting'
+		   and 1 = 1
 	  group by gjst.user_je_source_name
 			 , gjct.user_je_category_name
 			 , xah.product_rule_code
@@ -379,7 +389,7 @@ http://oraclemasterminds.blogspot.com/2015/01/ap-distribution-query-ap-xla-gl.ht
 */
 
 		select '#' || aia.invoice_num invoice_num
-			 , '#' || aia.invoice_id invoice_id
+			 , aia.invoice_id
 			 , pv.vendor_name
 			 , pv.segment1 vendor_number
 			 , gcc.segment1
@@ -391,7 +401,7 @@ http://oraclemasterminds.blogspot.com/2015/01/ap-distribution-query-ap-xla-gl.ht
 			 , gjh.posted_date posted_on_dt
 			 , TO_CHAR(gjh.posted_date, 'DD-MM-YY') posted_date
 			 , gjh.je_category
-			 , '#' || gjh.je_header_id gl_journal_id
+			 , gjh.je_header_id
 			 , gjh.name jnl_name
 			 , gjh.external_reference acct_je_line_desc
 			 , xal.description je_line_desc
@@ -422,6 +432,8 @@ http://oraclemasterminds.blogspot.com/2015/01/ap-distribution-query-ap-xla-gl.ht
 		  join gl_ledgers gl on gjh.ledger_id = gl.ledger_id
 		  join gl_code_combinations gcc on gcc.code_combination_id = gjl.code_combination_id
 		 where 1 = 1
+		   and xte.application_id = 200
+		   and xte.entity_code = 'AP_INVOICES'
 		   and 1 = 1
 
 -- ##############################################################
