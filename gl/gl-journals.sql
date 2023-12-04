@@ -280,7 +280,6 @@ https://rpforacle.blogspot.com/2020/08/sql-query-to-get-journal-approver-in-orac
 	 left join fnd_lookup_values_vl gjb_status on gjb_status.lookup_code = gjb.status and gjb_status.lookup_type = 'MJE_BATCH_STATUS' and gjb_status.view_application_id = 101
 	 left join gl_je_lines_recon gjlr on gjlr.je_header_id = gjh.je_header_id and gjlr.je_line_num = gjl.je_line_num
 		 where 1 = 1
-		   and gjh.name in ('01-10-2023 Deliver','01-10-2023 Invoice Price Adjust')
 		   and 1 = 1
 	  order by gjb.je_batch_id desc
 
