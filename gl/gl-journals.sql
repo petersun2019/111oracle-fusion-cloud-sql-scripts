@@ -36,13 +36,13 @@ Queries:
 -- ##############################################################
 
 		select gl.name ledger
-			 , '#' || gjb.group_id group_id
-			 , '#' || gjb.je_batch_id je_batch_id
+			 , gjb.group_id
+			 , gjb.je_batch_id
 			 , gjb.name batch_name
 			 , to_char(gjb.creation_date, 'yyyy-mm-dd') batch_created1
 			 , to_char(gjb.creation_date, 'yyyy-mm-dd hh24:mi:ss') batch_created
 			 , gjb.created_by batch_created_by
-			 , '#' || gjh.je_header_id je_header_id
+			 , gjh.je_header_id
 			 , gjh.name jnl_name
 			 , (select count(*) from gl_je_lines gjl where gjh.je_header_id = gjl.je_header_id) lines
 			 , to_char(gjh.creation_date, 'yyyy-mm-dd') journal_created1
@@ -51,8 +51,6 @@ Queries:
 			 , gjh.period_name period
 			 , gjh.accrual_rev_period_name rev_period
 			 , (replace(replace(gjh.description,chr(10),''),chr(13),' ')) jnl_description
-			 , abs(gjb.running_total_cr) batch_cr
-			 , abs(gjh.running_total_cr) jnl_cr
 			 , to_char(gjh.default_effective_date, 'yyyy-mm-dd') gl_date_header
 			 , gjst.user_je_source_name source
 			 , gjct.user_je_category_name category
@@ -63,6 +61,10 @@ Queries:
 			 , gjh.doc_sequence_value doc
 			 , decode(gjb.approval_status_code, 'A', gl_journals_rpt_pkg.get_action_user(gjb.je_batch_id, 'APPROVED'), null) approved_by
 			 , decode(gjb.approval_status_code, 'A', gl_journals_rpt_pkg.get_action_date(gjb.je_batch_id, 'APPROVED'), null) batch_approved_date
+			 , gjb.running_total_dr batch_dr
+			 , gjb.running_total_cr batch_cr
+			 , gjh.running_total_cr jnl_cr
+			 , gjh.running_total_dr jnl_dr
 		  from gl_je_batches gjb
 		  join gl_je_headers gjh on gjh.je_batch_id = gjb.je_batch_id
 	 left join gl_ledgers gl on gl.ledger_id = gjh.ledger_id
@@ -79,7 +81,7 @@ Queries:
 -- ##############################################################
 
 		select gl.name ledger
-			 , '#' || gjb.group_id group_id
+			 , gjb.group_id group_id
 			 , gjb.name batch_name
 			 , (replace(replace(gjb.description,chr(10),''),chr(13),' ')) batch_description
 			 , to_char(gjb.creation_date, 'yyyy-mm-dd hh24:mi:ss') batch_created
@@ -93,10 +95,10 @@ Queries:
 			 , (select count(*) from gl_je_lines gjl where gjh.je_header_id = gjl.je_header_id) lines
 			 , gjh.period_name period
 			 , gjh.accrual_rev_period_name rev_period
-			 , '#' || abs(gjb.running_total_cr) batch_cr
-			 , '#' || abs(gjb.running_total_dr) batch_dr
-			 , '#' || abs(gjh.running_total_cr) jnl_cr
-			 , '#' || abs(gjh.running_total_dr) jnl_dr
+			 , gjb.running_total_cr batch_cr
+			 , gjb.running_total_dr batch_dr
+			 , gjh.running_total_cr jnl_cr
+			 , gjh.running_total_dr jnl_dr
 			 , to_char(gjh.default_effective_date, 'yyyy-mm-dd') gl_date_header
 			 , gjst.user_je_source_name source
 			 , gjct.user_je_category_name category
@@ -116,21 +118,22 @@ Queries:
 -- JOURNAL HEADERS - VERSION 3
 -- ##############################################################
 
-		select '#' || gjb.je_batch_id je_batch_id
+		select gjb.je_batch_id
 			 , gjb.name batch_name
-			 , '#' || gjb.group_id group_id
+			 , gjb.group_id
 			 , to_char(gjb.creation_date, 'yyyy-mm-dd hh24:mi:ss') batch_created
 			 , gjb.created_by batch_created_by
-			 , abs(gjb.running_total_cr) batch_cr
 			 , gjb_status.meaning batch_status
-			 , '#' jnl_______________
-			 , '#' || gjh.je_header_id je_header_id
+			 , gjh.je_header_id je_header_id
 			 , to_char(gjh.default_effective_date, 'yyyy-mm-dd') gl_date_header
 			 , gjh.name jnl_name
 			 , gjst.user_je_source_name source
 			 , gjct.user_je_category_name category
 			 , gjh_status.meaning jnl_status
-			 , abs(gjh.running_total_cr) jnl_cr
+			 , gjb.running_total_cr batch_cr
+			 , gjb.running_total_dr batch_dr
+			 , gjh.running_total_cr jnl_cr
+			 , gjh.running_total_dr jnl_dr
 			 , (select count(*) from gl_je_lines gjl where gjl.je_header_id = gjh.je_header_id) line_count
 		  from gl_je_batches gjb
 		  join gl_je_headers gjh on gjh.je_batch_id = gjb.je_batch_id
@@ -149,7 +152,7 @@ Queries:
 		select gl.name ledger
 			 , gjb.je_batch_id
 			 , gjb.name batch_name
-			 , '#' || gjb.group_id group_id
+			 , gjb.group_id
 			 , to_char(gjb.creation_date, 'yyyy-mm-dd hh24:mi:ss') batch_created
 			 , gjb.created_by batch_created_by
 			 , gjh.je_header_id
@@ -162,8 +165,6 @@ Queries:
 			 , gjh.period_name period
 			 , gjh.accrual_rev_period_name rev_period
 			 , (replace(replace(gjh.description,chr(10),''),chr(13),' ')) jnl_description
-			 , abs(gjb.running_total_cr) batch_cr
-			 , abs(gjh.running_total_cr) jnl_cr
 			 , to_char(gjh.default_effective_date, 'yyyy-mm-dd') gl_date_header
 			 , gjst.user_je_source_name source
 			 , gjct.user_je_category_name category
@@ -174,7 +175,11 @@ Queries:
 			 , gjh.doc_sequence_value doc
 			 , decode(gjb.approval_status_code, 'A', gl_journals_rpt_pkg.get_action_user(gjb.je_batch_id, 'APPROVED'), null) approved_by
 			 , decode(gjb.approval_status_code, 'A', gl_journals_rpt_pkg.get_action_date(gjb.je_batch_id, 'APPROVED'), null) batch_approved_date
-			 , '#' rev____________
+			 , gjb.running_total_cr batch_cr
+			 , gjb.running_total_dr batch_dr
+			 , gjh.running_total_cr jnl_cr
+			 , gjh.running_total_dr jnl_dr
+			 , '#' rev___
 			 , gjh_rev.je_header_id rev_jnl_id
 			 , gjh_rev.reversed_je_header_id parent_id
 			 , gjh_rev.name rev_journal
@@ -216,6 +221,8 @@ https://rpforacle.blogspot.com/2020/08/sql-query-to-get-journal-approver-in-orac
 			 , gjh.period_name
 			 , gjb.description "batch_desc"
 			 , gjh.description "header_desc"
+			 , gjh.running_total_cr jnl_cr
+			 , gjh.running_total_dr jnl_dr
 			 , decode(gjb.approval_status_code, 'A', gl_journals_rpt_pkg.get_action_user(gjb.je_batch_id, 'APPROVED'), null) approved_by
 			 , decode(gjb.approval_status_code, 'A', gl_journals_rpt_pkg.get_action_date(gjb.je_batch_id, 'APPROVED'), null) batch_approved_date
 		  from gl_je_headers gjh
@@ -228,7 +235,7 @@ https://rpforacle.blogspot.com/2020/08/sql-query-to-get-journal-approver-in-orac
 -- ##############################################################
 
 		select gl.name ledger
-			 , '#' || gjb.group_id group_id
+			 , gjb.group_id
 			 , gjb.je_batch_id
 			 , gjb.name batch_name
 			 , to_char(gjb.creation_date, 'yyyy-mm-dd') batch_created1
@@ -246,39 +253,18 @@ https://rpforacle.blogspot.com/2020/08/sql-query-to-get-journal-approver-in-orac
 			 , to_char(gp.end_date, 'yyyy-mm-dd') period_end
 			 , gjh.accrual_rev_period_name rev_period
 			 , gjh.name journal
-			 , abs(gjb.running_total_dr) batch_dr
-			 , abs(gjb.running_total_cr) batch_cr
-			 , abs(gjh.running_total_cr) jnl_cr
-			 , abs(gjh.running_total_dr) jnl_dr
-			 , abs(gjh.running_total_dr) journal_total_dr
-			 , abs(gjh.running_total_cr) journal_total_cr
+			 , gjb.running_total_cr batch_cr
+			 , gjb.running_total_dr batch_dr
+			 , gjh.running_total_cr jnl_cr
+			 , gjh.running_total_dr jnl_dr
 			 , to_char(gjh.default_effective_date, 'yyyy-mm-dd') gl_date_header
 			 , gjst.user_je_source_name source
 			 , gjct.user_je_category_name category
 			 , decode(gjh.actual_flag,'A','Actual','E','Encumbrance','Other') jnl_type
-			 , gjb_status.meaning batch_status
-			 , gjh_status.meaning jnl_status
-			 , gjb.request_id
-			 , gjh.doc_sequence_value doc
-			 , 'lines______________' lines_
-			 , to_char(gjl.creation_date, 'yyyy-mm-dd hh24:mi:ss') line_created
-			 , to_char(gjl.effective_date, 'yyyy-mm-dd') gl_date_line
 			 , gjl.je_line_num line
 			 , gjl.accounted_dr dr
 			 , gjl.accounted_cr cr
-			 , (replace(replace(gjl.description,chr(10),''),chr(13),' ')) line_descr
-			 , '#' || gcc.segment1 seg1
-			 , '#' || gcc.segment2 seg2
-			 , '#' || gcc.segment3 seg3
-			 , '#' || gcc.segment4 seg4
-			 , '#' || gcc.segment5 seg5
-			 , '#' || gcc.segment6 seg6
-			 , '#' || gcc.segment7 seg7
-			 , '#' || gcc.segment8 seg8
-			 , gjl.attribute1
-			 , gjl.attribute2
-			 , gjl.attribute3
-			 , gcc.segment1 || '.' || gcc.segment2 || '.' || gcc.segment3 || '.' || gcc.segment4 || '.' || gcc.segment5 || '.' || gcc.segment6 || '.' || gcc.segment7	 || '.' || gcc.segment8 cgh_acct
+			 , gcc.segment1 || '.' || gcc.segment2 || '.' || gcc.segment3 || '.' || gcc.segment4 || '.' || gcc.segment5 || '.' || gcc.segment6 cgh_acct
 			 , gjlr.jgzz_recon_status
 			 , gjlr.jgzz_recon_ref
 		  from gl_je_batches gjb
@@ -294,6 +280,7 @@ https://rpforacle.blogspot.com/2020/08/sql-query-to-get-journal-approver-in-orac
 	 left join fnd_lookup_values_vl gjb_status on gjb_status.lookup_code = gjb.status and gjb_status.lookup_type = 'MJE_BATCH_STATUS' and gjb_status.view_application_id = 101
 	 left join gl_je_lines_recon gjlr on gjlr.je_header_id = gjh.je_header_id and gjlr.je_line_num = gjl.je_line_num
 		 where 1 = 1
+		   and gjh.name in ('01-10-2023 Deliver','01-10-2023 Invoice Price Adjust')
 		   and 1 = 1
 	  order by gjb.je_batch_id desc
 
@@ -367,7 +354,7 @@ https://rpforacle.blogspot.com/2020/08/sql-query-to-get-journal-approver-in-orac
 -- ##############################################################
 
 		select gl.name ledger
-			 , '#' || gjb.group_id group_id
+			 , gjb.group_id
 			 , gjst.user_je_source_name source
 			 , gjct.user_je_category_name category
 			 , gjh.created_by
@@ -663,6 +650,10 @@ https://rpforacle.blogspot.com/2020/08/sql-query-to-get-journal-approver-in-orac
 			 , gjb_status.meaning batch_status
 			 , gjh_status.meaning jnl_status
 			 , gjb.request_id
+			 , gjb.running_total_cr batch_cr
+			 , gjb.running_total_dr batch_dr
+			 , gjh.running_total_cr jnl_cr
+			 , gjh.running_total_dr jnl_dr
 			 , min(to_char(gjh.creation_date, 'yyyy-mm-dd')) min_gjh_cr_date
 			 , max(to_char(gjh.creation_date, 'yyyy-mm-dd')) max_gjh_cr_date		
 			 , sum(gjl.accounted_dr) dr
@@ -702,6 +693,10 @@ https://rpforacle.blogspot.com/2020/08/sql-query-to-get-journal-approver-in-orac
 			 , gjb_status.meaning
 			 , gjh_status.meaning
 			 , gjb.request_id
+			 , gjb.running_total_cr
+			 , gjb.running_total_dr
+			 , gjh.running_total_cr
+			 , gjh.running_total_dr
 
 -- ##############################################################
 -- COUNT BY RECONCILIATION INFO
