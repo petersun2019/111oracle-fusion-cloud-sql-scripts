@@ -274,12 +274,12 @@ https://rpforacle.blogspot.com/2020/08/sql-query-to-get-journal-approver-in-orac
 	 left join gl_code_combinations gcc on gjl.code_combination_id = gcc.code_combination_id
 	 left join gl_je_sources_tl gjst on gjh.je_source = gjst.je_source_name and gjst.language = userenv('lang')
 	 left join gl_je_categories_tl gjct on gjh.je_category = gjct.je_category_name and gjct.language = userenv('lang')
-	 left join gl_import_references gir on gjh.je_header_id = gir.je_header_id and gir.je_line_num = gjl.je_line_num
 	 left join gl_ledgers gl on gl.ledger_id = gjh.ledger_id
 	 left join fnd_lookup_values_vl gjh_status on gjh_status.lookup_code = gjh.status and gjh_status.lookup_type = 'MJE_BATCH_STATUS' and gjh_status.view_application_id = 101
 	 left join fnd_lookup_values_vl gjb_status on gjb_status.lookup_code = gjb.status and gjb_status.lookup_type = 'MJE_BATCH_STATUS' and gjb_status.view_application_id = 101
 	 left join gl_je_lines_recon gjlr on gjlr.je_header_id = gjh.je_header_id and gjlr.je_line_num = gjl.je_line_num
 		 where 1 = 1
+		   and gjh.name in ('01-10-2023 Deliver','01-10-2023 Invoice Price Adjust')
 		   and 1 = 1
 	  order by gjb.je_batch_id desc
 
@@ -716,7 +716,6 @@ https://rpforacle.blogspot.com/2020/08/sql-query-to-get-journal-approver-in-orac
 	 left join gl_code_combinations gcc on gjl.code_combination_id = gcc.code_combination_id
 	 left join gl_je_sources_tl gjst on gjh.je_source = gjst.je_source_name and gjst.language = userenv('lang')
 	 left join gl_je_categories_tl gjct on gjh.je_category = gjct.je_category_name and gjct.language = userenv('lang')
-	 left join gl_import_references gir on gjh.je_header_id = gir.je_header_id and gir.je_line_num = gjl.je_line_num
 	 left join gl_ledgers gl on gl.ledger_id = gjh.ledger_id
 	 left join fnd_lookup_values_vl gjh_status on gjh_status.lookup_code = gjh.status and gjh_status.lookup_type = 'MJE_BATCH_STATUS' and gjh_status.view_application_id = 101
 	 left join fnd_lookup_values_vl gjb_status on gjb_status.lookup_code = gjb.status and gjb_status.lookup_type = 'MJE_BATCH_STATUS' and gjb_status.view_application_id = 101
