@@ -143,7 +143,6 @@ Queries:
 		  join fnd_lookup_values_vl gjb_status on gjb_status.lookup_code = gjb.status and gjb_status.lookup_type = 'MJE_BATCH_STATUS' and gjb_status.view_application_id = 101
 		 where 1 = 1
 		   and 1 = 1
-	  order by 1 desc
 
 -- ##############################################################
 -- JOURNAL HEADERS - VERSION 4 - WITH REVERSAL DATA
@@ -202,7 +201,6 @@ Queries:
 	 left join fnd_lookup_values_vl gjb_rev_status on gjb_rev_status.lookup_code = gjb_rev.status and gjb_rev_status.lookup_type = 'MJE_BATCH_STATUS' and gjb_rev_status.view_application_id = 101
 		 where 1 = 1
 		   and 1 = 1
-	  order by gjb.je_batch_id desc
 
 -- ##############################################################
 -- JOURNAL HEADERS - APPROVED BY
@@ -265,6 +263,7 @@ https://rpforacle.blogspot.com/2020/08/sql-query-to-get-journal-approver-in-orac
 			 , gjl.accounted_dr dr
 			 , gjl.accounted_cr cr
 			 , gcc.segment1 || '.' || gcc.segment2 || '.' || gcc.segment3 || '.' || gcc.segment4 || '.' || gcc.segment5 || '.' || gcc.segment6 cgh_acct
+			 , to_char(gjl.effective_date, 'yyyy-mm-dd') gl_date_line
 			 , gjlr.jgzz_recon_status
 			 , gjlr.jgzz_recon_ref
 		  from gl_je_batches gjb
@@ -279,9 +278,7 @@ https://rpforacle.blogspot.com/2020/08/sql-query-to-get-journal-approver-in-orac
 	 left join fnd_lookup_values_vl gjb_status on gjb_status.lookup_code = gjb.status and gjb_status.lookup_type = 'MJE_BATCH_STATUS' and gjb_status.view_application_id = 101
 	 left join gl_je_lines_recon gjlr on gjlr.je_header_id = gjh.je_header_id and gjlr.je_line_num = gjl.je_line_num
 		 where 1 = 1
-		   and gjh.name in ('01-10-2023 Deliver','01-10-2023 Invoice Price Adjust')
 		   and 1 = 1
-	  order by gjb.je_batch_id desc
 
 -- ##############################################################
 -- ACTUALS ATTEMPT
@@ -331,7 +328,7 @@ https://rpforacle.blogspot.com/2020/08/sql-query-to-get-journal-approver-in-orac
 -- ##############################################################
 
 		select gl.name ledger
-			 , '#' || gjb.group_id group_id
+			 , gjb.group_id
 			 , min(to_char(gjh.creation_date, 'yyyy-mm-dd')) min_gjh_cr_date
 			 , max(to_char(gjh.creation_date, 'yyyy-mm-dd')) max_gjh_cr_date
 			 , min(gjb.request_id)
@@ -346,7 +343,7 @@ https://rpforacle.blogspot.com/2020/08/sql-query-to-get-journal-approver-in-orac
 		 where 1 = 1
 		   and 1 = 1
 	  group by gl.name
-			 , '#' || gjb.group_id
+			 , gjb.group_id
 
 -- ##############################################################
 -- COUNT BY GROUP ID, LEDGER, SOURCE, CATEGORY, CREATED BY
@@ -372,7 +369,7 @@ https://rpforacle.blogspot.com/2020/08/sql-query-to-get-journal-approver-in-orac
 		 where 1 = 1
 		   and 1 = 1
 	  group by gl.name
-			 , '#' || gjb.group_id
+			 , gjb.group_id
 			 , gjst.user_je_source_name
 			 , gjct.user_je_category_name
 			 , gjh.created_by
@@ -593,9 +590,9 @@ https://rpforacle.blogspot.com/2020/08/sql-query-to-get-journal-approver-in-orac
 -- ##############################################################
 
 		select gl.name ledger
-			 , '#' || gjb.je_batch_id je_batch_id
+			 , gjb.je_batch_id
 			 , gjb.name batch_name
-			 , '#' || gjb.group_id group_id
+			 , gjb.group_id
 			 , to_char(gjb.creation_date, 'yyyy-mm-dd hh24:mi:ss') batch_created
 			 , gjb.created_by batch_created_by
 			 , abs(gjb.running_total_cr) batch_cr
@@ -613,9 +610,9 @@ https://rpforacle.blogspot.com/2020/08/sql-query-to-get-journal-approver-in-orac
 		 where 1 = 1
 		   and 1 = 1
 	  group by gl.name
-			 , '#' || gjb.je_batch_id
+			 , gjb.je_batch_id
 			 , gjb.name
-			 , '#' || gjb.group_id
+			 , gjb.group_id
 			 , to_char(gjb.creation_date, 'yyyy-mm-dd hh24:mi:ss')
 			 , gjb.created_by
 			 , abs(gjb.running_total_cr)
@@ -628,7 +625,7 @@ https://rpforacle.blogspot.com/2020/08/sql-query-to-get-journal-approver-in-orac
 -- ##############################################################
 
 		select gl.name ledger
-			 , '#' || gjb.group_id group_id
+			 , gjb.group_id
 			 , gjb.je_batch_id
 			 , gjb.name batch_name
 			 , to_char(gjb.creation_date, 'yyyy-mm-dd hh24:mi:ss') batch_created
@@ -671,7 +668,7 @@ https://rpforacle.blogspot.com/2020/08/sql-query-to-get-journal-approver-in-orac
 		 where 1 = 1
 		   and 1 = 1
 	  group by gl.name
-			 , '#' || gjb.group_id group_id
+			 , gjb.group_id
 			 , gjb.je_batch_id
 			 , gjb.name
 			 , to_char(gjb.creation_date, 'yyyy-mm-dd hh24:mi:ss')
