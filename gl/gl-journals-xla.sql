@@ -7,8 +7,6 @@ URL: https://github.com/throwing-cheese/oracle-fusion-cloud-sql-scripts
 XLA_TRANSACTION_ENTITIES.SOURCE_ID_INT_1 column is often used for the main identifier for a transaction such as an AP Invoice, AR Transaction etc.
 So if you have that ID, you can check what SLA data exists for that Transaction by searching against it using the SOURCE_ID_INT_1 column.
 
-Queries:
-
 -- JOURNAL BATCHES AND HEADERS AND LINES AND XLA DATA
 -- WITH XLA_DISTRIBUTION_LINKS
 -- XLA SUMMARY - BY PERIOD
@@ -66,9 +64,9 @@ Queries:
 			 , case when gjl.accounted_dr is not null then -1 * gjl.accounted_dr when gjl.accounted_cr is not null then gjl.accounted_cr end accounted_net
 			 , '#' sla_data___
 			 , '#' || xte.transaction_number transaction_number
-			 , '#' || xte.source_id_int_1 source_id_int_1
-			 , '#' || xte.source_id_int_2 source_id_int_2
-			 , '#' || xte.source_id_int_3 source_id_int_3
+			 , xte.source_id_int_1
+			 , xte.source_id_int_2
+			 , xte.source_id_int_3
 			 , xah.event_type_code
 			 , xah.product_rule_code
 			 , (replace(replace(xah.description,chr(10),''),chr(13),' ')) xah_description
@@ -77,8 +75,8 @@ Queries:
 			 , xal.accounting_class_code
 			 , flv1.meaning accounting_class
 			 , xe.event_id
-			 -- , gjl.code_combination_id
-			 -- , xal.overridden_code_combination_id
+			 , gjl.code_combination_id
+			 , xal.overridden_code_combination_id
 			 , xal.override_reason
 			 , (replace(replace(xal.description,chr(10),''),chr(13),' ')) xal_description
 			 , xal.entered_dr
@@ -113,7 +111,6 @@ Queries:
 	 left join xla_event_classes_tl xecl on xecl.entity_code = xetl.entity_code and xecl.event_class_code = xetl.event_class_code and xecl.application_id = xetl.application_id and xecl.language = userenv('lang')
 	 left join fnd_lookup_values_vl flv1 on xal.accounting_class_code = flv1.lookup_code and flv1.lookup_type = 'XLA_ACCOUNTING_CLASS'
 		 where 1 = 1
-		   and fat.application_name = 'Receipt Accounting'
 		   and 1 = 1
 
 -- ##############################################################
