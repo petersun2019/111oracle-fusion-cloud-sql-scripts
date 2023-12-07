@@ -26,7 +26,7 @@ If you find any errors with joins etc. please let me know as per the `Issues` he
 
 ## Issues
 
-If you have any problems with the scripts, [please log an issue](https://github.com/throwing-cheese/oracle-fusion-cloud-sql-scripts/issues) or get in touch using the [this contact form](https://jimpix.co.uk/contact/).
+If you have any problems with the scripts, [please log an issue](https://github.com/throwing-cheese/oracle-fusion-cloud-sql-scripts/issues) or get in touch using [this contact form](https://jimpix.co.uk/contact/).
 
 ## Contents
 
