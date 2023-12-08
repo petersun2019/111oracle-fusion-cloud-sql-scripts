@@ -23,7 +23,7 @@ Queries:
 -- ##############################################################
 
 		select xcb.name budget_name
-			 -- , '#' || xcb.control_budget_id control_budget_id
+			 -- , xcb.control_budget_id
 			 , to_char(xcb.creation_date, 'yyyy-mm-dd hh24:mi:ss') creation_date
 			 , xcb.created_by
 			 , to_char(xcb.last_update_date, 'yyyy-mm-dd hh24:mi:ss') last_update_date
@@ -44,7 +44,7 @@ Queries:
 			 , to_char(xcb.start_date, 'yyyy-mm-dd') xcc_start_date
 			 , to_char(xcb.end_date, 'yyyy-mm-dd') xcc_end_date
 			 , xcb.status_code
-			 -- , '#' || xcb.project_id project_id
+			 -- , xcb.project_id
 			 , ppnf.full_name budget_manager
 			 , pu.username budget_manager_username
 			 , '#' project____
@@ -68,7 +68,7 @@ Queries:
 -- CONTROL BUDGET PERIODS
 -- ##############################################################
 
-		select '#' || xcb.control_budget_id
+		select xcb.control_budget_id
 			 , xcb.name budget_name
 			 , glv.name ledger
 			 , xcps.period_name
@@ -232,7 +232,7 @@ select * from xcc_tr_lines where header_num in ('1234++1','4321++1')
 
 		select xth.header_num
 			 , prha.requisition_number req
-			 , '#' || prha.requisition_header_id requisition_header_id
+			 , prha.requisition_header_id
 			 , prha.document_status
 			 , xth.transaction_number
 			 , xth.source_action_code
@@ -253,7 +253,7 @@ select * from xcc_tr_lines where header_num in ('1234++1','4321++1')
 
 		select xth.header_num
 			 , prha.requisition_number req
-			 , '#' || prha.requisition_header_id requisition_header_id
+			 , prha.requisition_header_id
 			 , prha.document_status
 			 , xth.transaction_number
 			 , xth.source_action_code
@@ -288,7 +288,7 @@ select * from xcc_tr_lines where header_num in ('1234++1','4321++1')
 
 		select xth.header_num
 			 , prha.requisition_number req
-			 , '#' || prha.requisition_header_id requisition_header_id
+			 , prha.requisition_header_id
 			 , prha.document_status
 			 , xth.transaction_number
 			 , xth.source_action_code
