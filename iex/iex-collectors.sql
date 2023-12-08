@@ -16,7 +16,7 @@ Queries:
 -- COLLECTORS
 -- ##################################################################
 
-		select '#' || ac.collector_id collector_id
+		select ac.collector_id
 			 , to_char(ac.creation_date, 'yyyy-mm-dd hh24:mi:ss') creation_date
 			 , ac.created_by
 			 , to_char(ac.last_update_date, 'yyyy-mm-dd hh24:mi:ss') last_update_date

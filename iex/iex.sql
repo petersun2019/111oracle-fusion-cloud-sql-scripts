@@ -33,11 +33,11 @@ Queries:
 -- STRATEGY ATTEMPT 1
 -- ##################################################################
 
-			select '#' || iswi.work_item_id work_item_id
-				 , '#' || iswi.strategy_id strategy_id 
-				 , '#' || iswi.work_item_template_id work_item_template_id 
-				 , '#' || iswi.resource_id resource_id 
-				 , '#' || iswi.payment_schedule_id payment_schedule_id 
+			select iswi.work_item_id
+				 , iswi.strategy_id 
+				 , iswi.work_item_template_id 
+				 , iswi.resource_id 
+				 , iswi.payment_schedule_id 
 				 , istwit.name template_name
 				 , iswi.status_code
 				 , to_char(iswi.execute_start, 'yyyy-mm-dd hh24:mi:ss') execute_start
@@ -62,7 +62,7 @@ Queries:
 				 , iswi.escalate_wait_time_uom
 				 , iswi.custom_workflow_type
 				 , rcta.trx_number
-				 , '#' || rcta.customer_trx_id trx_id
+				 , rcta.customer_trx_id
 				 , to_char(rcta.creation_date, 'yyyy-mm-dd hh24:mi:ss') trx_created
 				 , rcta.created_by trx_created_by
 				 , to_char(rcta.trx_date, 'yyyy-mm-dd') trx_date
@@ -91,7 +91,7 @@ Queries:
 -- ##################################################################
 
 		select rcta.trx_number
-			 , '#' || rcta.customer_trx_id trx_id
+			 , rcta.customer_trx_id
 			 , to_char(rcta.creation_date, 'yyyy-mm-dd hh24:mi:ss') trx_created
 			 , rcta.created_by trx_created_by
 			 , to_char(rcta.trx_date, 'yyyy-mm-dd') trx_date
@@ -120,11 +120,11 @@ Queries:
 -- STRATEGY ATTEMPT 3
 -- ##################################################################
 
-		select '#' || iswi.work_item_id work_item_id
-			 , '#' || iswi.strategy_id strategy_id 
-			 , '#' || iswi.work_item_template_id work_item_template_id 
-			 , '#' || iswi.resource_id resource_id 
-			 , istwit.name template_name
+		select iswi.work_item_id
+			 , iswi.strategy_id 
+			 , iswi.work_item_template_id 
+			 , iswi.resource_id 
+			 , istwit.name
 			 , iswi.status_code
 			 , to_char(iswi.execute_start, 'yyyy-mm-dd hh24:mi:ss') execute_start
 			 , to_char(iswi.execute_end, 'yyyy-mm-dd hh24:mi:ss') execute_end
@@ -157,7 +157,7 @@ Queries:
 -- ##################################################################
 
 		select rcta.trx_number
-			 , '#' || rcta.customer_trx_id trx_id
+			 , rcta.customer_trx_id
 			 , to_char(rcta.creation_date, 'yyyy-mm-dd hh24:mi:ss') trx_created
 			 , rcta.created_by trx_created_by
 			 , to_char(rcta.trx_date, 'yyyy-mm-dd') trx_date
@@ -169,7 +169,7 @@ Queries:
 			 , hp_bill.party_name bill_cust
 			 , hca_bill.account_number bill_acct
 			 , istwit.name template_name
-			 , '#' || iswi.work_item_id work_item_id
+			 , iswi.work_item_id
 		  from IEX_STRATEGY_WORK_ITEMS iswi
 		  join IEX_STRY_TEMP_WORK_ITEMS_TL istwit on istwit.WORK_ITEM_TEMP_ID = iswi.WORK_ITEM_TEMPLATE_ID and istwit.language = userenv('lang')
 		  join ar_payment_schedules_all apsa on iswi.PAYMENT_SCHEDULE_ID = apsa.PAYMENT_SCHEDULE_ID
@@ -209,11 +209,11 @@ Does not include Strategy Tasks which have a To Be Completed status as they don'
 			 , to_char(iswi.schedule_end, 'yyyy-mm-dd hh24:mi:ss') schedule_end
 			 , iswi.request_id
 			 , apsa.amount_due_remaining pay_sched_amt_remaining
-			 , '#' || hca_bill.cust_account_id cust_id
-			 , '#' || rcta.customer_trx_id trx_id
-			 , '#' || apsa.payment_schedule_id apsa_id
-			 , '#' || ida.delinquency_id delq_id
-			 , '#' || iswi.work_item_id item_id
+			 , hca_bill.cust_account_id
+			 , rcta.customer_trx_id
+			 , apsa.payment_schedule_id
+			 , ida.delinquency_id
+			 , iswi.work_item_id item_id
 		  from iex_strategy_work_items iswi
 		  join iex_stry_temp_work_items_tl istwit on istwit.work_item_temp_id = iswi.work_item_template_id and istwit.language = userenv('lang')
 		  join ar_payment_schedules_all apsa on iswi.PAYMENT_SCHEDULE_ID = apsa.PAYMENT_SCHEDULE_ID
@@ -326,8 +326,8 @@ Does not include Strategy Tasks which have a To Be Completed status as they don'
 			 , dunn.contact_party_id
 			 , dunn.party_location_id
 			 , hca.cust_account_id
-			 , '#' || dunn.dunning_id dunning_id
-			 , '#' || idt.dunning_trx_id dunning_trx_id
+			 , dunn.dunning_id
+			 , idt.dunning_trx_id
 		  from fusion.iex_dunnings dunn
 		  join fusion.iex_dunning_transactions idt on dunn.dunning_id = idt.dunning_id
 		  join fun_all_business_units_v fabuv on dunn.bu_id = fabuv.bu_id
@@ -380,19 +380,19 @@ Does not include Strategy Tasks which have a To Be Completed status as they don'
 			 , count(distinct iswi.work_item_id) tasks
 			 , haou.name org
 			 , idsa.number_delinquencies num_del
-			 , '#' || hca_bill.cust_account_id cust_id
-			 , '#' || rcta.customer_trx_id trx_id
+			 , hca_bill.cust_account_id
+			 , rcta.customer_trx_id
 			 , sum(apsa.amount_due_remaining) amt_due
 			 , min(istwit.name) min_templ
 			 , max(istwit.name) max_templ
-			 , min('#' || apsa.payment_schedule_id) min_apsa_id
-			 , max('#' || apsa.payment_schedule_id) max_apsa_id
-			 , min('#' || ida.delinquency_id) min_del_id
-			 , max('#' || ida.delinquency_id) max_del_id
-			 , min('#' || iswi.work_item_id) min_item_id
-			 , max('#' || iswi.work_item_id) max_item_id
-			 , min('#' || iswi.strategy_id) min_strat_id
-			 , max('#' || iswi.strategy_id) max_strat_id
+			 , min(apsa.payment_schedule_id) min_apsa_id
+			 , max(apsa.payment_schedule_id) max_apsa_id
+			 , min(ida.delinquency_id) min_del_id
+			 , max(ida.delinquency_id) max_del_id
+			 , min(iswi.work_item_id) min_item_id
+			 , max(iswi.work_item_id) max_item_id
+			 , min(iswi.strategy_id) min_strat_id
+			 , max(iswi.strategy_id) max_strat_id
 			 , min(to_char(iswi.creation_date, 'yyyy-mm-dd hh24:mi:ss')) min_task_created
 			 , max(to_char(iswi.creation_date, 'yyyy-mm-dd hh24:mi:ss')) max_task_created
 			 , min(iswi.created_by) min_task_created_by
@@ -422,8 +422,8 @@ Does not include Strategy Tasks which have a To Be Completed status as they don'
 			 , haou.name
 			 , idsa.number_delinquencies
 			 , idsa.display_name
-			 , '#' || hca_bill.cust_account_id
-			 , '#' || rcta.customer_trx_id
+			 , hca_bill.cust_account_id
+			 , rcta.customer_trx_id
 			 , hps.party_site_number
 			 , hcsua.location
 		-- having count(distinct iswi.work_item_id) > 1
@@ -571,20 +571,20 @@ Does not include Strategy Tasks which have a To Be Completed status as they don'
 -- STRATEGIES ASSIGNED TO CUSTOMER 1
 -- ##################################################################
 
-		select '#' || ixs.strategy_id strategy_id
-			 , '#' || ixs.strategy_assignment_matrix_id strategy_assignment_matrix_id
+		select ixs.strategy_id
+			 , ixs.strategy_assignment_matrix_id
 			 , ixs.status_code
-			 , '#' || ixs.strategy_template_id strategy_template_id
-			 , '#' || ixs.delinquency_id delinquency_id
+			 , ixs.strategy_template_id
+			 , ixs.delinquency_id
 			 , ixs.object_type
-			 , '#' || ixs.cust_account_id cust_account_id
-			 , '#' || ixs.party_id party_id
+			 , ixs.cust_account_id
+			 , ixs.party_id
 			 , ixs.score_value
-			 , '#' || ixs.next_work_item_id next_work_item_id
+			 , ixs.next_work_item_id
 			 , ixs.request_id
-			 , '#' || ixs.checklist_strategy_id checklist_strategy_id
+			 , ixs.checklist_strategy_id
 			 , ixs.jtf_object_type
-			 , '#' || ixs.customer_site_use_id customer_site_use_id
+			 , ixs.customer_site_use_id
 			 , to_char(ixs.creation_date, 'yyyy-mm-dd hh24:mi:ss') created
 			 , ixs.created_by
 			 , to_char(ixs.last_update_date, 'yyyy-mm-dd hh24:mi:ss') last_update_date
@@ -607,18 +607,18 @@ table dumps
 */
 
 select *
-  from IEX_STRATEGIES
- where cust_account_id = 100000043756218
+  from iex_strategies
+ where cust_account_id = 123
 
 select iswi.*
-  from IEX_STRATEGY_WORK_ITEMS iswi
+  from iex_strategy_work_items iswi
   join ar_payment_schedules_all apsa on iswi.payment_schedule_id = apsa.payment_schedule_id
- where apsa.customer_id = 100000043756218
+ where apsa.customer_id = 123
 
 select iswi.*
-  from IEX_STRATEGY_USER_ITEMS iswi
+  from iex_strategy_user_items iswi
   join ar_payment_schedules_all apsa on iswi.payment_schedule_id = apsa.payment_schedule_id
- where apsa.customer_id = 100000043756218
+ where apsa.customer_id = 123
 
 /*
 Manually added Strategy Tasks appear in the IEX_STRATEGY_USER_ITEMS table.
@@ -639,7 +639,7 @@ Which table stores the Strategy Tasks of type "Automatic" and status of "To Be C
 			 , ixs.status_code
 			 , ixs.object_type
 			 , ixs.score_value
-			 , '#' || ixs.next_work_item_id next_work_item_id
+			 , ixs.next_work_item_id
 			 , ixs.request_id -- Request ID for "Collections Scoring and Strategy Assignment" job
 			 , to_char(ixs.creation_date, 'yyyy-mm-dd hh24:mi:ss') created
 			 , ixs.created_by
@@ -661,37 +661,39 @@ Which table stores the Strategy Tasks of type "Automatic" and status of "To Be C
 -- ##################################################################
 
 		select haou.name org
-			 , hp.party_name customer_name
 			 , hca.account_number
+			 , hca.account_name
 			 , hcsua.site_use_code
 			 , hcsua.location bill_to_site_num
 			 , ac.name collector_name
 			 , hps.party_site_number
 			 , hcpc.name profile_class
-			 , to_char(hcpf.effective_start_date, 'yyyy-mm-dd') class_start_date
-			 , to_char(hcpf.effective_end_date, 'yyyy-mm-dd') class_end_date
-			 , to_char(hcpf.creation_date, 'yyyy-mm-dd hh24:mi:ss') customer_profile_created
-			 , hcpf.created_by customer_profile_created_by
+			 , case when hcpf.profile_class_id != isam.profile_class_id then 'NO' else 'YES' end profiles_match
+			 -- , to_char(hcpf.effective_start_date, 'yyyy-mm-dd') class_start_date
+			 -- , to_char(hcpf.effective_end_date, 'yyyy-mm-dd') class_end_date
+			 -- , to_char(hcpf.creation_date, 'yyyy-mm-dd hh24:mi:ss') customer_profile_created
+			 -- , hcpf.created_by customer_profile_created_by
 			 , to_char(hcpf.last_update_date, 'yyyy-mm-dd hh24:mi:ss') customer_profile_last_update_date
 			 , hcpf.last_updated_by customer_profile_last_updated_by
+			 , hcpf.request_id request_id_customer_profile
 			 , '#' iex_strategy_____
-			 , '#' || iex_strat.strategy_id strategy_id
-			 , to_char(hcpf.creation_date, 'yyyy-mm-dd hh24:mi:ss') strat_created
-			 , hcpf.created_by strat_created_by
-			 , to_char(hcpf.last_update_date, 'yyyy-mm-dd hh24:mi:ss') strat_updated
-			 , hcpf.last_updated_by strat_updated_by
+			 -- , iex_strat.strategy_id
+			 -- , to_char(iex_strat.creation_date, 'yyyy-mm-dd hh24:mi:ss') strat_created
+			 -- , iex_strat.created_by strat_created_by
+			 , to_char(iex_strat.last_update_date, 'yyyy-mm-dd hh24:mi:ss') strat_updated
+			 , iex_strat.last_updated_by strat_updated_by
 			 , iex_strat.request_id strat_request_id
-			 , iex_strat.status_code strat_status_code
+			 -- , iex_strat.status_code strat_status_code
 			 , '#' iex_strategy_assignment_____
-			 , '#' || isam.strategy_assignment_matrix_id isam_matrix_id
-			 , to_char(isam.creation_date, 'yyyy-mm-dd hh24:mi:ss') isam_created
-			 , isam.created_by isam_created_by
+			 -- , isam.strategy_assignment_matrix_id
+			 -- , to_char(isam.creation_date, 'yyyy-mm-dd hh24:mi:ss') isam_created
+			 -- , isam.created_by isam_created_by
 			 , to_char(isam.last_update_date, 'yyyy-mm-dd hh24:mi:ss') isam_updated
 			 , isam.last_updated_by isam_updated_by
 			 , isam.strategy_assign_matrix_name
-			 , '#' profile_class_id_compare____
-			 , '#' || hcpf.profile_class_id ar_profile_class_id
-			 , '#' || isam.profile_class_id iex_profile_class_id
+			 -- , '#' profile_class_id_compare____
+			 -- , hcpf.profile_class_id ar_profile_class_id
+			 -- , isam.profile_class_id iex_profile_class_id
 			 , idsa.display_name
 			 , idsa.number_delinquencies delinq_sum_num_del_trxns
 			 , idsa.total_amount_due delinq_sum_total_amt_due_cust
@@ -709,8 +711,9 @@ Which table stores the Strategy Tasks of type "Automatic" and status of "To Be C
 		  join hr_all_organization_units haou on haou.organization_id = idsa.org_id
 		 where 1 = 1
 		   and iex_strat.status_code = 'OPEN'
-		   and hcpf.profile_class_id != isam.profile_class_id
+		   -- and hcpf.profile_class_id != isam.profile_class_id
 		   and 1 = 1
+	  order by to_char(hcpf.last_update_date, 'yyyy-mm-dd hh24:mi:ss') desc
 
 -- ##################################################################
 -- SQL TO REPORT ON TO BE CREATED STRATEGY TASKS FOR TRANSACTION
