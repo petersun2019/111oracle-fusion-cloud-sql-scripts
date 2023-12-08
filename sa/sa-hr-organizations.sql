@@ -3,6 +3,7 @@ File Name: sa-hr-organizations.sql
 Version: Oracle Fusion Cloud
 Author: Throwing Cheese
 URL: https://github.com/throwing-cheese/oracle-fusion-cloud-sql-scripts
+
 */
 
 -- ##############################################################
@@ -10,7 +11,7 @@ URL: https://github.com/throwing-cheese/oracle-fusion-cloud-sql-scripts
 -- ##############################################################
 
 		select hov.name org_name
-			 , '#' || hov.organization_id org_id
+			 , hov.organization_id org_id
 			 , to_char(hov.effective_start_date) effective_start_date
 			 , to_char(hov.effective_end_date) effective_end_date
 			 , hov.status org_status

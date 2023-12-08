@@ -20,9 +20,9 @@ Queries:
 -- HDL HEADERS
 -- ##############################################################
 
-		select '#' || hdds.data_set_id data_set_id
-			 , '#' || hdds.ucm_content_id ucm_content_id
-			 , '#' || hdds.request_id process_id
+		select hdds.data_set_id
+			 , hdds.ucm_content_id
+			 , hdds.request_id process_id
 			 , to_char(hdds.creation_date, 'yyyy-mm-dd hh24:mi:ss') creation_date
 			 , hdds.created_by
 			 , hdds.data_set_name
@@ -47,9 +47,9 @@ Queries:
 -- HDL HEADERS AND LINES
 -- ##############################################################
 
-		select '#' || hdds.data_set_id data_set_id
-			 , '#' || hdds.ucm_content_id ucm_content_id
-			 , '#' || hdds.request_id process_id
+		select hdds.data_set_id
+			 , hdds.ucm_content_id
+			 , hdds.request_id process_id
 			 , to_char(hdds.creation_date, 'yyyy-mm-dd hh24:mi:ss') creation_date
 			 , hdds.created_by
 			 , hdds.data_set_name
@@ -64,8 +64,8 @@ Queries:
 			 , hdds.import_error_count
 			 , hdds.loaded_count
 			 , hdds.error_count
-			 , '#' || hdfl.data_set_bus_obj_id data_set_bus_obj_id
-			 , '#' || hdfl.line_id line_id
+			 , hdfl.data_set_bus_obj_id
+			 , hdfl.line_id
 			 , hdfl.text
 			 , hdfl.seq_num line_seq
 		  from hrc_dl_data_sets hdds
@@ -80,9 +80,9 @@ Queries:
 -- HDL HEADERS, LINES AND ERRORS
 -- ##############################################################
 
-		select '#' || hdds.request_id process_id
-			 -- , '#' || hdds.ucm_content_id ucm_content_id
-			 -- , '#' || hdds.data_set_id data_set_id
+		select hdds.request_id process_id
+			 -- , hdds.ucm_content_id
+			 -- , hdds.data_set_id
 			 , to_char(hdds.creation_date, 'yyyy-mm-dd hh24:mi:ss') creation_date
 			 , hdds.created_by
 			 , hdds.data_set_name
@@ -97,15 +97,15 @@ Queries:
 			 -- , hdds.import_error_count
 			 -- , hdds.loaded_count
 			 , hdds.error_count
-			 -- , '#' || hdfl.data_set_bus_obj_id data_set_bus_obj_id
-			 -- , '#' || hdfl.line_id line_id
+			 -- , hdfl.data_set_bus_obj_id
+			 -- , hdfl.line_id
 			 , hdfl.text line_text
 			 , hdml.message_source_table_name
 			 , hdml.originating_process
 			 , hdml.generated_by
 			 , hdml.message_type
-			 -- , '#' || hdml.message_source_line_id message_source_line_id
-			 -- , '#' || hdml.request_id request_id_err
+			 -- , hdml.message_source_line_id
+			 -- , hdml.request_id request_id_err
 			 , hdml.group_by_expr_val
 			 , hdml.msg_text error_message
 			 , hdml.message_user_details

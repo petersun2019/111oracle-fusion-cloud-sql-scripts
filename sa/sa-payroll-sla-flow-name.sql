@@ -118,14 +118,14 @@ select * from fusion.xla_events where application_id = 801 and entity_id = 12345
 -- XLA DATA 2
 -- ##############################################################
 
-		select '#' || ppra.payroll_rel_action_id payroll_rel_action_id
-			 , '#' || ppra.payroll_action_id payroll_action_id
-			 , '#' || ppra.payroll_relationship_id payroll_relationship_id
+		select ppra.payroll_rel_action_id
+			 , ppra.payroll_action_id
+			 , ppra.payroll_relationship_id
 			 , ppra.action_status
 			 , ppra.object_version_number
-			 , '#' || ppra.action_sequence chunk_number
-			 , '#' || ppa.payroll_id payroll_id
-			 , '#' || ppa.pay_request_id pay_request_id
+			 , ppra.action_sequence chunk_number
+			 , ppa.payroll_id
+			 , ppa.pay_request_id
 			 , ppa.display_run_number
 			 , to_char(ppa.start_date, 'yyyy-mm-dd') ppa_start_date
 			 , to_char(ppa.end_date, 'yyyy-mm-dd') ppa_end_date
@@ -135,16 +135,16 @@ select * from fusion.xla_events where application_id = 801 and entity_id = 12345
 			 , ppa.action_population_status
 			 , papf.payroll_name 
 			 , papf.reporting_name
-			 , '#' || prgd.relationship_group_id relationship_group_id
+			 , prgd.relationship_group_id
 			 , to_char(prgd.start_date, 'yyyy-mm-dd') prgd_start_date
 			 , to_char(prgd.end_date, 'yyyy-mm-dd') prgd_end_date
-			 , '#' || prgd.assignment_id assignment_id
+			 , prgd.assignment_id assignment_id
 			 , prgd.assignment_number
 			 , to_char(prgd.creation_date, 'yyyy-mm-dd hh24:mi:ss') prgd_creation_date
 			 , prgd.created_by prgd_created_by
 			 , to_char(prgd.last_update_date, 'yyyy-mm-dd hh24:mi:ss') prgd_last_update_date
 			 , prgd.last_updated_by prgd_last_updated_by
-			 , '#' || pprd.person_id person_id
+			 , pprd.person_id
 			 , '#' || papf2.person_number emp_num
 			 , ppnf.first_name
 			 , ppnf.last_name
@@ -153,29 +153,29 @@ select * from fusion.xla_events where application_id = 801 and entity_id = 12345
 			 , pc.debit_or_credit
 			 , gl.name ledger
 			 , '####' pxe_____________
-			 , '#' || pxe.event_id pxe_event_id
-			 , '#' || pxe.payroll_rel_action_id pxe_payroll_rel_action_id
-			 , '#' || pxe.payroll_id pxe_payroll_id
-			 , '#' || pxe.cost_action_id pxe_cost_action_id
+			 , pxe.event_id pxe_event_id
+			 , pxe.payroll_rel_action_id pxe_payroll_rel_action_id
+			 , pxe.payroll_id pxe_payroll_id
+			 , pxe.cost_action_id pxe_cost_action_id
 			 , pxe.cost_type pxe_cost_type
 			 , pxe.event_status pxe_event_status
 			 , '####' xla_transaction_entities_____________
-			 , '#' || xte.entity_id entity_id
-			 , '#' || xte.source_id_int_1 source_id_int_1
-			 , '#' || xte.source_id_int_2 source_id_int_2
-			 , '#' || xte.source_id_int_3 source_id_int_3
+			 , xte.entity_id entity_id
+			 , xte.source_id_int_1
+			 , xte.source_id_int_2
+			 , xte.source_id_int_3
 			 , '#' || xte.transaction_number transaction_number
 			 , xte.entity_code
 			 , fat.application_name app
 			 , '####' xla_events_____________
-			 , '#' || xe.event_id event_id
+			 , xe.event_id
 			 , xe.event_number
 			 , xe.creation_date event_created
 			 , flv2.meaning event_status
 			 , flv3.meaning event_process_status
 			 , xe.event_type_code
 			 , '####' xla_ae_headers_____________
-			 , '#' || xah.ae_header_id ae_header_id
+			 , xah.ae_header_id
 			 , decode(xah.balance_type_code,'e','encumbrance','a','actual') balance_type
 			 , xah.period_name
 			 , xah.completed_date
@@ -185,10 +185,10 @@ select * from fusion.xla_events where application_id = 801 and entity_id = 12345
 			 , xah.je_category_name
 			 , xah.creation_date
 			 , xah.request_id
-			 , '#' || xah.group_id group_id
+			 , xah.group_id
 			 , (replace(replace(xah.description,chr(10),''),chr(13),' ')) header_description
 			 , '####' xla_ae_lines_____________
-			 , '#' || xal.code_combination_id code_combination_id
+			 , xal.code_combination_id code_combination_id
 			 , '#' || gcc.segment1 seg1
 			 , '#' || gcc.segment2 seg2
 			 , '#' || gcc.segment3 seg3
@@ -242,14 +242,14 @@ select * from fusion.xla_events where application_id = 801 and entity_id = 12345
 -- XLA DATA 3 - ERRORS
 -- ##############################################################
 
-		select '#' || ppra.payroll_rel_action_id payroll_rel_action_id
-			 , '#' || ppra.payroll_action_id payroll_action_id
-			 , '#' || ppra.payroll_relationship_id payroll_relationship_id
+		select ppra.payroll_rel_action_id
+			 , ppra.payroll_action_id
+			 , ppra.payroll_relationship_id
 			 , ppra.action_status
 			 , ppra.object_version_number
-			 , '#' || ppra.action_sequence chunk_number
-			 , '#' || ppa.payroll_id payroll_id
-			 , '#' || ppa.pay_request_id pay_request_id
+			 , ppra.action_sequence chunk_number
+			 , ppa.payroll_id
+			 , ppa.pay_request_id
 			 , ppa.display_run_number
 			 , to_char(ppa.start_date, 'yyyy-mm-dd') ppa_start_date
 			 , to_char(ppa.end_date, 'yyyy-mm-dd') ppa_end_date
@@ -259,16 +259,16 @@ select * from fusion.xla_events where application_id = 801 and entity_id = 12345
 			 , ppa.action_population_status
 			 , papf.payroll_name 
 			 , papf.reporting_name
-			 , '#' || prgd.relationship_group_id relationship_group_id
+			 , prgd.relationship_group_id
 			 , to_char(prgd.start_date, 'yyyy-mm-dd') prgd_start_date
 			 , to_char(prgd.end_date, 'yyyy-mm-dd') prgd_end_date
-			 , '#' || prgd.assignment_id assignment_id
+			 , prgd.assignment_id
 			 , prgd.assignment_number
 			 , to_char(prgd.creation_date, 'yyyy-mm-dd hh24:mi:ss') prgd_creation_date
 			 , prgd.created_by prgd_created_by
 			 , to_char(prgd.last_update_date, 'yyyy-mm-dd hh24:mi:ss') prgd_last_update_date
 			 , prgd.last_updated_by prgd_last_updated_by
-			 , '#' || pprd.person_id person_id
+			 , pprd.person_id
 			 , '#' || papf2.person_number emp_num
 			 , ppnf.first_name
 			 , ppnf.last_name
@@ -277,29 +277,29 @@ select * from fusion.xla_events where application_id = 801 and entity_id = 12345
 			 , pc.debit_or_credit
 			 , gl.name ledger
 			 , '####' pxe_____________
-			 , '#' || pxe.event_id pxe_event_id
-			 , '#' || pxe.payroll_rel_action_id pxe_payroll_rel_action_id
-			 , '#' || pxe.payroll_id pxe_payroll_id
-			 , '#' || pxe.cost_action_id pxe_cost_action_id
+			 , pxe.event_id pxe_event_id
+			 , pxe.payroll_rel_action_id pxe_payroll_rel_action_id
+			 , pxe.payroll_id pxe_payroll_id
+			 , pxe.cost_action_id pxe_cost_action_id
 			 , pxe.cost_type pxe_cost_type
 			 , pxe.event_status pxe_event_status
 			 , '####' xla_transaction_entities_____________
-			 , '#' || xte.entity_id entity_id
-			 , '#' || xte.source_id_int_1 source_id_int_1
-			 , '#' || xte.source_id_int_2 source_id_int_2
-			 , '#' || xte.source_id_int_3 source_id_int_3
+			 , xte.entity_id
+			 , xte.source_id_int_1
+			 , xte.source_id_int_2
+			 , xte.source_id_int_3
 			 , '#' || xte.transaction_number transaction_number
 			 , xte.entity_code
 			 , fat.application_name app
 			 , '####' xla_events_____________
-			 , '#' || xe.event_id event_id
+			 , xe.event_id
 			 , xe.event_number
 			 , xe.creation_date event_created
 			 , flv2.meaning event_status
 			 , flv3.meaning event_process_status
 			 , xe.event_type_code
 			 , '####' xla_ae_headers_____________
-			 , '#' || xah.ae_header_id ae_header_id
+			 , xah.ae_header_id
 			 , decode(xah.balance_type_code,'e','encumbrance','a','actual') balance_type
 			 , xah.period_name
 			 , xah.completed_date
@@ -309,10 +309,10 @@ select * from fusion.xla_events where application_id = 801 and entity_id = 12345
 			 , xah.je_category_name
 			 , xah.creation_date
 			 , xah.request_id
-			 , '#' || xah.group_id group_id
+			 , xah.group_id
 			 , (replace(replace(xah.description,chr(10),''),chr(13),' ')) header_description
 			 , '####' xla_ae_lines_____________
-			 , '#' || xal.code_combination_id code_combination_id
+			 , xal.code_combination_id
 			 , '#' || gcc.segment1 seg1
 			 , '#' || gcc.segment2 seg2
 			 , '#' || gcc.segment3 seg3

@@ -29,7 +29,7 @@ Queries:
 			 , pur.created_by access_created_by
 			 , decode(pu.suspended, 'N', 'Active', 'Y', 'Inactive') user_active_status
 			 -- , pu.active_flag user_active_flag
-			 , (replace(replace(prdt.description,chr(10),''),chr(13),' ')) role_description
+			 -- , (replace(replace(prdt.description,chr(10),''),chr(13),' ')) role_description
 		  from per_users pu
 		  join per_user_roles pur on pu.user_id = pur.user_id
 		  join per_roles_dn_tl prdt on pur.role_id = prdt.role_id
@@ -38,6 +38,7 @@ Queries:
 		   and pur.active_flag = 'Y'
 		   and pur.terminated_flag = 'N'
 		   and 1 = 1
+	  order by to_char(pur.creation_date, 'yyyy-mm-dd hh24:mi:ss') desc
 
 -- ##############################################################
 -- COMPARE ROLES BETWEEN USERS
@@ -113,7 +114,7 @@ Queries:
 			 , pur.active_flag access_active
 			 , pur.terminated_flag access_terminated
 			 , '#' || papf.person_number person_number
-			 -- , '#' || papf.person_id person_id
+			 -- , papf.person_id
 			 -- , to_char(papf.effective_start_date, 'yyyy-mm-dd') papf_start
 			 -- , to_char(papf.effective_end_date, 'yyyy-mm-dd') papf_end
 			 , ppnf.full_name
@@ -151,7 +152,7 @@ Queries:
 			 , pur.terminated_flag access_terminated
 			 -- , '#' hr_______________
 			 , '#' || papf.person_number emp_num
-			 -- , '#' || papf.person_id person_id
+			 -- , papf.person_id
 			 , ppnf.full_name
 			 , bg.name bus_group
 			 , hauft.name employer
@@ -249,7 +250,7 @@ Queries:
 -- ROLE SETUP
 -- ##############################################################
 
-		select '#' || prdt.role_id role_id
+		select prdt.role_id
 			 , prdt.creation_date
 			 , prdt.created_by
 			 , prdt.role_name

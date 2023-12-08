@@ -7,7 +7,6 @@ URL: https://github.com/throwing-cheese/oracle-fusion-cloud-sql-scripts
 Fusion Applications: SOA Purge Details of a Software as a Service (SaaS) Fusion Apps Environment (Doc ID 2175534.1)
 Is data purged from FA_FUSION_SOAINFRA WF% tables?
 https://cloudcustomerconnect.oracle.com/posts/396af4367b
-
 */
 
 		select owner

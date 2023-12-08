@@ -40,8 +40,8 @@ Queries:
 			 , (select distinct approver_id from ap_inv_aprvl_hist_all h2 where h2.invoice_id = aia.invoice_id and h2.response = 'ORA_ASSIGNED TO' and approver_id like '%@%' and approver_id != aia.created_by and rownum = 1) other_approver
 			 , '#######################'
 			 , fwt.taskdefinitionname
-			 , '#' || fwt.taskid taskid
-			 , '#' || fwt.identificationkey identificationkey
+			 , fwt.taskid
+			 , fwt.identificationkey
 			 , fwt.tasknumber
 			 , to_char(fwt.createddate, 'yyyy-mm-dd hh24:mi:ss') createddate
 			 , to_char(fwt.assigneddate, 'yyyy-mm-dd hh24:mi:ss') assigneddate

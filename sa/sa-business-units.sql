@@ -10,14 +10,13 @@ Queries:
 -- BUSINESS UNITS - RELATED FUNCTIONS
 
 See also: gl/gl-ledgers-legal-entities.sql
-
 */
 
 -- ##############################################################
 -- BUSINESS UNITS - BASIC DEFINITION
 -- ##############################################################
 
-		select '#' || fabuv.bu_id business_unit_id
+		select fabuv.bu_id business_unit_id
 			 , fabuv.bu_name bu_name
 			 , fabuv.short_code short_code
 			 , fabuv.status status
@@ -35,7 +34,7 @@ See also: gl/gl-ledgers-legal-entities.sql
 -- BUSINESS UNITS - RELATED FUNCTIONS
 -- ##############################################################
 
-		select '#' || fbu.business_unit_id business_unit_id
+		select fbu.business_unit_id
 			 , fabuv.bu_name bu_name
 			 , fabuv.short_code short_code
 			 , fabuv.status status

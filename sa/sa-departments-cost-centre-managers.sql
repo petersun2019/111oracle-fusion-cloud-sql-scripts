@@ -32,7 +32,7 @@ Queries:
 -- ##############################################################
 
 		select hov.name dept
-			 , '#' || hov.organization_id dept_id
+			 , hov.organization_id dept_id
 			 , hov.status dept_status
 			 , hov.set_id dept_set_id
 			 , to_char(hov.effective_start_date, 'yyyy-mm-dd') dept_start
@@ -177,7 +177,7 @@ This SQL shows the setup for the PER_GL_COST_CENTER_INFO DFF
 			 , '#' || papf.person_number person_number
 			 , pd.name person_department
 			 , fnd_value.enabled_flag enabled_
-			 , '#' || hoif.org_information_id hoif_id
+			 , hoif.org_information_id hoif_id
 			 , to_char(hoif.effective_start_date) cc_manager_effective_start
 			 , to_char(fnd_value.creation_date, 'yyyy-mm-dd hh24:mi:ss') cc_created
 			 , to_char(hoif.creation_date, 'yyyy-mm-dd hh24:mi:ss') hoif_created
@@ -204,7 +204,7 @@ This SQL shows the setup for the PER_GL_COST_CENTER_INFO DFF
 -- ##############################################################
 
 		select hov.name dept
-			 , '#' || hov.organization_id dept_id
+			 , hov.organization_id dept_id
 			 , hov.status dept_status
 			 , to_char(hov.effective_start_date, 'yyyy-mm-dd') dept_start
 			 , to_char(hov.creation_date, 'yyyy-mm-dd hh24:mi:ss') dept_created
@@ -224,18 +224,18 @@ This SQL shows the setup for the PER_GL_COST_CENTER_INFO DFF
 			 , pjfv.approval_authority cc_manager_job_level
 			 , nvl(pea.email_address, 'no-email') cc_manager_email
 			 , '###########################' technical_info_______
-			 , '#' || hoif.org_information_id hoif_id
+			 , hoif.org_information_id hoif_id
 			 , to_char(hoif.effective_start_date, 'yyyy-mm-dd') hoif_start
 			 , to_char(hoif.effective_end_date  , 'yyyy-mm-dd') hoif_end
 			 , '#' || hoif.org_information1  hoif_cost_centre
-			 , '#' || hoif.org_information2  hoif_val_set_id_ent
+			 ,  hoif.org_information2  hoif_val_set_id_ent
 			 , fnd_set_ent.flex_value_set_name value_set_name_ent
-			 , '#' || hoif.org_information3  hoif_bsv
-			 , '#' || hoif.org_information4  hoif_val_set_id_cc
+			 , '#' || hoif.org_information3 hoif_bsv
+			 , '#' || hoif.org_information4 hoif_val_set_id_cc
 			 , fnd_set_cc.flex_value_set_name value_set_name_cc
-			 , '#' || hoif.org_information6  hoif_person_id
-			 , '#' || hoif.org_information7  hoif_record_identifier
-			 , '#' || hoif.sequence_number   hoif_seq_num
+			 , hoif.org_information6 hoif_person_id
+			 , '#' || hoif.org_information7 hoif_record_identifier
+			 , '#' || hoif.sequence_number hoif_seq_num
 		  from hr_organization_v hov
 		  join hr_organization_information_f hoif on hov.organization_id = hoif.organization_id and hoif.org_information_context = 'PER_GL_COST_CENTER_INFO' and hov.classification_code = 'DEPARTMENT' and sysdate between hov.effective_start_date and hov.effective_end_date -- and sysdate between hoif.effective_start_date and hoif.effective_end_date
 	 left join per_person_names_f ppnf on ppnf.person_id = hoif.org_information6 and ppnf.name_type = 'GLOBAL' and sysdate between ppnf.effective_start_date and ppnf.effective_end_date
@@ -254,7 +254,7 @@ This SQL shows the setup for the PER_GL_COST_CENTER_INFO DFF
 -- ##############################################################
 
 		select hoif.org_information1 cc
-			 , '#' || hoif.org_information6 person_id
+			 , hoif.org_information6 person_id
 			 , hoif.org_information1 || '#' || hoif.org_information6 joined
 			 , '###### department'
 			 , hov.name department
@@ -275,12 +275,12 @@ This SQL shows the setup for the PER_GL_COST_CENTER_INFO DFF
 			 , pjfv.approval_authority ccm_job_level
 			 , paam.assignment_status_type ccm_assignment_status_type
 			 , pastt.user_status ccm_assigment_status
-			 , '#' || hoif.org_information6 ccm_person_id
+			 , hoif.org_information6 ccm_person_id
 			 , hla.location_code ccm_location
 			 , hapf.position_code ccm_position
 			 , hapft.name ccm_position_name
 			 , '#######' technical_info_______
-			 , '#' || hoif.org_information_id hoif_id
+			 , hoif.org_information_id hoif_id
 			 , to_char(hoif.effective_start_date, 'yyyy-mm-dd') hoif_start
 			 , to_char(hoif.effective_end_date , 'yyyy-mm-dd') hoif_end
 			 , '#' || hoif.org_information1 hoif_cost_centre
@@ -289,7 +289,7 @@ This SQL shows the setup for the PER_GL_COST_CENTER_INFO DFF
 			 , '#' || hoif.org_information3 hoif_bsv
 			 , '#' || hoif.org_information4 hoif_val_set_id_cc
 			 , fnd_set_cc.flex_value_set_name value_set_name_cc
-			 , '#' || hoif.org_information6 hoif_person_id
+			 , hoif.org_information6 hoif_person_id
 			 , '#' || hoif.org_information7 hoif_record_identifier
 			 , '#' || hoif.sequence_number hoif_seq_num
 		  from hr_organization_v hov
@@ -340,7 +340,7 @@ This SQL shows the setup for the PER_GL_COST_CENTER_INFO DFF
 			 , pjfv.approval_authority ccm_job_level
 			 , paam.assignment_status_type ccm_assignment_status_type
 			 , pastt.user_status ccm_assigment_status
-			 , '#' || hoif.org_information6 ccm_person_id
+			 , hoif.org_information6 ccm_person_id
 			 , hla.location_code ccm_location
 			 , hapf.position_code ccm_position
 			 , hapft.name ccm_position_name
@@ -356,7 +356,7 @@ This SQL shows the setup for the PER_GL_COST_CENTER_INFO DFF
 			 , hapf_mgr.position_code mgr_position
 			 , hapft_mgr.name mgr_position_name
 			 , '#######' technical_info_______
-			 , '#' || hoif.org_information_id hoif_id
+			 , hoif.org_information_id hoif_id
 			 , to_char(hoif.effective_start_date, 'yyyy-mm-dd') hoif_start
 			 , to_char(hoif.effective_end_date , 'yyyy-mm-dd') hoif_end
 			 , '#' || hoif.org_information1 hoif_cost_centre
@@ -365,7 +365,7 @@ This SQL shows the setup for the PER_GL_COST_CENTER_INFO DFF
 			 , '#' || hoif.org_information3 hoif_bsv
 			 , '#' || hoif.org_information4 hoif_val_set_id_cc
 			 , fnd_set_cc.flex_value_set_name value_set_name_cc
-			 , '#' || hoif.org_information6 hoif_person_id
+			 , hoif.org_information6 hoif_person_id
 			 , '#' || hoif.org_information7 hoif_record_identifier
 			 , '#' || hoif.sequence_number hoif_seq_num
 		  from hr_organization_v hov
@@ -443,15 +443,15 @@ On this bit: where fnd_set.flex_value_set_name in ('XX Cost Centre')
 			 , '#' hoif_tech___
 			 , to_char(hoif.effective_start_date, 'yyyy-mm-dd') hoif_start
 			 , to_char(hoif.effective_end_date  , 'yyyy-mm-dd') hoif_end
-			 , '#' || hoif.org_information1  hoif_cost_centre
-			 , '#' || hoif.org_information2  hoif_val_set_id_ent
+			 , '#' || hoif.org_information1 hoif_cost_centre
+			 , '#' || hoif.org_information2 hoif_val_set_id_ent
 			 , fnd_set_ent.flex_value_set_name value_set_name_ent
-			 , '#' || hoif.org_information3  hoif_bsv
-			 , '#' || hoif.org_information4  hoif_val_set_id_cc
+			 , '#' || hoif.org_information3 hoif_bsv
+			 , '#' || hoif.org_information4 hoif_val_set_id_cc
 			 , fnd_set_cc.flex_value_set_name value_set_name_cc
-			 , '#' || hoif.org_information6  hoif_person_id
-			 , '#' || hoif.org_information7  hoif_record_identifier
-			 , '#' || hoif.sequence_number   hoif_seq_num
+			 , hoif.org_information6  hoif_person_id
+			 , '#' || hoif.org_information7 hoif_record_identifier
+			 , '#' || hoif.sequence_number hoif_seq_num
 		  from (select fnd_value.flex_value cc, fnd_value_tl.description cc_desc, fnd_value.enabled_flag cc_enabled, fnd_value.attribute1 cc_budget_holder, fnd_value.attribute2 cc_fin_contact_name, fnd_value.attribute4 cc_bh_empno from fnd_flex_values fnd_value join fnd_flex_value_sets fnd_set on fnd_value.flex_value_set_id = fnd_set.flex_value_set_id join fnd_flex_values_tl fnd_value_tl on fnd_value.flex_value_id = fnd_value_tl.flex_value_id where fnd_set.flex_value_set_name in ('XX Cost Centre')) tbl_cc
 	 left join hr_organization_information_f hoif on hoif.org_information1 = tbl_cc.cc and sysdate between hoif.effective_start_date and hoif.effective_end_date
 	 left join hr_organization_v hov on hov.organization_id = hoif.organization_id and hoif.org_information_context = 'PER_GL_COST_CENTER_INFO' and hov.classification_code = 'DEPARTMENT' and sysdate between hov.effective_start_date and hov.effective_end_date

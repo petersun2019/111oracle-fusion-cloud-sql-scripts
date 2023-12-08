@@ -49,8 +49,9 @@ Queries:
 		  from fnd_lookup_values_vl flv
 		  join fnd_application_tl fat on fat.application_id = flv.view_application_id
 		 where 1 = 1
+		   and flv.lookup_code in ('Y','NT','N')
 		   and 1 = 1
-		having count(*) = 10
+		having count(*) = 3
 	  group by flv.lookup_type
 			 , flv.view_application_id
 			 , fat.application_name
@@ -61,6 +62,6 @@ Queries:
 -- TABLE DUMPS
 -- ##############################################################
 
-select * from fnd_lookup_values_vl where lookup_type in ('POSTED PAID STATUS','POSTING STATUS','INVOICE PAYMENT STATUS');
-select * from fnd_lookup_types_tl where lookup_type like 'VEND%TYP%';
+select * from fnd_lookup_values_vl where lookup_type in ('GL_TRANSFER_FLAG','XLA_ACCT_TRANSFER')
+select * from fnd_lookup_types_tl where lookup_type in ('GL_TRANSFER_FLAG','XLA_ACCT_TRANSFER')
 select * from ar_lookups where lookup_code in ('A1','A2','A3','A4','A5')

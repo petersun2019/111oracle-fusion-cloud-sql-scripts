@@ -74,35 +74,37 @@ select * from fusion_ora_ess.request_property where requestid = 123456
 		select rh.requestid
 			 , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
 			 , rh.instanceparentid -- the parent process in that instance run
-			 -- , rh.state
+			 , rh.state
 			 , flv_state.meaning status
-			 -- , rh.name submission_comments
-			 -- , to_char(rh.processstart, 'dy') weekday
+			 , rh.name submission_comments
+			 , to_char(rh.processstart, 'dy') weekday
 			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
 			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
 			 , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
 			 , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
-			 -- , '#' || replace(substr(to_char(rh.processend-rh.processstart, 'DD HH24:MI:SS'), 0, instr(to_char(rh.processend-rh.processstart, 'DD HH24:MI:SS'), '.')-1),'+0000000','') duration -- dd_mm_hh_ss
-			 -- , round((cast(sys_extract_utc (rh.processend) as date) - cast(sys_extract_utc (rh.processstart) as date)) * 1440,2) total_minutes
+			 , replace(substr(to_char(rh.processend-rh.processstart, 'DD HH24:MI:SS'), 0, instr(to_char(rh.processend-rh.processstart, 'DD HH24:MI:SS'), '.')-1),'+0000000','') duration -- dd_mm_hh_ss
+			 , round((cast(sys_extract_utc (rh.processend) as date) - cast(sys_extract_utc (rh.processstart) as date)) * 1440,2) total_minutes
 			 , rh.definition definition1
 			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition2
 			 , rh.jobtype
 			 , rh.product
 			 , rh.username
-			 , rp.value completion_text
-			 -- , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
+			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
 			 -- , rh.error_warning_detail -- including this breaks excel export as it always has line breaks and things in it, even if you try and strip them out they always appear at the start of the field, whatever i try...
-			 -- , replace(replace(replace(utl_raw.cast_to_varchar2(rh.adhocschedule),chr(0),''),chr(10),''),chr(13),'') adhocschedule_cast -- schedule data in XML format
-	from request_history rh
+			 -- , replace(replace(replace(utl_raw.cast_to_varchar2(rh.adhocschedule),chr(0),''),chr(10),''),chr(13),'') adhocschedule_cast -- contains schedule data
+			 , '#########################'
+			 , rhv.name rhv_name
+			 , rhv.lastscheduleinstanceid
+		  from request_history rh
 		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS'
-	 left join request_property rp on rp.requestid = rh.requestid and rp.name = 'completionText'
+	left join fusion_ora_ess.request_history_view rhv on rhv.requestid = rh.requestid
 		 where 1 = 1
 		   -------------------------- ids --------------------------
 		   -- and rh.requestid = 123456
 		   -- and rh.requestid between 123456 and 123490
 		   -- and rh.absparentid = 1609423
 		   -------------------------- definition --------------------------
-		   -- and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('APCSTTRF')
+		   -- and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('XLAGLTRN')
 		   -------------------------- users --------------------------
 		   -- and rh.username = 'THIS'
 		   -- and rh.username not in ('FIN_SCHEDULE','FAAdmin','FUSION_APPS_PRC_SOA_APPID')
@@ -120,7 +122,7 @@ select * from fusion_ora_ess.request_property where requestid = 123456
 		   -- and rh.product in ('FUN','GL')
 		   -------------------------- dates and times --------------------------
 		   -- and rh.processstart > sysdate - 10
-		   -- and rh.completedtime is null
+		   -- and rh.completedtime is not null
 		   -- and rh.scheduled is null
 		   -- and to_char(rh.processstart, 'YYYY') = '2023'
 		   -- and to_char(rh.processstart, 'MM') = '10'
@@ -147,27 +149,29 @@ select * from fusion_ora_ess.request_property where requestid = 123456
 			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
 			 , to_char(rh.submission, 'yyyy-mm-dd hh24:mi:ss') submission
 			 , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
-			 -- , '#' || replace(substr(to_char(rh.processend-rh.processstart, 'DD HH24:MI:SS'), 0, instr(to_char(rh.processend-rh.processstart, 'DD HH24:MI:SS'), '.')-1),'+0000000','') duration -- dd_mm_hh_ss
-			 -- , round((cast(sys_extract_utc (rh.processend) as date) - cast(sys_extract_utc (rh.processstart) as date)) * 1440,2) total_minutes
-			 , rh.definition definition1
-			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition2
-			 , rh.jobtype
+			 , replace(substr(to_char(rh.processend-rh.processstart, 'DD HH24:MI:SS'), 0, instr(to_char(rh.processend-rh.processstart, 'DD HH24:MI:SS'), '.')-1),'+0000000','') duration -- dd_mm_hh_ss
+			 , round((cast(sys_extract_utc (rh.processend) as date) - cast(sys_extract_utc (rh.processstart) as date)) * 1440,2) total_minutes
+			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
+			 , replace(rh.definition, 'JobDefinition://', '') def1
+			 , rh.definition full_definition
+			 , regexp_substr(replace(rh.definition, 'JobDefinition://', ''), '[^/]+', 1, 1) segment1
 			 , rh.product
 			 , rh.username
-			 , rp.value completion_text
 			 , ppnf.full_name
 			 , ppx.person_number
 			 , nvl(pea.email_address, 'no-email') email_address
-			 -- , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
-			 -- , rh.error_warning_detail -- including this breaks excel export as it always has line breaks and things in it, even if you try and strip them out they always appear at the start of the field, whatever i try...
-			 -- , replace(replace(replace(utl_raw.cast_to_varchar2(rh.adhocschedule),chr(0),''),chr(10),''),chr(13),'') adhocschedule_cast -- schedule data in XML format
+			 , replace(replace(replace(rh.error_warning_message, chr(10), ''), chr(13), ''), chr(09), '') error_warning_message
+			 , rh.error_warning_detail -- including this breaks excel export as it always has line breaks and things in it, even if you try and strip them out they always appear at the start of the field, whatever i try...
+			 , '#########################'
+			 , rhv.name rhv_name
+			 , rhv.lastscheduleinstanceid
 		  from request_history rh
 		  join fnd_lookup_values_vl flv_state on flv_state.lookup_code = rh.state and flv_state.lookup_type = 'ORA_EGP_ESS_REQUEST_STATUS' and flv_state.view_application_id = 0
 	left join per_users pu on rh.username = pu.username and pu.active_flag = 'Y' -- some user accounts have more than 1 row in user tables e.g. FAAdmin, so only select active user
 	left join per_people_x ppx on ppx.person_id = pu.person_id
 	left join per_person_names_f ppnf on ppx.person_id = ppnf.person_id and ppnf.name_type = 'GLOBAL' and sysdate between ppnf.effective_start_date and ppnf.effective_end_date
 	left join per_email_addresses pea on ppx.person_id = pea.person_id and pea.email_type = 'W1'
-	left join request_property rp on rp.requestid = rh.requestid and rp.name = 'completionText'
+	left join fusion_ora_ess.request_history_view rhv on rhv.requestid = rh.requestid
 		 where 1 = 1
 		   -------------------------- ids --------------------------
 		   -- and rh.requestid = 123456
@@ -242,7 +246,7 @@ Also, some jobs are submitted by "regular" non system users where the <ical-expr
 
 Main job seems to be the "EssBipJob" under the "BI Publisher" Product name, so these are scheduled BI Publisher jobs.
 
-Therefore, to exclude <ical-expression> jobs, add this line:
+Therefore, to return non <ical-expression> jobs, add this line:
 
 and instr(replace(utl_raw.cast_to_varchar2(adhocschedule),chr(0),''),'<ical-expression>') = 0 -- exclude jobs run by system %APPID accounts, plus the "EssBipJob" BI Publiser job
 */
@@ -251,7 +255,7 @@ and instr(replace(utl_raw.cast_to_varchar2(adhocschedule),chr(0),''),'<ical-expr
 		select rh.requestid
 			 , rh.absparentid -- when the process is scheduled, this field contains the parent request which is the schedule parent
 			 , rh.instanceparentid -- the parent process in that instance run
-			 -- , rh.state
+			 , rh.state
 			 , flv_state.meaning status
 			 , rh.name submission_comments
 			 , to_char(rh.processstart, 'dy') weekday
@@ -325,7 +329,7 @@ and instr(replace(utl_raw.cast_to_varchar2(adhocschedule),chr(0),''),'<ical-expr
 			 , flv_state.meaning status
 			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
 			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
-			 , '#' || replace(substr(to_char(rh.processend-rh.processstart, 'DD HH24:MI:SS'), 0, instr(to_char(rh.processend-rh.processstart, 'DD HH24:MI:SS'), '.')-1),'+0000000','') duration -- dd_mm_hh_ss
+			 , replace(substr(to_char(rh.processend-rh.processstart, 'DD HH24:MI:SS'), 0, instr(to_char(rh.processend-rh.processstart, 'DD HH24:MI:SS'), '.')-1),'+0000000','') duration -- dd_mm_hh_ss
 			 , round((cast(sys_extract_utc (rh.processend) as date) - cast(sys_extract_utc (rh.processstart) as date)) * 1440,2) total_minutes
 			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
 			 , rh.product
@@ -780,7 +784,7 @@ with tbl_job_lookups as
 			 , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
 			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') process_start
 			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') process_end
-			 , '#' || replace(substr(to_char(rh.processend-rh.processstart, 'DD HH24:MI:SS'), 0, instr(to_char(rh.processend-rh.processstart, 'DD HH24:MI:SS'), '.')-1),'+0000000','') duration -- dd_mm_hh_ss
+			 , replace(substr(to_char(rh.processend-rh.processstart, 'DD HH24:MI:SS'), 0, instr(to_char(rh.processend-rh.processstart, 'DD HH24:MI:SS'), '.')-1),'+0000000','') duration -- dd_mm_hh_ss
 			 -- , rh.definition full_definition
 			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
 			 -- , replace(rh.definition, 'JobDefinition://', '') def1
@@ -873,5 +877,5 @@ Report Job ID: EXTERNALPROCESSID
 Report Job Name: REQUESTID
 */
 
-select * from fusion_ora_ess.request_history_view where requestid = 123
-select * from fusion_ora_ess.request_history where requestid = 123
+select * from fusion_ora_ess.request_history_view where requestid = 5292473
+select * from fusion_ora_ess.request_history where requestid = 5292473

@@ -3,10 +3,11 @@ File Name: ap-audit.sql
 Version: Oracle Fusion Cloud
 Author: Throwing Cheese
 URL: https://github.com/throwing-cheese/oracle-fusion-cloud-sql-scripts
+*/
 
+/*
 FND_AUDIT_ATTRIBUTES
-This table will store the attributes enabled for Auditing#
-
+This table will store the attributes enabled for Auditing.
 */
 
 select *

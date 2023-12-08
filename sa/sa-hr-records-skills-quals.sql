@@ -16,7 +16,7 @@ Queries:
 -- SKILLS AND QUALIFICATIONS
 -- ##############################################################
 
-		select '#' || papf.person_id person_id
+		select papf.person_id
 			 , '#' || papf.person_number emp_num
 			 , ppnf.first_name
 			 , ppnf.last_name
@@ -32,8 +32,8 @@ Queries:
 			 , hpts.display_order
 			 , hpts.section_layout
 			 , hpts.content_type_id
-			 , '#' || hpts.section_id section_id
-			 , '#' || hpts.parent_section_id parent_section_id
+			 , hpts.section_id
+			 , hpts.parent_section_id
 			 , hptst.name section_name
 			 , '#' other________________
 			 , hctt.content_type_name

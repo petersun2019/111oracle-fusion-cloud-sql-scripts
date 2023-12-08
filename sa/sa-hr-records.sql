@@ -45,13 +45,13 @@ N: Nonworker
 -- HR RECORDS - SIMPLE
 -- ##############################################################
 
-		select '#' || papf.person_id person_id
+		select papf.person_id
 			 , '#' || papf.person_number emp_num
 			 , ppnf.first_name
 			 , ppnf.last_name
 			 , ppnf.full_name
 			 , pu.username
-			 , '#' || hp.party_id party_id
+			 , hp.party_id
 			 , hp.party_name
 			 , nvl(pea.email_address, 'no-email') email_address
 		  from per_all_people_f papf 
@@ -67,13 +67,13 @@ N: Nonworker
 -- ##############################################################
 
 		select '#' || papf.person_number emp_num
-			 , '#' || papf.person_id person_id
+			 , papf.person_id
 			 , ppnf.full_name
 			 , bu.bu_name business_unit
 			 , bg.name bus_group
 			 , hauft.name employer
 			 , ppnf.display_name
-			 , '#' || paam.assignment_id assg_id
+			 , paam.assignment_id
 			 , '#' || paam.assignment_number assg_numb
 			 , paam.assignment_name assg_name
 			 , paam.assignment_status_type
@@ -144,13 +144,13 @@ N: Nonworker
 -- ##############################################################
 
 		select '#' || papf.person_number emp_num
-			 , '#' || papf.person_id person_id
+			 , papf.person_id
 			 , ppnf.full_name
 			 , bu.bu_name business_unit
 			 , bg.name bus_group
 			 , hauft.name employer
 			 , ppnf.display_name
-			 , '#' || paam.assignment_id assg_id
+			 , paam.assignment_id
 			 , '#' || paam.assignment_number assg_numb
 			 , paam.assignment_name assg_name
 			 , paam.effective_latest_change
@@ -187,9 +187,9 @@ N: Nonworker
 			 , bg_mgr.name mgr_bus_group
 			 , hauft_mgr.name mgr_employer
 			 , pd.name mgr_department
-			 , '#' || papf_mgr.person_id mgr_person_id
+			 , papf_mgr.person_id mgr_person_id
 			 , '#' || papf_mgr.person_number mgr_emp_num
-			 , '#' || paam_mgr.assignment_id mgr_assignment_id
+			 , paam_mgr.assignment_id mgr_assignment_id
 			 , '#' || paam_mgr.assignment_number mgr_assg_numb
 			 , org_mgr.name mgr_assig_org
 			 , nvl(pea_mgr.email_address, 'no-email') mgr_email_address

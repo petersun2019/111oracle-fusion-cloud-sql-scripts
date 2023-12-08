@@ -41,7 +41,7 @@ Queries:
 			 , pu.last_updated_by user_updated_by
 			 , papf.person_number
 			 , nvl(pea.email_address, 'no-email') email_address
-			 , '#' || papf.person_id person_id
+			 , papf.person_id
 			 , ppnf.full_name
 			 , ppnf.display_name
 			 , paaf.assignment_number assignment
@@ -153,7 +153,7 @@ https://community.oracle.com/customerconnect/discussion/comment/616402#comment_6
 			 , pu.created_by user_created_by
 			 , '#' || papf.person_number person_number
 			 , nvl(pea.email_address, 'no-email') email_address
-			 , '#' || papf.person_id person_id
+			 , papf.person_id
 			 , ppnf.full_name
 			 , ppnf.display_name
 		  from per_users pu

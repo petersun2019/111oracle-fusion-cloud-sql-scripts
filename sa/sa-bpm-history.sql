@@ -64,8 +64,8 @@ select * from fa_fusion_soainfra.wftask fwt where to_char(fwt.createddate, 'yyyy
 select * from fa_fusion_soainfra.wftask fwt where title like '%123%' and componentname = 'FinApHoldApproval'
 
 		select distinct fwt.taskdefinitionname
-			 , '#' || fwt.taskid taskid
-			 , '#' || fwt.identificationkey identificationkey
+			 , fwt.taskid
+			 , fwt.identificationkey
 			 , fwt.tasknumber
 			 , to_char(fwt.createddate, 'yyyy-mm-dd hh24:mi:ss') createddate
 			 , to_char(fwt.assigneddate, 'yyyy-mm-dd hh24:mi:ss') assigneddate

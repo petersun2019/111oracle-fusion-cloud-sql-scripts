@@ -20,7 +20,7 @@ https://fusionhcmknowledgebase.com/2020/04/supervisor-direct-and-indirect-report
 */
 
 		select ppnf_emp.full_name emp_name
-			 , '#' || pmhd.person_id emp_id
+			 , pmhd.person_id emp_id
 			 , fu_person.username emp_uname
 			 , '#' || papf_emp.person_number emp_num
 			 , pd_emp.name emp_dept
@@ -28,16 +28,16 @@ https://fusionhcmknowledgebase.com/2020/04/supervisor-direct-and-indirect-report
 			 , pjfv_emp.approval_authority emp_job_level
 			   -- ########################## manager
 			 , ppnf_sup.full_name mgr_name
-			 , '#' || pmhd.manager_id mgr_id
+			 , pmhd.manager_id mgr_id
 			 , fu_manager.username mgr_uname
 			 , '#' || papf_sup.person_number mgr_num
 			 , pd_sup.name manager_dept
 			 , pjfv_sup.name mgr_job
 			 , pjfv_sup.approval_authority mgr_job_level
 			   -- ############# hier table
-			 -- , pmhd.assignment_id
-			 -- , pmhd.manager_id
-			 -- , pmhd.manager_assignment_id
+			 , pmhd.assignment_id
+			 , pmhd.manager_id
+			 , pmhd.manager_assignment_id
 			 , pmhd.manager_level
 			 , pmhd.manager_type
 			 , pmhd.effective_start_date
@@ -79,16 +79,16 @@ https://fusionhcmknowledgebase.com/2020/04/supervisor-direct-and-indirect-report
 */
 
 		select ppnf_emp.full_name
-			 -- , '#' || pmhd.person_id person_id
+			 , pmhd.person_id
 			 , fu_person.username person_username
 			 , '#' || papf_emp.person_number person_number
 			 , pd_emp.name person_dept
-			 -- , '#' || pmhd.assignment_id assignment_id
-			 -- , '#' || pmhd.manager_id manager_id
-			 -- , '#' || papf_sup.person_number manager_number
+			 , pmhd.assignment_id
+			 , pmhd.manager_id
+			 , '#' || papf_sup.person_number manager_number
 			 , ppnf_sup.full_name manager_full_name
 			 , fu_manager.username manager_username
-			 -- , '#' || pmhd.manager_assignment_id
+			 , pmhd.manager_assignment_id
 			 , pjfv_sup.name mgr_job
 			 , pjfv_sup.approval_authority mgr_job_level
 			 , pmhd.manager_level

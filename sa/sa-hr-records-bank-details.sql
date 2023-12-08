@@ -3,6 +3,7 @@ File Name: sa-hr-records-bank-details.sql
 Version: Oracle Fusion Cloud
 Author: Throwing Cheese
 URL: https://github.com/throwing-cheese/oracle-fusion-cloud-sql-scripts
+
 */
 
 -- ##############################################################

@@ -237,9 +237,9 @@ with my_data as (
 		   and rp.name in ('completionText','display.attribute6.value','display.attribute8.value','display.attribute26.value','display.attribute27.value')
 		   -- and rp.name in ('display.attribute26.value') and rp.value = 'Payroll'
 		   and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute8.value' and rp2.value = 'F') -- final
-		   and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute26.value' and rp2.value = 'Project Costing')
+		   and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute26.value' and rp2.value = 'Receivables')
 		   -- and exists (select 'y' from request_property rp2 where rp2.requestid = rh.requestid and rp2.name = 'display.attribute27.value' and rp2.value = 'XX Ledger')
-		   and flv_state.meaning = 'Warning'
+		   -- and flv_state.meaning = 'Warning'
 		   -- and rh.requestid = 123456
 		   and 1 = 1)
 select * from (

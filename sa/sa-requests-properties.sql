@@ -33,7 +33,7 @@ select * from request_property where requestid in (123456)
 			 , to_char(rh.scheduled, 'yyyy-mm-dd hh24:mi:ss') scheduled
 			 , to_char(rh.processstart, 'yyyy-mm-dd hh24:mi:ss') start_
 			 , to_char(rh.processend, 'yyyy-mm-dd hh24:mi:ss') end_
-			 , '#' || replace(substr(to_char(rh.processend-rh.processstart, 'DD HH24:MI:SS'), 0, instr(to_char(rh.processend-rh.processstart, 'DD HH24:MI:SS'), '.')-1),'+0000000','') dur_ -- dd_mm_hh_ss
+			 , replace(substr(to_char(rh.processend-rh.processstart, 'DD HH24:MI:SS'), 0, instr(to_char(rh.processend-rh.processstart, 'DD HH24:MI:SS'), '.')-1),'+0000000','') dur_ -- dd_mm_hh_ss
 			 , substr(rh.definition,(instr(rh.definition,'/',-1)+1)) definition
 			 , rh.product
 			 , rh.username
@@ -41,7 +41,7 @@ select * from request_property where requestid in (123456)
 			 , rh.error_warning_detail -- including this breaks excel export as it always has line breaks and things in it, even if you try and strip them out they always appear at the start of the field, whatever i try...
 			 , rp.name
 			 , rp.datatype
-			 , '#' || rp.value value
+			 , rp.value value
 			 -- ,'##################'
 			 -- , rh_sub.requestid child_id
 			 -- , regexp_substr(rh_sub.definition, '[^/]+', 1, length(regexp_replace(rh_sub.definition, '[^/]', ''))) child_definition
@@ -56,7 +56,7 @@ select * from request_property where requestid in (123456)
 	 left join request_property rp on rp.requestid = rh.requestid
 		 where 1 = 1
 		   and rp.value is not null
-		   and rh.requestid = 3271553
+		   and rh.requestid = 123456
 		   and 1 = 1
 	  order by rh.requestid desc
 			 , rp.name
