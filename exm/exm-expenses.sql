@@ -28,7 +28,7 @@ select * from exm_expenses where expense_report_id = 123456
 -- REPORT HEADERS
 -- ##############################################################
 
-		select '#' || eer.expense_report_id rpt_id
+		select eer.expense_report_id
 			 , eer.expense_report_num
 			 , to_char(eer.expense_report_date, 'yyyy-mm-dd') expense_report_date
 			 , to_char(eer.report_submit_date, 'yyyy-mm-dd') report_submit_date
@@ -85,7 +85,7 @@ This table is used to store processing status for an expense report.
 -- REPORT HEADERS AND EXPENSE LINES (ITEMS)
 -- ##############################################################
 
-		select '#' || eer.expense_report_id rpt_id
+		select eer.expense_report_id
 			 , eer.expense_report_num hdr_expense_report_num
 			 , to_char(eer.expense_report_date, 'yyyy-mm-dd') hdr_expense_report_date
 			 , to_char(eer.report_submit_date, 'yyyy-mm-dd') hdr_report_submit_date
@@ -109,7 +109,7 @@ This table is used to store processing status for an expense report.
 -- REPORT HEADERS, EXPENSE LINES (ITEMS) AND DISTRIBUTIONS
 -- ##############################################################
 
-		select '#' || eer.expense_report_id rpt_id
+		select eer.expense_report_id
 			 , eer.expense_report_num rpt_num
 			 , to_char(eer.expense_report_date, 'yyyy-mm-dd') rpt_date
 			 , to_char(eer.report_submit_date, 'yyyy-mm-dd') rpt_submitted
@@ -129,11 +129,11 @@ This table is used to store processing status for an expense report.
 			 , '#' || gcc.segment6 segment6
 			 , '#' || gcc.segment7 segment7
 			 , '#' || gcc.segment8 segment8
-			 , '#' || ee.expense_id expense_id
-			 , '#' || ee.person_id person_id
-			 , '#' || ee.assignment_id assignment_id
+			 , ee.expense_id
+			 , ee.person_id
+			 , ee.assignment_id
 			 , ee.reimbursable_amount
-			 , '#' || ee.emp_default_cost_center emp_default_cost_center
+			 , ee.emp_default_cost_center
 			 , ee.vehicle_type
 			 , ee.distance_unit_code
 			 , ee.destination_from
