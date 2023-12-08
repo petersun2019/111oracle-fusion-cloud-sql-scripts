@@ -18,7 +18,6 @@ Oracle said on an SR thaat the Trx Bus Cat on the Invoice Line's value is based 
 I wanted to investigate that, hence these queries.
 From what I could see though sometimes the Trx Bus Cat was empty on some invoice lines even if it was populated on the PO Shipment
 This was relevant as some Tax Box calculations were based on the value in the Trx Bus Cat - so if it was empty sometimes, exceptions were returned in the Tax Box Prepapartion Report
-
 */
 
 -- ##############################################################
@@ -161,8 +160,8 @@ This was relevant as some Tax Box calculations were based on the value in the Tr
 			 , max(to_char(aia.creation_date, 'yyyy-mm-dd hh24:mi:ss')) created_inv_max
 			 , min('#' || aia.invoice_num) min_inv_num
 			 , max('#' || aia.invoice_num) max_inv_num
-			 , min('#' || aia.invoice_id) min_inv_id
-			 , max('#' || aia.invoice_id) max_inv_id
+			 , min(aia.invoice_id) min_inv_id
+			 , max(aia.invoice_id) max_inv_id
 			 , count(distinct aia.invoice_id) inv_count
 			 , count(aila.line_number) inv_line_count
 		  from po_headers_all pha

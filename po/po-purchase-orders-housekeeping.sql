@@ -106,7 +106,7 @@ Same as above but also includes requisition linked to the Purchase Order.
 					 , prha.requisition_number req
 					 , prha.creation_date req_created
 					 , prha.document_status req_status
-					 , '#' || prha.requisition_header_id req_header_id
+					 , prha.requisition_header_id req_header_id
 					 , prha.created_by req_created_by
 					 , bu.bu_name bu
 					 , nvl(case when (plla.quantity is null and pla.unit_price is null) then 'AMOUNT'
@@ -183,7 +183,7 @@ Same as above but also includes requisition linked to the Purchase Order.
 					 , prha.requisition_number req
 					 , prha.creation_date req_created
 					 , prha.document_status req_status
-					 , '#' || prha.requisition_header_id req_header_id
+					 , prha.requisition_header_id req_header_id
 					 , prha.created_by req_created_by
 					 , bu.bu_name bu
 					 , nvl(case when (plla.quantity is null and pla.unit_price is null) then 'AMOUNT'

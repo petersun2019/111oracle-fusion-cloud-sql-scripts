@@ -16,7 +16,7 @@ Queries:
 -- ##############################################################
 
 		select prha.requisition_number req
-			 , '#' || prha.requisition_header_id requisition_header_id
+			 , prha.requisition_header_id
 			 , prha.approved_date req_approved_date
 			 , prha.document_status req_status
 			 , to_char(prha.approved_date, 'yyyy-mm-dd hh24:mi:ss') approved_date
@@ -41,7 +41,7 @@ Queries:
 -- ##############################################################
 
 		select pha.segment1 po
-			 , '#' || pha.po_header_id po_header_id
+			 , pha.po_header_id
 			 , to_char(pha.creation_date, 'yyyy-mm-dd hh24:mi:ss') po_created
 			 , pha.created_by po_created_by
 			 , flv_po_status.meaning po_status

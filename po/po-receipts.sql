@@ -11,8 +11,9 @@ Queries:
 -- RECEIPTS JOINED TO PO TABLE 1
 -- RECEIPTS JOINED TO PO TABLE 2
 -- RECEIPTS JOINED TO PO HEADERS AND LINES
--- AP INVOICE > PO > RECEIPT (MATCH TO PO)
--- AP INVOICE > PO > RECEIPT (MATCH TO PO)
+-- AP INVOICE > PO > RECEIPT (MATCH TO PO) 1
+-- AP INVOICE > PO > RECEIPT (MATCH TO PO) 2
+-- REQ -> PO -> RECEIPT -> ID DATA DISTINCT
 
 */
 
@@ -42,7 +43,7 @@ Queries:
 -- RECEIPTS JOINED TO PO TABLE 1
 -- ##############################################################
 
-		select '#' || rsh.shipment_header_id shipment_header_id
+		select rsh.shipment_header_id
 			 , pha.segment1 po
 			 , bu.bu_name
 			 , psv.vendor_name
@@ -50,9 +51,9 @@ Queries:
 			 , to_char(rsh.creation_date, 'yyyy-mm-dd') gl_date
 			 , to_char(rsh.creation_date, 'yyyy-mm-dd hh24:mi:ss') receipt_created
 			 , rsh.created_by receipt_created_by
-			 , '#' || rt.quantity receipt_qty
+			 , rt.quantity receipt_qty
 			 , '####################'
-			 , '#' || rt.transaction_id transaction_id
+			 , rt.transaction_id
 			 , to_char(rt.creation_date, 'yyyy-mm-dd hh24:mi:ss') rx_trx_created
 			 , to_char(rt.transaction_date, 'yyyy-mm-dd') transaction_date
 			 , rt.amount receipt_amount
@@ -60,8 +61,10 @@ Queries:
 			 , rt.destination_type_code receipt_destination
 			 , rt.currency_code receipt_currency
 			 , rt.currency_conversion_type receipt_curr_conv_type
-			 , '#' || rt.currency_conversion_rate receipt_conv_rate
-			 , rt.currency_conversion_date receipt_conv_date
+			 , rt.currency_conversion_rate
+			 , to_char(rt.currency_conversion_date, 'yyyy-mm-dd') receipt_conv_date
+			 , to_char(rsh.last_update_date, 'yyyy-mm-dd hh24:mi:ss') rsh_updated
+			 , to_char(rt.last_update_date, 'yyyy-mm-dd hh24:mi:ss') rt_updated
 		  from rcv_shipment_headers rsh
 		  join rcv_transactions rt on rt.shipment_header_id = rsh.shipment_header_id
 		  join po_headers_all pha on rt.po_header_id = pha.po_header_id
@@ -69,11 +72,10 @@ Queries:
 		  join fun_all_business_units_v bu on bu.bu_id = pha.req_bu_id
 		 where 1 = 1
 		   and 1 = 1
-	  order by to_char(rsh.creation_date, 'yyyy-mm-dd hh24:mi:ss') desc
 
 -- ##############################################################
 
-		select '#' || rsh.shipment_header_id shipment_header_id_
+		select rsh.shipment_header_id shipment_header_id_
 			 , pha.segment1 po_
 			 , rsh.receipt_num rx_num
 			 , '####################'
@@ -85,11 +87,10 @@ Queries:
 		  join fun_all_business_units_v bu on bu.bu_id = pha.req_bu_id
 		 where 1 = 1
 		   and 1 = 1
-	  order by to_char(rsh.creation_date, 'yyyy-mm-dd hh24:mi:ss') desc
 
 -- ##############################################################
 
-		select '#' || rsh.shipment_header_id shipment_header_id_
+		select rsh.shipment_header_id
 			 , pha.segment1 po_
 			 , rsh.receipt_num rx_num
 			 , rsh.created_by
@@ -101,7 +102,7 @@ Queries:
 		  join fun_all_business_units_v bu on bu.bu_id = pha.req_bu_id
 		 where 1 = 1
 		   and 1 = 1
-	  group by '#' || rsh.shipment_header_id
+	  group by rsh.shipment_header_id
 			 , pha.segment1
 			 , rsh.receipt_num
 			 , rsh.created_by
@@ -128,7 +129,7 @@ Queries:
 			 , rsh.shipment_header_id
 			 , to_char(rsh.creation_date, 'yyyy-mm-dd hh24:mi:ss') receipt_created
 			 , rsh.created_by receipt_created_by
-			 , '#' || rt.quantity receipt_qty
+			 , rt.quantity receipt_qty
 			 , rt.source_doc_quantity
 			 , rt.quantity_billed
 			 , pla.unit_price po_line_unit_price
@@ -152,7 +153,7 @@ Queries:
 		   and 1 = 1
 
 -- ##############################################################
--- AP INVOICE > PO > RECEIPT (MATCH TO PO)
+-- AP INVOICE > PO > RECEIPT (MATCH TO PO) 1
 -- ##############################################################
 
 /*
@@ -162,7 +163,7 @@ However, if 10 receipts done against that PO, the SQL will return 10 rows, since
 When the PO match is set as "MATCH TO PO" the Invoice will not get the RCV_TRANSACTION_ID
 */
 
-		select '#' || aia.invoice_id invoice_id
+		select aia.invoice_id
 			 , '#' || aia.invoice_num invoice_num
 			 , hou.name operating_unit
 			 , aia.invoice_type_lookup_code
@@ -198,7 +199,7 @@ When the PO match is set as "MATCH TO PO" the Invoice will not get the RCV_TRANS
 	 left join rcv_shipment_headers rsh on rt.shipment_header_id = rsh.shipment_header_id
 		 where 1 = 1
 		   and 1 = 1
-	  group by '#' || aia.invoice_id
+	  group by aia.invoice_id
 			 , '#' || aia.invoice_num
 			 , hou.name
 			 , aia.invoice_type_lookup_code
@@ -219,7 +220,7 @@ When the PO match is set as "MATCH TO PO" the Invoice will not get the RCV_TRANS
 			 , rsh.receipt_num
 
 -- ##############################################################
--- AP INVOICE > PO > RECEIPT (MATCH TO PO)
+-- AP INVOICE > PO > RECEIPT (MATCH TO PO) 2
 -- ##############################################################
 
 /*
@@ -249,7 +250,7 @@ Check field PO Matching Option, and it will either be set to "PO" or to "Receipt
 In which case can join rcv_transactions to AP Invoice Distribution: rt.transaction_id = aida.RCV_TRANSACTION_ID
 */
 
-		select '#' || aia.invoice_id invoice_id
+		select aia.invoice_id
 			 , '#' || aia.invoice_num invoice_num
 			 , hou.name operating_unit
 			 , aia.invoice_type_lookup_code
@@ -286,7 +287,7 @@ In which case can join rcv_transactions to AP Invoice Distribution: rt.transacti
 		  -- join rcv_shipment_lines rsl on rsl.shipment_header_id = rsh.shipment_header_id and rsl.po_header_id = pha.po_header_id and rsl.po_line_id = pla.po_line_id and rsl.po_line_location_id = plla.line_location_id and rsl.po_distribution_id = pda.po_distribution_id and rsl.rcv_shipment_line_id = aila.rcv_shipment_line_id
 		 where 1 = 1
 		   and 1 = 1
-	  group by '#' || aia.invoice_id
+	  group by aia.invoice_id
 			 , '#' || aia.invoice_num
 			 , hou.name
 			 , aia.invoice_type_lookup_code
@@ -305,3 +306,47 @@ In which case can join rcv_transactions to AP Invoice Distribution: rt.transacti
 			 , to_char(pha.creation_date, 'yyyy-mm-dd hh24:mi:ss')
 			 , to_char(rsh.creation_date, 'yyyy-mm-dd hh24:mi:ss')
 			 , rsh.receipt_num
+
+-- ##############################################################
+-- REQ -> PO -> RECEIPT -> ID DATA DISTINCT
+-- ##############################################################
+
+		select distinct prha.requisition_number req
+			 , to_char(prha.creation_date,'yyyy-mm-dd hh24:mi:ss') req_created
+			 , prha.created_by req_created_by
+			 , pha.segment1 po
+			 , pha.document_creation_method
+			 , to_char(pha.creation_date,'yyyy-mm-dd hh24:mi:ss') po_created
+			 , pha.created_by po_created_by
+			 , rsh.receipt_num
+			 , to_char(rsh.creation_date, 'yyyy-mm-dd hh24:mi:ss') receipt_created
+			 , rsh.created_by receipt_created_by
+			 , ppav.segment1 project
+			 , to_char(pda.pjc_expenditure_item_date, 'yyyy-mm-dd') pjc_expenditure_item_date
+			 , exp_type.expenditure_type_name exp_type
+			 , '#' id_info____________
+			 , prha.requisition_header_id
+			 , pha.po_header_id
+			 , rsh.shipment_header_id
+			 , rt.transaction_id
+			 , pla.po_line_id
+			 , prda.requisition_line_id
+			 , prda.distribution_id req_dist_id
+			 , pda.po_distribution_id
+		  from rcv_shipment_headers rsh
+		  join rcv_transactions rt on rt.shipment_header_id = rsh.shipment_header_id
+		  join po_headers_all pha on rt.po_header_id = pha.po_header_id
+		  join po_lines_all pla on rt.po_line_id = pla.po_line_id
+		  join po_distributions_all pda on pla.po_line_id = pda.po_line_id
+		  join po_line_locations_all plla on pla.po_line_id = plla.po_line_id
+		  join por_req_distributions_all prda on pda.req_distribution_id = prda.distribution_id
+		  join por_requisition_lines_all prla on prla.requisition_line_id = prda.requisition_line_id
+		  join por_requisition_headers_all prha on prha.requisition_header_id = prla.requisition_header_id
+		  join pjf_projects_all_vl ppav on pda.pjc_project_id = ppav.project_id
+		  join pjf_exp_types_tl exp_type on pda.pjc_expenditure_type_id = exp_type.expenditure_type_id and exp_type.language = userenv('lang')
+		 where 1 = 1
+		   and pla.item_id is not null
+		   and exp_type.expenditure_type_name = 'MATERIALS'
+		   -- and ppav.segment1 = '14080'
+		   and 1 = 1
+	order by to_char(rsh.creation_date, 'yyyy-mm-dd hh24:mi:ss') desc

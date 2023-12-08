@@ -10,7 +10,7 @@ URL: https://github.com/throwing-cheese/oracle-fusion-cloud-sql-scripts
 -- ##############################################################
 
 		select to_char(paa.creation_date, 'yyyy-mm-dd hh24:mi:ss') agent_created
-			 , '#' || papf.person_id person_id
+			 , papf.person_id
 			 , papf.person_number
 			 , ppnf.full_name
 			 , ppnf.display_name

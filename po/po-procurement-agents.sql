@@ -30,7 +30,7 @@ https://www.oracleappsdna.com/2020/05/sql-query-to-get-list-of-procurement-agent
 		  join per_users pu on pu.person_id = ppf.person_id
 		  join hr_organization_units hou on hou.organization_id = paa.prc_bu_id
 		 where 1 = 1
-		   -- and lower(pu.username) like '%user%'
+		   -- and lower(pu.username) like '%fire%'
 		   and paa.access_action_code = 'MANAGE_PURCHASE_ORDERS'
 		   and paa.access_others_level_code = 'FULL'
 		   and 1 = 1
