@@ -20,7 +20,7 @@ https://cloudcustomerconnect.oracle.com/posts/104def26eb?commentid=382104#382104
 */
 
 		select hov.name
-			 , '#' || hov.organization_id org_id
+			 , hov.organization_id org_id
 			 , to_char(hov.effective_start_date, 'yyyy-mm-dd') effective_start_date
 			 , to_char(hov.effective_end_date, 'yyyy-mm-dd') effective_end_date
 			 , hov.classification_code
@@ -40,7 +40,7 @@ https://cloudcustomerconnect.oracle.com/posts/104def26eb?commentid=382104#382104
 -- ##############################################################
 
 		select hov.name
-			 , '#' || hov.organization_id org_id
+			 , hov.organization_id org_id
 			 , to_char(hov.effective_start_date, 'yyyy-mm-dd') effective_start_date
 			 , to_char(hov.effective_end_date, 'yyyy-mm-dd') effective_end_date
 			 , hov.status

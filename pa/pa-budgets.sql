@@ -27,9 +27,9 @@ Queries:
 -- ##############################################################
 
 		select ppav.segment1 proj
-			 -- , ppav.name
-			 -- , ppav.description
-			 , '#' || ppav.project_id project_id
+			 , ppav.name
+			 , ppav.description
+			 , ppav.project_id
 			 , to_char(ppav.creation_date, 'YYYY-MM-DD HH24:MI:SS') proj_created
 			 , ppav.created_by project_created_by
 			 , ppav.pm_product_code
@@ -37,7 +37,7 @@ Queries:
 			 , pptt.project_type
 			 , ppst.project_status_name project_status
 			 , '#################'
-			 , '#' || ppvb.plan_version_id plan_version_id
+			 , ppvb.plan_version_id
 			 , ppvb.object_version_number 
 			 , pptl.name budget_type
 			 , ppvt.version_name
@@ -113,8 +113,8 @@ Queries:
 -- ##############################################################
 
 		select ppav.segment1 proj
-			 -- , ppav.name
-			 -- , ppav.description
+			 , ppav.name
+			 , ppav.description
 			 , ppav.creation_date proj_created
 			 , ppav.created_by project_created_by
 			 , ppav.pm_product_code
@@ -318,7 +318,7 @@ Queries:
 -- ##############################################################
 
 			select ppav.segment1 proj
-				 , '#' || ppav.project_id project_id
+				 , ppav.project_id
 				 , ppvv.version_name
 				 , ppvv.object_version_number
 				 , ppvv.pfc_raw_cost

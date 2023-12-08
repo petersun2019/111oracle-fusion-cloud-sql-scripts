@@ -30,7 +30,7 @@ select * from pjf_tasks_v where project_id = 123456
 -- PROJECT HEADERS
 -- ##############################################################
 
-		select '#' || ppav.project_id project_id
+		select ppav.project_id
 			 , ppav.segment1
 			 , ppav.name
 			 , ppav.description
@@ -61,7 +61,7 @@ select * from pjf_tasks_v where project_id = 123456
 -- ##############################################################
 
 		select ppav.segment1 proj_number
-			 , '#' || ppav.project_id project_id
+			 , ppav.project_id
 			 , ppav.name proj_name
 			 , ppav.project_status_code
 			 , ppst.project_status_name project_status
@@ -73,8 +73,8 @@ select * from pjf_tasks_v where project_id = 123456
 			 , ppav.last_updated_by project_updated_by
 			 , to_char(ppav.start_date, 'yyyy-mm-dd') project_start_date
 			 , to_char(ppav.completion_date, 'yyyy-mm-dd') project_completion_date
-			 , '#' || ptv.task_number task_number
-			 , '#' || ptv.task_id task_id
+			 , ptv.task_number
+			 , ptv.task_id
 			 , ptv.task_name
 			 , flv_service_type.meaning task_service_type
 			 , to_char(ptv.creation_date, 'yyyy-mm-dd hh24:mi:ss') task_created
@@ -107,7 +107,7 @@ https://community.oracle.com/message/15591664
 			 , ppst.project_status_name project_status
 			 , haou.name org
 			 , pptt.project_type
-			 , '#' || ptv.task_number task_number
+			 , ptv.task_number
 			 , ptv.task_name
 			 , ptv.task_id
 			 , flv_service_type.meaning task_service_type
@@ -148,7 +148,7 @@ https://community.oracle.com/message/15591664
 -- ##############################################################
 
 		select ppav.segment1 proj_number
-			 , '#' || ppav.project_id project_id
+			 , ppav.project_id
 			 , ppav.name proj_name
 			 , ppav.project_status_code
 			 , ppst.project_status_name project_status
@@ -163,7 +163,7 @@ https://community.oracle.com/message/15591664
 		 where 1 = 1
 		   and 1 = 1
 	  group by ppav.segment1
-			 , '#' || ppav.project_id
+			 , ppav.project_id
 			 , ppav.name
 			 , ppav.project_status_code
 			 , ppst.project_status_name

@@ -106,10 +106,11 @@ When Transfer is done, transferring Raw Cost from 1 Project to another - this ha
 
 */
 
-		select '#' || peia.expenditure_item_id item_id
+		select peia.expenditure_item_id item_id
 			 , pptt.project_type
 			 , pptb.burden_cost_flag -- burdening only happens for project types where the burden cost flag = Y
 			 , ppav.segment1 proj
+			 , ppav.attribute7 proj_attrib_7
 			 , peia.system_linkage_function cost_fcn
 			 , pslt_fcn.meaning cost_fcn_meaning
 			 , peia.src_system_linkage_function src_fcn -- populated for burden transactions
@@ -132,6 +133,7 @@ When Transfer is done, transferring Raw Cost from 1 Project to another - this ha
 			 , haou_exp.name expenditure_org
 			 , ptst.user_transaction_source trx_source
 			 , petl.expenditure_type_name exp_type
+			 , petb.attribute1 exp_type_attrib_1
 			 , pect.expenditure_category_name
 			 , ptdet.doc_entry_name exp_document_entry
 			 , ptdt.document_name exp_document
@@ -189,15 +191,15 @@ When Transfer is done, transferring Raw Cost from 1 Project to another - this ha
 			 , pcdla.transfer_status_code
 			 , pcdla.acct_source_code
 			 , '#' id_info___
-			 , '#' || peia.adjusted_expenditure_item_id adjusted_expenditure_item_id -- The identifier of the expenditure item adjusted by this expenditure item. Adjustment items are entered by users with negative amounts to fully reverse an item, or are system created to reverse a transferred item.	
-			 , '#' || peia.transferred_from_exp_item_id transferred_from_exp_item_id -- The identifier of the expenditure item from which this expenditure item originated. This expenditure item is the new item that is system created when an item is transferred and is charged to the new project/task	
-			 , '#' || peia.source_expenditure_item_id source_expenditure_item_id -- Stores the transaction number of the raw cost for which the separate burden cost was created. This is populated for burden cost transactions only if burden grouping is configured in the Project Process Configurator to group burden costs by transaction number.	
-			 , '#' || peia.burden_sum_dest_run_id burden_sum_dest_run_id -- Burden summarization run id. If populated, means Exp Item is created via Generate Burden Costs. Id will identify all the expenditure items created by burden component summarization process. This is used to identify all the Cost distribution lines summarized together to create expenditure item	
-			 , '#' || pcdla.ind_compiled_set_id ind_compiled_set_id -- The identifier of the compiled set which is used to calculate the burden cost
-			 , '#' || pcdla.burden_sum_source_run_id burden_sum_source_run_id -- If populated, means this is a Raw Cost Exp Item which has been Burdened. The same ID appears in the burden_sum_dest_run_id field on the exp item table for the Exp Item for the Burden Cost. This will identify group of Cost Distribution Lines that were summarized to create summarized burden component expenditure items(EI). The same run_id will be populated in EI table to identify all EI's created during a run.
-			 , '#' || pcdla.acct_event_id acct_event_id
-			 , '#' || pcdla.request_id cost_item_request_id
-			 , '#' || pcdla.interface_id interface_id
+			 , peia.adjusted_expenditure_item_id -- The identifier of the expenditure item adjusted by this expenditure item. Adjustment items are entered by users with negative amounts to fully reverse an item, or are system created to reverse a transferred item.	
+			 , peia.transferred_from_exp_item_id -- The identifier of the expenditure item from which this expenditure item originated. This expenditure item is the new item that is system created when an item is transferred and is charged to the new project/task	
+			 , peia.source_expenditure_item_id -- Stores the transaction number of the raw cost for which the separate burden cost was created. This is populated for burden cost transactions only if burden grouping is configured in the Project Process Configurator to group burden costs by transaction number.	
+			 , peia.burden_sum_dest_run_id -- Burden summarization run id. If populated, means Exp Item is created via Generate Burden Costs. Id will identify all the expenditure items created by burden component summarization process. This is used to identify all the Cost distribution lines summarized together to create expenditure item	
+			 , pcdla.ind_compiled_set_id -- The identifier of the compiled set which is used to calculate the burden cost
+			 , pcdla.burden_sum_source_run_id -- If populated, means this is a Raw Cost Exp Item which has been Burdened. The same ID appears in the burden_sum_dest_run_id field on the exp item table for the Exp Item for the Burden Cost. This will identify group of Cost Distribution Lines that were summarized to create summarized burden component expenditure items(EI). The same run_id will be populated in EI table to identify all EI's created during a run.
+			 , pcdla.acct_event_id
+			 , pcdla.request_id cost_item_request_id
+			 , pcdla.interface_id
 		  from pjc_exp_items_all peia
 		  join pjc_cost_dist_lines_all pcdla on pcdla.project_id = peia.project_id and pcdla.expenditure_item_id = peia.expenditure_item_id
 	 left join pjf_projects_all_vl ppav on peia.project_id = ppav.project_id
@@ -257,8 +259,8 @@ When Transfer is done, transferring Raw Cost from 1 Project to another - this ha
 -- EXPENDITURE ITEMS 2 - WITH ERRORS AND COMMENTS AND PERIODS
 -- ##############################################################
 
-		select '#' || peia.expenditure_item_id item_id
-			 -- , pptt.project_type
+		select peia.expenditure_item_id item_id
+			 , pptt.project_type
 			 , ppav.segment1 proj_number
 			 , to_char(peia.expenditure_item_date, 'yyyy-mm-dd') exp_item_date
 			 , pha.segment1 po
@@ -268,9 +270,9 @@ When Transfer is done, transferring Raw Cost from 1 Project to another - this ha
 			 , peia.request_id
 			 , ppst.project_status_name project_status
 			 , ptv.task_number task
-			 -- , ptv.task_id
-			 -- , ptv.top_task_id
-			 -- , ptv.parent_task_id
+			 , ptv.task_id
+			 , ptv.top_task_id
+			 , ptv.parent_task_id
 			 , flv_rev.meaning revenue_status
 			 , haou.name project_org
 			 , haou_exp.name expenditure_org
@@ -297,10 +299,10 @@ When Transfer is done, transferring Raw Cost from 1 Project to another - this ha
 			 , peia.denom_currency_code
 			 , peia.acct_currency_code
 			 , peia.unit_of_measure uom
-			 , '#' || peia.burden_sum_dest_run_id burden_sum_dest_run_id
-			 , '#' || peia.adjusted_expenditure_item_id adjusted_expenditure_item_id
+			 , peia.burden_sum_dest_run_id
+			 , peia.adjusted_expenditure_item_id
 			 , peia.net_zero_adjustment_flag -- if y revenue will never be recognised
-			 , '#' || peia.transferred_from_exp_item_id transferred_from_exp_item_id
+			 , peia.transferred_from_exp_item_id
 		  from pjc_exp_items_all peia
 	 left join pjf_projects_all_vl ppav on peia.project_id = ppav.project_id
 	 left join pjf_tasks_v ptv on ppav.project_id = ptv.project_id and peia.task_id = ptv.task_id
@@ -434,13 +436,13 @@ When Transfer is done, transferring Raw Cost from 1 Project to another - this ha
 			 , rsh.receipt_num
 			 , to_char(rsh.creation_date, 'yyyy-mm-dd hh24:mi:ss') receipt_created
 			 , rsh.created_by receipt_created_by
-			 , '#' || rt.quantity receipt_qty
+			 , rt.quantity receipt_qty
 			 , rt.amount receipt_amount
 			 , rt.transaction_type receipt_type
 			 , rt.destination_type_code receipt_destination
 			 , rt.currency_code receipt_currency
 			 , rt.currency_conversion_type receipt_curr_conv_type
-			 , '#' || rt.currency_conversion_rate receipt_conv_rate
+			 , rt.currency_conversion_rate receipt_conv_rate
 			 , rt.currency_conversion_date receipt_conv_date
 		  from pjf_projects_all_vl ppav
 		  join pjf_project_types_tl pptt on pptt.project_type_id = ppav.project_type_id and pptt.language = userenv('lang')
@@ -702,7 +704,7 @@ When Transfer is done, transferring Raw Cost from 1 Project to another - this ha
 -- DOCUMENT ENTRIES
 -- ##############################################################
 
-		select '#' || doc_entry_id doc_entry_id
+		select doc_entry_id
 			 , doc_entry_name
 			 , description
 			 , source_lang
@@ -754,8 +756,8 @@ When Transfer is done, transferring Raw Cost from 1 Project to another - this ha
 			 , max(to_char(peia.creation_date, 'yyyy-mm-dd hh24:mi:ss')) max_creation_date 
 			 , min(to_char(peia.expenditure_item_date, 'yyyy-mm-dd')) min_item_date
 			 , max(to_char(peia.expenditure_item_date, 'yyyy-mm-dd')) max_item_date
-			 , min('#' || peia.expenditure_item_id) min_item_id
-			 , max('#' || peia.expenditure_item_id) max_item_id
+			 , min(peia.expenditure_item_id) min_item_id
+			 , max(peia.expenditure_item_id) max_item_id
 			 , min(peia.request_id) min_request_id
 			 , max(peia.request_id) max_request_id
 			 , count(*) ct
@@ -1262,10 +1264,6 @@ with overheads as
 -- COUNT BY SYSTEM_LINKAGE_FUNCTION AND BUDGETARY_CONTROL_VAL_STATUS
 -- ##############################################################
 
--- ##############################################################
--- COUNT BY SYSTEM_LINKAGE_FUNCTION AND BUDGETARY_CONTROL_VAL_STATUS
--- ##############################################################
-
 		select peia.system_linkage_function cost_fcn
 			 , pslt_fcn.meaning cost_fcn_meaning
 			 , pslt_src.meaning src_fcn
@@ -1328,8 +1326,8 @@ with overheads as
 			 , max(to_char(peia.creation_date, 'yyyy-mm-dd hh24:mi:ss')) max_creation_date 
 			 , min(to_char(peia.expenditure_item_date, 'yyyy-mm-dd')) min_item_date
 			 , max(to_char(peia.expenditure_item_date, 'yyyy-mm-dd')) max_item_date
-			 , min('#' || peia.expenditure_item_id) min_item_id
-			 , max('#' || peia.expenditure_item_id) max_item_id
+			 , min(peia.expenditure_item_id) min_item_id
+			 , max(peia.expenditure_item_id) max_item_id
 			 , min(peia.request_id) min_request_id
 			 , max(peia.request_id) max_request_id
 			 , count(*) ct

@@ -3,13 +3,19 @@ File Name: pa-transaction-sources.sql
 Version: Oracle Fusion Cloud
 Author: Throwing Cheese
 URL: https://github.com/throwing-cheese/oracle-fusion-cloud-sql-scripts
+
+Queries:
+
+-- PA TRANSACTION SOURCES
+-- PA TRANSACTION SOURCES - DOCUMENTS
+
 */
 
 -- ##############################################################
 -- PA TRANSACTION SOURCES
 -- ##############################################################
 
-		select '#' || ptsb.transaction_source_id trx_src_id
+		select ptsb.transaction_source_id
 			 , ptsb.transaction_source trx_src
 			 , ptst.user_transaction_source trx_src_name
 			 , ptst.description trx_src_description
@@ -40,7 +46,7 @@ https://docs.oracle.com/en/cloud/saas/project-management/23b/oedpp/pjftxndocumen
 
 		select ptdt.document_name
 			 , ptdb.document_code
-			 , '#' || ptdb.document_id document_id
+			 , ptdb.document_id
 			 , to_char(ptdb.creation_date, 'yyyy-mm-dd hh24:mi:ss') doc_created
 			 , ptdb.created_by doc_created_by
 			 , to_char(ptdb.last_update_date, 'yyyy-mm-dd hh24:mi:ss') doc_updated

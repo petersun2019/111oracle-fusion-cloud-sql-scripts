@@ -94,4 +94,5 @@ Queries:
 		  join pjf_expend_typ_sys_links petsl on petsl.expenditure_type_id = petb.expenditure_type_id
 		  join pjf_system_linkages_tl pslt on pslt.function = petsl.system_linkage_function and pslt.language = userenv('lang')
 		 where 1 = 1
+		   and petl.expenditure_type_name = 'MATERIALS'
 		   and 1 = 1

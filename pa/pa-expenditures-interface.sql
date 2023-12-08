@@ -107,7 +107,7 @@ For this template, enter LABOR.
 			 , ptst.user_transaction_source trx_source
 			 , petl.expenditure_type_name
 			 , ptxa.document_name
-			 , '#' || ptxa.document_id document_id
+			 , ptxa.document_id
 			 , ptdet.doc_entry_name exp_document_entry
 			 , ptdt.document_name exp_document
 			 , ptxa.batch_name
@@ -120,7 +120,7 @@ For this template, enter LABOR.
 			 , ptxa.project_burdened_cost
 			 , replace(replace(ptxa.expenditure_comment,chr(10),' '),chr(13),' ') expenditure_comment
 			 , ptxa.transaction_status_code
-			 , '#' || ptxa.orig_transaction_reference orig_transaction_reference
+			 , ptxa.orig_transaction_reference
 			 , ptxa.user_transaction_source
 			 , ptxa.denom_currency_code
 			 , ptxa.acct_currency_code
@@ -170,7 +170,7 @@ https://cloudcustomerconnect.oracle.com/posts/c7c8591753
 			 , petl.expenditure_type_name
 			 , haou.name exp_org
 			 , ptxa.document_name
-			 , '#' || ptxa.document_id document_id
+			 , ptxa.document_id
 			 , ptdet.doc_entry_name exp_document_entry
 			 , ptdt.document_name exp_document
 			 , ptxa.batch_name
