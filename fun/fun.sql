@@ -4,8 +4,6 @@ Version: Oracle Fusion Cloud
 Author: Throwing Cheese
 URL: https://github.com/throwing-cheese/oracle-fusion-cloud-sql-scripts
 
-https://docs.oracle.com/en/cloud/saas/financials/22d/oedmf/funinerroractions-25587.html#funinerroractions-25587
-
 Queries:
 
 -- INTERCOMPANY TABLE DUMPS
@@ -13,6 +11,7 @@ Queries:
 -- INTERCOMPANY BALANCING RULES
 -- FUN_BAL_INTER_ACCOUNTS_ADDL
 
+https://docs.oracle.com/en/cloud/saas/financials/22d/oedmf/funinerroractions-25587.html#funinerroractions-25587
 */
 
 -- ##############################################################
@@ -27,10 +26,10 @@ select * from fun_trx_lines order by creation_date desc
 -- INTERCOMPANY BATCHES, HEADERS, LINES AND DISTRIBUTIONS
 -- ##############################################################
 
-		select '#' || ftb.batch_id batch_id
+		select ftb.batch_id batch_id
 			 , ftb.batch_number
-			 , '#' || ftb.original_batch_id original_batch_id
-			 , '#' || ftb.reversed_batch_id reversed_batch_id
+			 , ftb.original_batch_id
+			 , ftb.reversed_batch_id
 			 , to_char(ftb.creation_date, 'yyyy-mm-dd hh24:mi:ss') batch_created
 			 , to_char(ftb.gl_date, 'yyyy-mm-dd') batch_gl_date
 			 , to_char(ftb.batch_date, 'yyyy-mm-dd') batch_date
@@ -38,22 +37,22 @@ select * from fun_trx_lines order by creation_date desc
 			 , ftb.status batch_status
 			 , ftb.description batch_description
 			 , ftb.note batch_note
-			 , '#' || ftb.from_le_id from_le_id
-			 , '#' || ftb.from_ledger_id from_ledger_id
+			 , ftb.from_le_id
+			 , ftb.from_ledger_id
 			 , ftb.control_total
 			 , ftb.running_total_dr
 			 , ftb.running_total_cr
 			 , ftb.reject_allow_flag
 			 , '#' header_______
-			 , '#' || fth.trx_id trx_id
-			 , '#' || fth.to_le_id to_le_id
-			 , '#' || fth.to_ledger_id to_ledger_id
+			 , fth.trx_id
+			 , fth.to_le_id
+			 , fth.to_ledger_id
 			 , fth.status header_status
 			 , fth.init_amount_dr
 			 , fth.reci_amount_cr
 			 , fth.ar_invoice_number
 			 , fth.invoice_flag
-			 , '#' || fth.approver_id approver_id
+			 , fth.approver_id
 			 , fth.description hdr_descr
 			 , fth.attribute1
 			 , fth.attribute2
@@ -63,7 +62,7 @@ select * from fun_trx_lines order by creation_date desc
 			 , fth.created_by hdr_created_by
 			 , fth.ar_inv_cm_trx_type_id
 			 , '#' lines_______
-			 , '#' || ftl.line_id line_id
+			 , ftl.line_id
 			 , ftl.init_amount_dr line_init_amount_dr
 			 , ftl.init_amount_cr line_init_amount_cr
 			 , to_char(ftl.creation_date, 'yyyy-mm-dd hh24:mi:ss') line_created
@@ -71,7 +70,7 @@ select * from fun_trx_lines order by creation_date desc
 			 , ftl.line_number
 			 , ftl.line_type_flag
 			 , '#' dists_______
-			 , '#' || fdl.dist_id dist_id
+			 , fdl.dist_id
 			 , fdl.dist_number
 			 , fdl.party_type_flag
 			 , fdl.dist_type_flag
