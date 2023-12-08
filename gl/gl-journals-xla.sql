@@ -7,6 +7,8 @@ URL: https://github.com/throwing-cheese/oracle-fusion-cloud-sql-scripts
 XLA_TRANSACTION_ENTITIES.SOURCE_ID_INT_1 column is often used for the main identifier for a transaction such as an AP Invoice, AR Transaction etc.
 So if you have that ID, you can check what SLA data exists for that Transaction by searching against it using the SOURCE_ID_INT_1 column.
 
+Queries:
+
 -- JOURNAL BATCHES AND HEADERS AND LINES AND XLA DATA
 -- WITH XLA_DISTRIBUTION_LINKS
 -- XLA SUMMARY - BY PERIOD
@@ -258,8 +260,8 @@ So if you have that ID, you can check what SLA data exists for that Transaction 
 			 , max(gjh.name) max_jnl_name
 			 , min(gjb.name) min_batch_name
 			 , max(gjb.name) max_batch_name
-			 , min('#' || xte.source_id_int_1) min_id_int_1
-			 , max('#' || xte.source_id_int_1) max_id_int_1
+			 , min(xte.source_id_int_1) min_id_int_1
+			 , max(xte.source_id_int_1) max_id_int_1
 			 , min('#' || xte.transaction_number) min_trx_num
 			 , max('#' || xte.transaction_number) max_trx_num
 			 , count(distinct gjb.je_batch_id) count_jnl_batches
@@ -310,8 +312,8 @@ So if you have that ID, you can check what SLA data exists for that Transaction 
 			 , max(gjh.name) max_jnl_name
 			 , min(gjb.name) min_batch_name
 			 , max(gjb.name) max_batch_name
-			 , min('#' || xte.source_id_int_1) min_id_int_1
-			 , max('#' || xte.source_id_int_1) max_id_int_1
+			 , min(xte.source_id_int_1) min_id_int_1
+			 , max(xte.source_id_int_1) max_id_int_1
 			 , min('#' || xte.transaction_number) min_trx_num
 			 , max('#' || xte.transaction_number) max_trx_num
 			 , count(distinct gjb.je_batch_id) count_jnl_batches

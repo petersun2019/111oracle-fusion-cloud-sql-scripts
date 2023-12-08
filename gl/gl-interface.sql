@@ -29,10 +29,10 @@ Queries:
 -- GL INTERFACE DETAILS 2
 -- ##############################################################
 
-		select '#' || gi.group_id group_id
-			 , '#' || gi.ledger_id ledger_id
-			 , '#' || gi.set_of_books_id set_of_books_id
-			 , '#' || gi.gl_interface_id gl_interface_id
+		select gi.group_id
+			 , gi.ledger_id
+			 , gi.set_of_books_id
+			 , gi.gl_interface_id
 			 , gi.request_id
 			 , to_char(gi.date_created, 'yyyy-mm-dd hh24:mi:ss') date_created
 			 , gi.created_by
@@ -60,7 +60,7 @@ Queries:
 			 , '#' || gi.segment7 seg7
 			 , '#' || gi.segment8 seg8
 			 , gi.segment1 || '.' || gi.segment2 || '.' || gi.segment3 || '.' || gi.segment4 || '.' || gi.segment5 || '.' || gi.segment6 || '.' || gi.segment7 || '.' || gi.segment8 || '.' || gi.segment9 || '.' || gi.segment10 code_combination
-			 , '#' || gcc.code_combination_id ccid
+			 , gcc.code_combination_id
 			 , gcc.enabled_flag enabled
 			 , gcc.summary_flag summary
 			 , gcc.detail_posting_allowed_flag posting_flag

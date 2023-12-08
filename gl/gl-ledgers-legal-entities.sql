@@ -22,15 +22,15 @@ Queries:
 https://rpforacle.blogspot.com/2019/12/legal-entity-and-ledger-relationship-table.html
 */
 
-		select '#' || lep.legal_entity_id legal_entity_id
+		select lep.legal_entity_id
 			 , lep.name legal_entity_name
 			 , reg.registered_name
 			 , gl.name ledger_name
 			 , hro.name ou_name
 			 , hrl.location_code
-			 , '#' || reg.registration_number registration_number
-			 , '#' || hro.set_of_books_id set_of_books_id
-			 , '#' || gl.ledger_id ledger_id
+			 , reg.registration_number
+			 , hro.set_of_books_id
+			 , gl.ledger_id
 		  from xle_entity_profiles lep
 	 left join xle_registrations reg on lep.legal_entity_id = reg.source_id
 	 left join hr_locations_all hrl on hrl.location_id = reg.location_id
@@ -66,9 +66,9 @@ https://appsoracle-abhi.blogspot.com/2018/12/oracle-fusion-business-unit-ledgers
 			 , gl_ledger_le_v.ledger_name as ledger_name
 			 , fssv.set_code
 			 , fssv.set_name
-			 , '#' || gl_ledger_le_v.chart_of_accounts_id chart_of_accounts_id
-			 , '#' || gl_ledger_le_v.legal_entity_id legal_entity_id
-			 , '#' || gl_ledger_le_v.ledger_id ledger_id
+			 , gl_ledger_le_v.chart_of_accounts_id
+			 , gl_ledger_le_v.legal_entity_id
+			 , gl_ledger_le_v.ledger_id
 		  from hr_organization_v hov
 		  join hr_org_details_by_class_v hodbcv on hov.organization_id = hodbcv.organization_id and hov.classification_code = hodbcv.classification_code and hodbcv.org_information_context = hov.classification_code
 		  join gl_ledger_le_v gl_ledger_le_v on hodbcv.org_information2 = gl_ledger_le_v.legal_entity_id and hodbcv.org_information3 = gl_ledger_le_v.ledger_id
@@ -112,21 +112,21 @@ https://appsoracle-abhi.blogspot.com/2018/12/oracle-fusion-business-unit-ledgers
 -- GL LEDGERS - TABLE DUMP
 -- ##############################################################
 
-		select '#' || ledger_id ledger_id
+		select ledger_id
 			 , name
-			 , '#' || short_name short_name
+			 , short_name
 			 , description
 			 , ledger_category_code
 			 , alc_ledger_type_code
 			 , object_type_code
 			 , le_ledger_type_code
 			 , completion_status_code
-			 , '#' || chart_of_accounts_id chart_of_accounts_id
+			 , chart_of_accounts_id
 			 , currency_code
 			 , period_set_name
 			 , accounted_period_type
 			 , first_ledger_period_name
-			 , '#' || ret_earn_code_combination_id ret_earn_code_combination_id
+			 , ret_earn_code_combination_id
 			 , suspense_allowed_flag
 			 , allow_intercompany_post_flag
 			 , track_rounding_imbalance_flag
@@ -143,7 +143,7 @@ https://appsoracle-abhi.blogspot.com/2018/12/oracle-fusion-business-unit-ledgers
 			 , bal_seg_value_option_code
 			 , bal_seg_column_name
 			 , mgt_seg_value_option_code
-			 , '#' || bal_seg_value_set_id bal_seg_value_set_id
+			 , bal_seg_value_set_id
 			 , future_enterable_periods_limit
 			 , ledger_attributes
 			 , latest_opened_period_name

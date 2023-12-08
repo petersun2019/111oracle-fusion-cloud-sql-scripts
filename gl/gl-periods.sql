@@ -31,7 +31,7 @@ Lists Accounting Periods per module, and whether they are open or closed
 
 		select gps.period_name
 			 , gsob.name set_of_books
-			 , '#' || gsob.set_of_books_id set_of_books_id
+			 , gsob.set_of_books_id
 			 , flv_status.meaning || ' - ' || gps.closing_status period_status
 			 , to_char(gps.start_date, 'yyyy-mm-dd') start_date
 			 , to_char(gps.end_date, 'yyyy-mm-dd') end_date
