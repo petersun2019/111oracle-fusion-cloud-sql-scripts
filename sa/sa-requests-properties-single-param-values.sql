@@ -576,7 +576,7 @@ with my_data as (
 		  join request_property rp on rp.requestid = rh.requestid
 		 where 1 = 1
 		   and substr(rh.definition,(instr(rh.definition,'/',-1)+1)) in ('TaxBoxAllocationListing')
-		   and rp.name in ('submit.argument1','submit.argument2','submit.argument3')
+		   and rp.name in ('completionText','submit.argument1','submit.argument2','submit.argument3')
 		   -- and flv_state.meaning = 'Warning'
 		   -- and rh.requestid = 123456
 		   and 1 = 1)
