@@ -31,6 +31,7 @@ If you have any problems with the scripts, [please log an issue](https://github.
 ## Contents
 
 ```
+|   
 +---ap
 |       ap-expenses.sql
 |       ap-idr-options.sql
@@ -107,23 +108,20 @@ If you have any problems with the scripts, [please log an issue](https://github.
 |       inv-transactions.sql
 |       
 +---pa
-|   |   pa-billing-events.sql
-|   |   pa-budgets.sql
-|   |   pa-burden-schedules.sql
-|   |   pa-contracts.sql
-|   |   pa-expenditure-types.sql
-|   |   pa-expenditures-interface.sql
-|   |   pa-expenditures.sql
-|   |   pa-invoices.sql
-|   |   pa-key-members.sql
-|   |   pa-orgs.sql
-|   |   pa-projects.sql
-|   |   pa-settings.sql
-|   |   pa-transaction-sources.sql
-|   |   
-|   \---interface
-|           PjcLaborLines_00005.csv
-|           
+|       pa-billing-events.sql
+|       pa-budgets.sql
+|       pa-burden-schedules.sql
+|       pa-contracts.sql
+|       pa-expenditure-types.sql
+|       pa-expenditures-interface.sql
+|       pa-expenditures.sql
+|       pa-invoices.sql
+|       pa-key-members.sql
+|       pa-orgs.sql
+|       pa-projects.sql
+|       pa-settings.sql
+|       pa-transaction-sources.sql
+|       
 +---po
 |       po-approval-history.sql
 |       po-categories.sql
@@ -137,39 +135,36 @@ If you have any problems with the scripts, [please log an issue](https://github.
 |       po_agents.sql
 |       
 +---sa
-|   |   sa-applications.sql
-|   |   sa-approval-groups.sql
-|   |   sa-attachments.sql
-|   |   sa-audit.sql
-|   |   sa-bpm-history-ap-payment-approvals.sql
-|   |   sa-bpm-history.sql
-|   |   sa-business-units.sql
-|   |   sa-departments-cost-centre-managers.sql
-|   |   sa-flexfields-descriptive.sql
-|   |   sa-flexfields-key.sql
-|   |   sa-flexfields-validation.sql
-|   |   sa-hdl.sql
-|   |   sa-hr-organizations.sql
-|   |   sa-hr-records-bank-details.sql
-|   |   sa-hr-records-skills-quals.sql
-|   |   sa-hr-records.sql
-|   |   sa-lookup-values.sql
-|   |   sa-manager-hierarchy.sql
-|   |   sa-payroll-sla-flow-name.sql
-|   |   sa-profiles.sql
-|   |   sa-purge-job-frequency.sql
-|   |   sa-requests-history.sql
-|   |   sa-requests-properties-single-param-values.sql
-|   |   sa-requests-properties.sql
-|   |   sa-role-mappings.sql
-|   |   sa-roles-data-access.sql
-|   |   sa-roles.sql
-|   |   sa-ucm.sql
-|   |   sa-users.sql
-|   |   
-|   \---archive
-|           oracle_ess_sql_queries.zip
-|           
+|       sa-applications.sql
+|       sa-approval-groups.sql
+|       sa-attachments.sql
+|       sa-audit.sql
+|       sa-bpm-history-ap-payment-approvals.sql
+|       sa-bpm-history.sql
+|       sa-business-units.sql
+|       sa-departments-cost-centre-managers.sql
+|       sa-flexfields-descriptive.sql
+|       sa-flexfields-key.sql
+|       sa-flexfields-validation.sql
+|       sa-hdl.sql
+|       sa-hr-organizations.sql
+|       sa-hr-records-bank-details.sql
+|       sa-hr-records-skills-quals.sql
+|       sa-hr-records.sql
+|       sa-lookup-values.sql
+|       sa-manager-hierarchy.sql
+|       sa-payroll-sla-flow-name.sql
+|       sa-profiles.sql
+|       sa-purge-job-frequency.sql
+|       sa-requests-history.sql
+|       sa-requests-properties-single-param-values.sql
+|       sa-requests-properties.sql
+|       sa-role-mappings.sql
+|       sa-roles-data-access.sql
+|       sa-roles.sql
+|       sa-ucm.sql
+|       sa-users.sql
+|       
 +---xcc
 |       xcc.sql
 |       
