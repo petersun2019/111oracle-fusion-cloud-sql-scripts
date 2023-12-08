@@ -24,7 +24,7 @@ select * from ce_stmt_import_errors where statement_header_int_id = 123456
 -- STATEMENTS - BASIC
 -- ##############################################################
 
-		select '#' || csh.statement_header_id statement_header_id
+		select csh.statement_header_id
 			 , csh.statement_number
 			 , to_char(csh.statement_date, 'yyyy-mm-dd') statement_date
 			 , csh.balance_check
@@ -36,7 +36,7 @@ select * from ce_stmt_import_errors where statement_header_int_id = 123456
 			 , to_char(csh.creation_date, 'yyyy-mm-dd hh24:mi:ss') header_created
 			 , csh.created_by header_created_by
 			 , '#' lines_______
-			 , '#' || csl.statement_line_id statement_line_id
+			 , csl.statement_line_id
 			 , csl.line_number
 			 , csl.trx_type
 			 , csl.trx_code_id
