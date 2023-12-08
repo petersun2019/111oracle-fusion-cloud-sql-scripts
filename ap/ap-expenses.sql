@@ -17,12 +17,12 @@ Queries:
 -- HEADERS SIMPLE
 -- ##############################################################
 
-		select '#' || eer.expense_report_id expense_report_id
+		select eer.expense_report_id
 			 , creation_date
 			 , created_by
-			 , , '#' || person_id person_id
-			 , , '#' || preparer_id preparer_id
-			 , , '#' || assignment_id assignment_id
+			 , person_id
+			 , preparer_id
+			 , assignment_id
 		  from exm_expense_reports
 	  order by expense_report_id desc
 
@@ -35,7 +35,7 @@ Delegation - if delegated, the delegation info is the info (preparer_id) for the
 If, via "manage delegations", they are raising expenses on behalf of someone else, that someone else is the person_id
 */
 
-		select '#' || eer.expense_report_id expense_report_id
+		select eer.expense_report_id
 			 , to_char(eer.creation_date, 'yyyy-mm-dd hh24:mi:ss') expense_created
 			 , eer.created_by expense_created_by
 			 , flv_status.meaning expense_report_status
@@ -47,14 +47,14 @@ If, via "manage delegations", they are raising expenses on behalf of someone els
 			 , eer.expense_report_total
 			 , eer.purpose
 			 , '------ raise'
-			 , '#' || eer.person_id person_id
+			 , eer.person_id
 			 , ppnf_raise.first_name raised_first_name
 			 , ppnf_raise.last_name raised_last_name
 			 , ppnf_raise.full_name raised_full_name
 			 , nvl(pea_raise.email_address, 'no-email') raise_email
 			 , fu_raise.username raise_user
 			 , '------ deleg'
-			 , '#' || , eer.preparer_id preparer_id
+			 , eer.preparer_id
 			 , ppnf_deleg.first_name preparer_first_name
 			 , ppnf_deleg.last_name preparer_last_name
 			 , ppnf_deleg.full_name preparer_full_name
@@ -80,18 +80,18 @@ If, via "manage delegations", they are raising expenses on behalf of someone els
 -- DELEGATIONS
 -- ##############################################################
 
-		select '#' || ed.delegation_id delegation_id
+		select ed.delegation_id
 			 , to_char(ed.creation_date, 'yyyy-mm-dd hh24:mi:ss') deleg_created
 			 , ed.created_by deleg_created_by
 			 , to_char(ed.start_date, 'yyyy-mm-dd') start_date
 			 , '------------ FROM'
-			 , , '#' || ed.delegate_person_id from_person_id
+			 , ed.delegate_person_id from_person_id
 			 , papf_deleg.person_number from_person_number
 			 , ppnf_deleg.full_name from_person_name
 			 , fu_deleg.username from_person_username
 			 , (select max(plu.email) from per_ldap_users plu where plu.user_guid = fu_deleg.user_guid and plu.email like '%@%') to_plu_email
 			 , '------------ TO'
-			 , , '#' || ed.person_id to_person_id
+			 , ed.person_id to_person_id
 			 , papf_person.person_number to_person_number
 			 , ppnf_person.full_name to_person_name
 			 , fu_person.username to_person_username
@@ -115,7 +115,7 @@ If, via "manage delegations", they are raising expenses on behalf of someone els
 -- DISTRIBUTIONS
 -- ##############################################################
 
-		select '#' || eer.expense_report_id expense_report_id
+		select eer.expense_report_id
 			 , to_char(eer.creation_date, 'yyyy-mm-dd hh24:mi:ss') expense_created
 			 , eer.created_by expense_created_by
 			 , to_char(eer.expense_report_date, 'yyyy-mm-dd') expense_report_date
@@ -125,7 +125,7 @@ If, via "manage delegations", they are raising expenses on behalf of someone els
 			 , eer.expense_report_num
 			 , eer.expense_report_total
 			 , eer.purpose
-			 , '#' || eer.person_id person_id
+			 , eer.person_id
 			 , '#' 
 			 , eed.reimbursable_amount
 			 , eed.cost_center

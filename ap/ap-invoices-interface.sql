@@ -72,7 +72,7 @@ select * from ap_interface_rejections where invoice_id in (123,234,345)
 -- HEADERS - DETAILS
 -- ##############################################################
 
-		select '#' || aii.invoice_id inv_id
+		select aii.invoice_id
 			 , '#' || aii.invoice_num invoice_num
 			 , hou.name operating_unit
 			 , aii.invoice_type_lookup_code
@@ -159,7 +159,7 @@ select * from ap_interface_rejections where invoice_id in (123,234,345)
 -- AP_INVOICES_INTERFACE & LINES
 -- ##############################################################
 
-		select '#' || aii.invoice_id inv_id
+		select aii.invoice_id
 			 , '#' || aii.invoice_num invoice_num
 			 , hou.name operating_unit
 			 , aii.invoice_type_lookup_code

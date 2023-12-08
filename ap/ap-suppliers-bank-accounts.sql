@@ -17,7 +17,7 @@ Queries:
 -- SUPPLIER BANK ACCOUNTS 1
 -- ##############################################################
 
-		select '#' || ieb.ext_bank_account_id ext_bank_account_id
+		select ieb.ext_bank_account_id
 			 , '#' supplier________
 			 , ps.segment1 as vendor_num
 			 , hzp.party_name as vendor_name
@@ -27,7 +27,7 @@ Queries:
 			 , prc_bu_id.bu_name procurement_bu
 			 , '#' person_____
 			 , hp_empl.party_number person_party_num
-			 , '#' || hp_empl.party_id person_party_id
+			 , hp_empl.party_id person_party_id
 			 , hp_empl.party_name person_party_name
 			 , '#' bank_acct_____
 			 , ieb.bank_account_name
@@ -45,11 +45,11 @@ Queries:
 			 , to_char(uses.start_date, 'yyyy-mm-dd') bank_acct_assignment_start
 			 , to_char(uses.end_date, 'yyyy-mm-dd') bank_acct_assignment_end
 			 , '#' instrument_____________
-			 , '#' || ipiua.instrument_payment_use_id instrument_payment_use_id
+			 , ipiua.instrument_payment_use_id
 			 , ipiua.payment_flow -- Specifies funds capture or disbursement flow. Values taken from lookup: IBY_PAYMENT_FLOW. DISBURSEMENT = Paying money out, FUNDS_CAPTURE is money coming in
-			 , '#' || ipiua.ext_pmt_party_id ext_pmt_party_id
+			 , ipiua.ext_pmt_party_id
 			 , ipiua.instrument_type
-			 , '#' || ipiua.instrument_id instrument_id
+			 , ipiua.instrument_id
 			 , ipiua.payment_function
 			 , ipiua.order_of_preference
 			 , ipiua.primary_flag
@@ -77,7 +77,7 @@ Queries:
 -- SUPPLIER BANK ACCOUNTS 2 - WITHOUT IBY_PMT_INSTR_USES_ALL TABLE
 -- ##############################################################
 
-		select'#' || ieb.ext_bank_account_id ext_bank_account_id
+		select ieb.ext_bank_account_id
 			 , prc_bu_id.bu_name procurement_bu
 			 , ieb.bank_account_name
 			 , ieb.bank_account_num
@@ -108,7 +108,7 @@ Queries:
 -- ##############################################################
 
 		select ps.segment1 as vendor_num
-			 , '#' || ieb.ext_bank_account_id ext_bank_account_id
+			 , ieb.ext_bank_account_id
 			 , prc_bu_id.bu_name procurement_bu
 			 , hzp.party_name as vendor_name
 			 , pssm.vendor_site_code site
@@ -146,7 +146,7 @@ Queries:
 https://www.oracleappsdna.com/2021/01/oracle-erp-cloud-sql-query-to-find-bank-accounts-associated-with-a-supplier/
 */
 
-		SELECT '#' || ieb.ext_bank_account_id ext_bank_account_id
+		SELECT ieb.ext_bank_account_id
 			 , ieb.bank_account_name
 			 , ieb.bank_account_num
 			 , nvl(ieb.currency_code, 'No Currency Defined') currency_code

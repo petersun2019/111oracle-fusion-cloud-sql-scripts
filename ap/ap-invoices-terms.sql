@@ -16,7 +16,7 @@ Queries:
 -- ##############################################################
 
 		select att.name
-			 , '#' || atb.term_id term_id
+			 , atb.term_id
 			 , atb.enabled_flag
 			 , to_char(atb.creation_date, 'yyyy-mm-dd hh24:mi:ss') creation_date
 			 , atb.created_by

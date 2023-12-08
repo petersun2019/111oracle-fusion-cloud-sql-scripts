@@ -41,7 +41,7 @@ Queries:
 -- ##############################################################
 
 with inv_data as (select '#' || aia.invoice_num invoice_num
-					   , '#' || aila.invoice_id invoice_id
+					   , aila.invoice_id
 					   , to_char(aia.creation_date, 'yyyy-mm-dd hh24:mi:ss') inv_created
 					   , aia.created_by inv_created_by
 					   , decode(ap_invoices_utility_pkg.get_approval_status(aia.invoice_id,aia.invoice_amount,aia.payment_status_flag,aia.invoice_type_lookup_code), 'FULL' , 'Fully Applied', 'NEVER APPROVED' , 'Never Validated', 'NEEDS REAPPROVAL', 'Needs Revalidation', 'CANCELLED' , 'Cancelled', 'UNPAID' , 'Unpaid', 'AVAILABLE' , 'Available', 'UNAPPROVED' , 'Unvalidated', 'APPROVED' , 'Validated', 'PERMANENT' , 'Permanent Prepayment', null) inv_hdr_status
@@ -104,7 +104,7 @@ with inv_data as (select '#' || aia.invoice_num invoice_num
 -- INVOICES WITH MISSING TRX BUSINESS CATEGORY
 -- ##############################################################
 
-		select distinct '#' || aia.invoice_id invoice_id
+		select distinct aia.invoice_id
 			 , '#' || aia.invoice_num invoice_num
 			 , hou.name operating_unit
 			 , aia.invoice_type_lookup_code
@@ -154,7 +154,7 @@ with inv_data as (select '#' || aia.invoice_num invoice_num
 -- INVOICES WITH MISSING TRX BUSINESS CATEGORY - NO PO JOINS
 -- ##############################################################
 
-		select '#' || aia.invoice_id invoice_id
+		select aia.invoice_id
 			 , '#' || aia.invoice_num invoice_num
 			 , hou.name operating_unit
 			 , aia.invoice_type_lookup_code
@@ -202,7 +202,7 @@ with inv_data as (select '#' || aia.invoice_num invoice_num
 -- ##############################################################
 
 		select '#' || aia.invoice_num invoice_num
-			 , '#' || aila.invoice_id invoice_id
+			 , aila.invoice_id
 			 , to_char(aia.creation_date, 'yyyy-mm-dd hh24:mi:ss') inv_created
 			 , aia.source inv_source
 			 , psv.vendor_name supplier

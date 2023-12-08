@@ -27,7 +27,7 @@ Queries:
 -- SUPPLIERS HEADERS 1
 -- ##############################################################
 
-		select '#' || psv.vendor_id vendor_id
+		select psv.vendor_id
 			 , hp.party_name
 			 , ps.segment1 supplier_num
 			 , ps.enabled_flag enabled
@@ -63,7 +63,7 @@ Queries:
 
 		select psv.vendor_name
 			 , psv.segment1 supplier_num
-			 -- , '#' || psv.vendor_id vendor_id
+			 , psv.vendor_id
 			 , prc_bu_id.bu_name procurement_bu
 			 , psv.enabled_flag enabled
 			 , psv.organization_type_lookup_code
@@ -88,10 +88,10 @@ Queries:
 			 , to_char(pssam.inactive_date, 'yyyy-mm-dd') site_inactive_date
 			 , pssam.auto_tax_calc_flag site_calc_tax
 			 , pssam.email_address
-			 , '#' || pssam.party_site_id party_site_id
+			 , pssam.party_site_id
 			 , nvl(pssam.terms_date_basis, 'Not Defined') site_terms_date_basis
 			 , att.name site_payment_terms
-			 , '#' || pssam.vendor_site_id site_id
+			 , pssam.vendor_site_id
 			 , hp.party_number
 			 , hp.party_name
 			 , (select count(*) from ap_invoices_all aia where aia.vendor_id = psv.vendor_id and aia.vendor_site_id = pssam.vendor_site_id) invoice_count
@@ -260,7 +260,6 @@ http://oracleebsgeeks.blogspot.com/2020/08/sql-query-to-get-supplier-contact.htm
 		   -- and iepa.party_site_id is null and iepa.supplier_site_id is null -- disbursement is at supplier level
 		   -- and iepa.ext_payee_id is not null and iepa.party_site_id is not null and iepa.supplier_site_id is null -- disbursement is at address level
 		   -- and substr(iepa.remit_advice_email,1,1) = ' ' or substr(iepa.remit_advice_email,-1,1) = ' ' -- leading or trailing spaces in email address
-		   and 1 = 1
 
 -- ##############################################################
 -- TABLE STORING REMITTANCE INFO LINKED TO A PAYMENT PROCESS PROFILE: IBY_REMIT_ADVICE_SETUP
@@ -381,7 +380,6 @@ VAT Registration Number can be held at Supplier Header and / or Supplier Site le
 */
 
 		select psv.vendor_name
-			 -- , '#' || psv.vendor_id supp_id
 			 , psv.segment1 supplier_num
 			 , psv.enabled_flag supplier_enabled
 			 , psv.organization_type_lookup_code
@@ -396,13 +394,13 @@ VAT Registration Number can be held at Supplier Header and / or Supplier Site le
 			 , zptp_header.tax_classification_code supplier_tax_class_code
 			 , zptp_site.tax_classification_code site_tax_class_code
 			 -- , (select count(*) from ap_invoices_all aia where aia.vendor_id = psv.vendor_id and aia.vendor_site_id = pssam.vendor_site_id) invoice_count
-			 , '#' || hp.party_id party_id
-			 , '#' || psv.vendor_id vendor_id
-			 , '#' || zptp_header.party_id zptp_header_party_id
-			 , '#' || pssam.party_site_id
-			 , '#' || pssam.vendor_site_id
-			 , '#' || zptp_site.party_id zptp_site_party_id
-			 , '#' || zptp_site.party_tax_profile_id party_tax_profile_id
+			 , hp.party_id
+			 , psv.vendor_id vendor_id
+			 , zptp_header.party_id zptp_header_party_id
+			 , pssam.party_site_id
+			 , pssam.vendor_site_id
+			 , zptp_site.party_id zptp_site_party_id
+			 , zptp_site.party_tax_profile_id
 			 , zr_header.tax_regime_code tax_regime_header
 			 , zr_header.registration_number tax_reg_header
 			 , zr_site.tax_regime_code tax_regime_site

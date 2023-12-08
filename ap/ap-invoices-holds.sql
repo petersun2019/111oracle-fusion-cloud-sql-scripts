@@ -21,7 +21,7 @@ Queries:
 
 select * from ap_invoices_all where validation_request_id = 123
 
-		select '#' || aia.invoice_id id
+		select aia.invoice_id
 			 , '#' || aia.invoice_num invoice_num
 			 , pv.vendor_name supplier
 			 , pvsa.vendor_site_code site
@@ -65,7 +65,7 @@ select * from ap_invoices_all where validation_request_id = 123
 
 select * from ap_invoices_all where validation_request_id = 123
 
-		select '#' || aia.invoice_id id
+		select aia.invoice_id
 			 , '#' || aia.invoice_num invoice_num
 			 , pv.vendor_name supplier
 			 , pvsa.vendor_site_code site
@@ -97,7 +97,7 @@ select * from ap_invoices_all where validation_request_id = 123
 			 , '#################' ap_lines_____
 			 , aila.line_number inv_line
 			 , aila.trx_business_category
-			 , '#' || aila.requester_id requester_id
+			 , aila.requester_id
 			 , to_char(aila.creation_date, 'yyyy-mm-dd hh24:mi:ss') line_created
 			 , aila.created_by line_created_by
 			 , to_char(aila.last_update_date, 'yyyy-mm-dd hh24:mi:ss') line_updated
@@ -108,42 +108,8 @@ select * from ap_invoices_all where validation_request_id = 123
 			 , aila.match_type
 			 , aila.amount line_amount
 			 , aila.request_id line_request_id
-			 , '#' || aila.requester_id line_requester_id
+			 , aila.requester_id line_requester_id
 			 , to_char(aila.accounting_date, 'yyyy-mm-dd') line_accounting_date
-		  from ap_invoices_all aia
-		  join ap_invoice_lines_all aila on aia.invoice_id = aila.invoice_id
-		  join poz_suppliers_v pv on aia.vendor_id = pv.vendor_id
-		  join poz_supplier_sites_all_m pvsa on aia.vendor_site_id = pvsa.vendor_site_id
-		  join ap_holds_all aha on aia.invoice_id = aha.invoice_id
-		  join fnd_lookup_values_vl flv on flv.lookup_code = aha.hold_lookup_code and flv.lookup_type = 'HOLD CODE' and flv.view_application_id = 200
-		 where 1 = 1
-		   and 1 = 1
-	  order by to_char(aha.creation_date,'yyyy-mm-dd HH24:MM:SS') desc
-
-		select distinct '#' || aia.invoice_num invoice_num
-			 -- , '#' || aia.invoice_id id
-			 , pv.vendor_name supplier
-			 , pvsa.vendor_site_code site
-			 , aia.invoice_amount hdr_inv_amt
-			 -- , aia.payment_status_flag hdr_payment_status
-			 , aia.amount_paid hdr_amt_paid
-			 , aia.approval_status hdr_apprv_status
-			 , aia.wfapproval_status hdr_wf_status
-			 , to_char(aia.creation_date, 'yyyy-mm-dd HH24:MM:SS') inv_created
-			 , aia.created_by inv_created_by
-			 , to_char(aia.last_update_date, 'yyyy-mm-dd HH24:MM:SS') inv_updated
-			 , aia.last_updated_by inv_updated_by
-			 , to_char(aia.invoice_date, 'yyyy-mm-dd') invoice_date
-			 , flv.meaning hold
-			 -- , aha.hold_reason
-			 -- , aha.hold_date
-			 , to_char(aha.creation_date, 'yyyy-mm-dd HH24:MM:SS') hold_created
-			 , aha.created_by hold_created_by
-			 , to_char(aha.last_update_date, 'yyyy-mm-dd HH24:MM:SS') hold_updated
-			 , aha.last_updated_by hold_updated_by
-			 -- , aha.release_lookup_code
-			 -- , aha.release_reason
-			 , aha.validation_request_id
 		  from ap_invoices_all aia
 		  join ap_invoice_lines_all aila on aia.invoice_id = aila.invoice_id
 		  join poz_suppliers_v pv on aia.vendor_id = pv.vendor_id
@@ -159,21 +125,24 @@ select * from ap_invoices_all where validation_request_id = 123
 -- ##############################################################
 
 		select flv.meaning
-			 , aha.hold_lookup_code
+			 , ahc.hold_lookup_code
 			 , min(to_char(aha.creation_date, 'yyyy-mm-dd hh24:mi:ss')) min_creation
 			 , max(to_char(aha.creation_date, 'yyyy-mm-dd hh24:mi:ss')) max_creation
 			 , min(pv.vendor_name || '___' || pvsa.vendor_site_code) min_supplier_info
 			 , max(pv.vendor_name || '___' || pvsa.vendor_site_code) max_supplier_info
-			 , count(*)
-		  from ap_holds_all aha
-		  join fnd_lookup_values_vl flv on flv.lookup_code = aha.hold_lookup_code and flv.lookup_type = 'HOLD CODE' and flv.view_application_id = 200
-		  join ap_invoices_all aia on aia.invoice_id = aha.invoice_id
-		  join poz_suppliers_v pv on aia.vendor_id = pv.vendor_id
-		  join poz_supplier_sites_all_m pvsa on aia.vendor_site_id = pvsa.vendor_site_id
+			 , min('#' || aia.invoice_num) min_inv_num
+			 , max('#' || aia.invoice_num) max_inv_num
+			 , count(aia.invoice_id) invoice_count
+		  from ap_hold_codes ahc
+		  join fnd_lookup_values_vl flv on flv.lookup_code = ahc.hold_lookup_code and flv.lookup_type = 'HOLD CODE' and flv.view_application_id = 200
+	 left join ap_holds_all aha on aha.hold_lookup_code = ahc.hold_lookup_code
+	 left join ap_invoices_all aia on aia.invoice_id = aha.invoice_id
+	 left join poz_suppliers_v pv on aia.vendor_id = pv.vendor_id
+	 left join poz_supplier_sites_all_m pvsa on aia.vendor_site_id = pvsa.vendor_site_id
 		 where 1 = 1
 		   and 1 = 1
 	  group by flv.meaning
-			 , aha.hold_lookup_code
+			 , ahc.hold_lookup_code
 
 -- ##############################################################
 -- INVOICE - MATCH / HOLD COUNTS BY SOURCE
@@ -231,7 +200,7 @@ select * from ap_invoices_all where validation_request_id = 123
 -- INVOICE - MATCH / HOLD INFORMATION ON INVOICES
 -- ##############################################################
 
-		select distinct aia.invoice_id invoice_id
+		select distinct aia.invoice_id
 			 , '#' || aia.invoice_num invoice_num
 			 , aia.creation_date invoice_created
 			 , psv.vendor_name supplier

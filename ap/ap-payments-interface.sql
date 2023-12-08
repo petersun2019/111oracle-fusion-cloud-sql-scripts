@@ -20,10 +20,10 @@ Queries:
 Import job: Import Payables Payment Requests
 */
 
-		select '#' || apri.payment_request_interface_id payment_request_interface_id
-			 , '#' || apri.invoice_id invoice_id
-			 , '#' || apri.new_invoice_id new_invoice_id
-			 , '#' || apri.load_request_id load_request_id
+		select apri.payment_request_interface_id
+			 , apri.invoice_id
+			 , apri.new_invoice_id
+			 , apri.load_request_id
 			 , '#' || apri.invoice_num
 			 , to_char(apri.creation_date, 'yyyy-mm-dd hh24:mi:ss') int_record_created
 			 , to_char(apri.last_update_date, 'yyyy-mm-dd hh24:mi:ss') int_record_updated
@@ -52,27 +52,27 @@ Import job: Import Payables Payment Requests
 			 , apri.payment_method_code
 			 , apri.terms_name
 			 , apri.invoice_description
-			 , '#' || apri.group_id group_id
+			 , apri.group_id
 			 , apri.line_number
 			 , apri.dist_code_concatenated
-			 , '#' || gcc.code_combination_id ccid
+			 , gcc.code_combination_id ccid
 			 , apri.line_description
 			 , apri.status
-			 , '#' || apri.request_id request_id
+			 , apri.request_id
 			 , apri.last_updated_by
 			 , apri.created_by
-			 , '#' || apri.party_id party_id
-			 , '#' || apri.party_site_id party_site_id
+			 , apri.party_id
+			 , apri.party_site_id
 			 , apri.object_version_number
 			 , apri.location_orig_system_reference
-			 , '#' || apri.batch_id batch_id
+			 , apri.batch_id
 			 , apri.file_record_num
 			 , apri.upload_status
 			 , '###################'
 			 , air.reject_lookup_code
 			 , air.rejection_message
 			 , '####################'
-			 , '#' || aia.invoice_id aia_inv_id
+			 , aia.invoice_id aia_inv_id
 			 , '#' || aia.invoice_num aia_inv_num
 			 -- , (select count(aiaha.invoice_id) from ap_inv_aprvl_hist_all aiaha where aiaha.invoice_id = aia.invoice_id) approval_lines_count
 		  from ap_payment_requests_int apri

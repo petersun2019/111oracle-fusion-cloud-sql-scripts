@@ -50,7 +50,7 @@ Queries:
 -- INVOICE HEADERS - BASIC
 -- ##############################################################
 
-		select aia.invoice_id invoice_id
+		select aia.invoice_id
 			 , '#' || aia.invoice_num invoice_num
 			 , (replace(replace(aia.description,chr(10),''),chr(13),' ')) description
 			 , hou.name operating_unit
@@ -140,8 +140,8 @@ Queries:
 			 , aila.discarded_flag
 			 , aila.original_amount
 			 , aila.original_base_amount
-			 , '#' || aila.request_id line_request_id
-			 , '#' || aila.requester_id line_requester_id
+			 , aila.request_id line_request_id
+			 , aila.requester_id line_requester_id
 			 , to_char(aila.accounting_date, 'yyyy-mm-dd') line_accounting_date
 			 , pha_header.segment1 inv_header_po
 			 , pha_line.segment1 inv_line_po_num
@@ -167,87 +167,82 @@ Queries:
 -- INVOICE HEADERS, LINES AND DISTRIBUTIONS
 -- ##############################################################
 
-		select aia.invoice_id invoice_id
+		select aia.invoice_id
 			 , '#' || aia.invoice_num invoice_num
-			 -- , gllv.legal_entity_name legal_entity_1
-			 -- , xep.name legal_entity_2
+			 , xep.name legal_entity
 			 , hou.name operating_unit
 			 , aia.invoice_type_lookup_code
-			 -- , aia.requester_id requester_id
-			 -- , aia.source
+			 , aia.requester_id requester_id
+			 , aia.source
 			 , flv_source.meaning source_description
-			 -- , (replace(replace(aia.description,chr(10),''),chr(13),' ')) inv_description
-			 -- , gsob.name set_of_books
-			 -- , att.name invoice_terms
+			 , (replace(replace(aia.description,chr(10),''),chr(13),' ')) inv_description
+			 , gsob.name set_of_books
+			 , att.name invoice_terms
 			 , psv.vendor_name supplier
 			 , pssam.vendor_site_code site
 			 , to_char(aia.invoice_date, 'yyyy-mm-dd') inv_date
 			 , to_char(aia.creation_date, 'yyyy-mm-dd hh24:mi:ss') inv_created
 			 , aia.creation_date
 			 , aia.created_by
-			 -- , to_char(aia.last_update_date, 'yyyy-mm-dd hh24:mi:ss') inv_updated
-			 -- , aia.last_updated_by inv_updated_by
+			 , to_char(aia.last_update_date, 'yyyy-mm-dd hh24:mi:ss') inv_updated
+			 , aia.last_updated_by inv_updated_by
 			 , aia.invoice_amount
 			 , aia.payment_status_flag
 			 , aia.amount_paid
-			 -- , aia.approval_status
-			 -- , aia.wfapproval_status
-			 -- , decode(ap_invoices_utility_pkg.get_approval_status(aia.invoice_id,aia.invoice_amount,aia.payment_status_flag,aia.invoice_type_lookup_code), 'FULL' , 'Fully Applied', 'NEVER APPROVED' , 'Never Validated', 'NEEDS REAPPROVAL', 'Needs Revalidation', 'CANCELLED' , 'Cancelled', 'UNPAID' , 'Unpaid', 'AVAILABLE' , 'Available', 'UNAPPROVED' , 'Unvalidated', 'APPROVED' , 'Validated', 'PERMANENT' , 'Permanent Prepayment', null) inv_hdr_status
-			 -- , ap_invoices_pkg.get_posting_status(aia.invoice_id) accounted
-			 -- , aia.invoice_currency_code
-			 -- , aia.payment_currency_code
-			 -- , nvl2(aia.cancelled_amount, 'Y', 'N') cancelled
-			 -- , to_char(aia.cancelled_date, 'yyyy-mm-dd') cancelled_date
-			 -- , aia.cancelled_by
-			 -- , aia.cancelled_amount
-			 -- , case when aia.payment_status_flag = 'N' then (decode(ap_invoices_utility_pkg.get_approval_status(aia.invoice_id,aia.invoice_amount,aia.payment_status_flag,aia.invoice_type_lookup_code), 'FULL' , 'Fully Applied', 'NEVER APPROVED' , 'Never Validated', 'NEEDS REAPPROVAL', 'Needs Revalidation', 'CANCELLED' , 'Cancelled', 'UNPAID' , 'Unpaid', 'AVAILABLE' , 'Available', 'UNAPPROVED' , 'Unvalidated', 'APPROVED' , 'Validated', 'PERMANENT' , 'Permanent Prepayment', null)) else 'N/A' end status
-			 -- , case when aia.payment_status_flag = 'N' then (select count(aha.invoice_id) from ap_holds_all aha where aha.invoice_id = aia.invoice_id and aha.release_reason is null) else 0 end open_hold_count
+			 , aia.approval_status
+			 , aia.wfapproval_status
+			 , decode(ap_invoices_utility_pkg.get_approval_status(aia.invoice_id,aia.invoice_amount,aia.payment_status_flag,aia.invoice_type_lookup_code), 'FULL' , 'Fully Applied', 'NEVER APPROVED' , 'Never Validated', 'NEEDS REAPPROVAL', 'Needs Revalidation', 'CANCELLED' , 'Cancelled', 'UNPAID' , 'Unpaid', 'AVAILABLE' , 'Available', 'UNAPPROVED' , 'Unvalidated', 'APPROVED' , 'Validated', 'PERMANENT' , 'Permanent Prepayment', null) inv_hdr_status
+			 , ap_invoices_pkg.get_posting_status(aia.invoice_id) accounted
+			 , aia.invoice_currency_code
+			 , aia.payment_currency_code
+			 , nvl2(aia.cancelled_amount, 'Y', 'N') cancelled
+			 , to_char(aia.cancelled_date, 'yyyy-mm-dd') cancelled_date
+			 , aia.cancelled_by
+			 , aia.cancelled_amount
+			 , case when aia.payment_status_flag = 'N' then (decode(ap_invoices_utility_pkg.get_approval_status(aia.invoice_id,aia.invoice_amount,aia.payment_status_flag,aia.invoice_type_lookup_code), 'FULL' , 'Fully Applied', 'NEVER APPROVED' , 'Never Validated', 'NEEDS REAPPROVAL', 'Needs Revalidation', 'CANCELLED' , 'Cancelled', 'UNPAID' , 'Unpaid', 'AVAILABLE' , 'Available', 'UNAPPROVED' , 'Unvalidated', 'APPROVED' , 'Validated', 'PERMANENT' , 'Permanent Prepayment', null)) else 'N/A' end status
+			 , case when aia.payment_status_flag = 'N' then (select count(aha.invoice_id) from ap_holds_all aha where aha.invoice_id = aia.invoice_id and aha.release_reason is null) else 0 end open_hold_count
 			 , to_char(aila.creation_date, 'yyyy-mm-dd hh24:mi:ss') line_created
 			 , aila.created_by line_created_by
 			 , aila.line_number inv_line
 			 , aila.line_type_lookup_code
-			 -- , aila.line_source
-			 -- , (replace(replace(aila.description,chr(10),''),chr(13),' ')) line_description
-			 -- , aila.match_type
+			 , aila.line_source
+			 , (replace(replace(aila.description,chr(10),''),chr(13),' ')) line_description
+			 , aila.match_type
 			 , aila.amount line_amount
 			 , aila.original_amount
 			 , aila.original_base_amount
-			 -- , aila.request_id line_request_id
-			 -- , to_char(aila.accounting_date, 'yyyy-mm-dd') line_accounting_date
+			 , aila.request_id line_request_id
+			 , to_char(aila.accounting_date, 'yyyy-mm-dd') line_accounting_date
 			 , to_char(aila.last_update_date, 'yyyy-mm-dd hh24:mi:ss') line_updated
 			 , aila.last_updated_by line_updated_by
-			 -- , aida.line_type_lookup_code dist_line_type
-			 -- , to_char(aida.creation_date, 'yyyy-mm-dd hh24:mi:ss') dist_created
-			 -- , aida.created_by dist_created_by
-			 -- , to_char(aida.last_update_date, 'yyyy-mm-dd hh24:mi:ss') dist_updated
-			 -- , aida.last_updated_by dist_updated_by
-			 -- , to_char(aida.accounting_date, 'yyyy-mm-dd') dist_accounting_date
-			 -- , aida.amount dist_amount
-			 -- , aida.unit_price dist_unit_price
-			 -- , aida.quantity_invoiced dist_qty_invoiced
-			 -- , ppav.segment1 proj_number
-			 -- , '#' || ptv.task_number task_number
-			 -- , '#' || aida.invoice_distribution_id invoice_distribution_id
-			 -- , '#' || aida.accounting_event_id accounting_event_id
-			 -- , aida.po_distribution_id
-			 -- , aida.request_id dist_request_id
-			 -- , aida.distribution_line_number
+			 , aida.line_type_lookup_code dist_line_type
+			 , to_char(aida.creation_date, 'yyyy-mm-dd hh24:mi:ss') dist_created
+			 , aida.created_by dist_created_by
+			 , to_char(aida.last_update_date, 'yyyy-mm-dd hh24:mi:ss') dist_updated
+			 , aida.last_updated_by dist_updated_by
+			 , to_char(aida.accounting_date, 'yyyy-mm-dd') dist_accounting_date
+			 , aida.amount dist_amount
+			 , aida.unit_price dist_unit_price
+			 , aida.quantity_invoiced dist_qty_invoiced
+			 , ppav.segment1 proj_number
+			 , '#' || ptv.task_number task_number
+			 , aida.invoice_distribution_id invoice_distribution_id
+			 , aida.accounting_event_id accounting_event_id
+			 , aida.po_distribution_id
+			 , aida.request_id dist_request_id
+			 , aida.distribution_line_number
 			 , aida.line_type_lookup_code dist_type
 			 , nvl(aila.discarded_flag, 'N') discarded_flag
-			 , nvl2(aia.cancelled_amount, 'Y', 'N') cancelled_amount
-			 -- , gcc.enabled_flag
+			 , gcc.enabled_flag
 			 , gcc.segment1 || '-' || gcc.segment2 || '-' || gcc.segment3 || '-' || gcc.segment4 || '-' || gcc.segment5 || '-' || gcc.segment6 || '-' || gcc.segment7 || '-' || gcc.segment8 code_comb
-			 -- , '#' || gcc.segment1 seg1
-			 -- , '#' || gcc.segment2 seg2
-			 -- , '#' || gcc.segment3 seg3
-			 -- , '#' || gcc.segment4 seg4
-			 -- , '#' || gcc.segment5 seg5
-			 -- , '#' || gcc.segment6 seg6
-			 -- , '#' || gcc.segment7 segment7
-			 -- , '#' || gcc.segment8 segment8
-			 -- , (select count(aiaha.invoice_id) from ap_inv_aprvl_hist_all aiaha where aiaha.invoice_id = aia.invoice_id) approval_lines_count
-			 -- , pha_header.segment1 inv_header_po
-			 -- , pha_line.segment1 inv_line_po_num
+			 , '#' || gcc.segment1 seg1
+			 , '#' || gcc.segment2 seg2
+			 , '#' || gcc.segment3 seg3
+			 , '#' || gcc.segment4 seg4
+			 , '#' || gcc.segment5 seg5
+			 , '#' || gcc.segment6 seg6
+			 , '#' || gcc.segment7 seg7
+			 , '#' || gcc.segment8 seg8
 			 , '#' tax_info_inv_lines_____________
 			 , aila.tax_regime_code
 			 , aila.tax
@@ -259,21 +254,18 @@ Queries:
 			 , aida.recovery_rate_name
 			 , aida.recovery_type_code
 		  from ap_invoices_all aia
-		  -- join ap_terms_tl att on aia.terms_id = att.term_id and att.language = userenv('lang')
+		  join ap_terms_tl att on aia.terms_id = att.term_id and att.language = userenv('lang')
 	 left join poz_suppliers_v psv on aia.vendor_id = psv.vendor_id
 	 left join poz_supplier_sites_all_m pssam on psv.vendor_id = pssam.vendor_id and aia.vendor_site_id = pssam.vendor_site_id
 		  join hr_operating_units hou on aia.org_id = hou.organization_id
-		  -- join xle_entity_profiles xep on aia.legal_entity_id = xep.legal_entity_id
-		  -- join gl_sets_of_books gsob on aia.set_of_books_id = gsob.set_of_books_id
+		  join xle_entity_profiles xep on aia.legal_entity_id = xep.legal_entity_id
+		  join gl_sets_of_books gsob on aia.set_of_books_id = gsob.set_of_books_id
 		  join ap_invoice_lines_all aila on aia.invoice_id = aila.invoice_id
 		  join ap_invoice_distributions_all aida on aia.invoice_id = aida.invoice_id and aila.line_number = aida.invoice_line_number
 		  join gl_code_combinations gcc on aida.dist_code_combination_id = gcc.code_combination_id
-	 -- left join pjf_projects_all_vl ppav on ppav.project_id = aida.pjc_project_id
-	 -- left join pjf_tasks_v ptv on ptv.task_id = aida.pjc_task_id
-	 left join fnd_lookup_values_vl flv_source on flv_source.lookup_code = aia.source and flv_source.lookup_type = 'SOURCE' and flv_source.view_application_id = 200
-		  -- join gl_ledger_le_v gllv on aia.legal_entity_id = gllv.legal_entity_id
-	 -- left join po_headers_all pha_header on aia.po_header_id = pha_header.po_header_id
-	 -- left join po_headers_all pha_line on aila.po_header_id = pha_line.po_header_id
+	 left join pjf_projects_all_vl ppav on ppav.project_id = aida.pjc_project_id
+	 left join pjf_tasks_v ptv on ptv.task_id = aida.pjc_task_id
+		  join fnd_lookup_values_vl flv_source on flv_source.lookup_code = aia.source and flv_source.lookup_type = 'SOURCE' and flv_source.view_application_id = 200
 		 where 1 = 1
 		   and 1 = 1
 	  order by aia.creation_date desc
@@ -282,7 +274,7 @@ Queries:
 -- INVOICE HEADERS - LONGER VERSION
 -- ##############################################################
 
-		select aia.invoice_id invoice_id
+		select aia.invoice_id
 			 , '#' || aia.invoice_num invoice_num
 			 , hou.name operating_unit
 			 , (select min(segment1) from po_headers_all pha join po_distributions_all pda on pha.po_header_id = pda.po_header_id join ap_invoice_distributions_all aida on aida.invoice_id = aia.invoice_id and pda.po_distribution_id = aida.po_distribution_id) po
@@ -353,7 +345,7 @@ Queries:
 -- INVOICE HEADERS - TERMS
 -- ##############################################################
 
-		select aia.invoice_id invoice_id
+		select aia.invoice_id
 			 , '#' || aia.invoice_num invoice_num
 			 , hou.name operating_unit
 			 , aia.invoice_type_lookup_code
@@ -449,7 +441,7 @@ Returns data about requester on invoice line
 Requester ID on Invoice Line is same as Preparer ID on REQ Line
 */
 
-		select distinct aia.invoice_id invoice_id
+		select distinct aia.invoice_id
 			 , '#' || aia.invoice_num invoice_num
 			 , aia.invoice_amount inv_amt
 			 , aia.total_tax_amount tax_amt
@@ -466,7 +458,7 @@ Requester ID on Invoice Line is same as Preparer ID on REQ Line
 			 , '#################' ap_lines_____
 			 , aila.line_number inv_line
 			 , aila.trx_business_category
-			 , '#' || aila.requester_id requester_id
+			 , aila.requester_id
 			 , ppnf.full_name inv_line_requester
 			 , to_char(aila.creation_date, 'yyyy-mm-dd hh24:mi:ss') line_created
 			 , aila.created_by line_created_by
@@ -478,7 +470,7 @@ Requester ID on Invoice Line is same as Preparer ID on REQ Line
 			 , aila.match_type
 			 , aila.amount line_amount
 			 , aila.request_id line_request_id
-			 , '#' || aila.requester_id line_requester_id
+			 , aila.requester_id line_requester_id
 			 , to_char(aila.accounting_date, 'yyyy-mm-dd') line_accounting_date
 			 , '#################' ap_inv_dists_____
 			 , aida.line_type_lookup_code dist_line_type
@@ -490,17 +482,17 @@ Requester ID on Invoice Line is same as Preparer ID on REQ Line
 			 , aida.amount dist_amount
 			 , aida.unit_price dist_unit_price
 			 , aida.quantity_invoiced dist_qty_invoiced
-			 , '#' || aida.invoice_distribution_id invoice_distribution_id
-			 , '#' || aida.accounting_event_id accounting_event_id
+			 , aida.invoice_distribution_id
+			 , aida.accounting_event_id
 			 , aida.po_distribution_id
 			 , aida.request_id dist_request_id
 			 , aida.distribution_line_number
 			 , aida.line_type_lookup_code dist_type
 			 , '#################' po_dists_____
 			 , pda.distribution_num
-			 , '#' || pda.po_distribution_id po_dist_id
+			 , pda.po_distribution_id
 			 , '#################' po_lines_____
-			 , '#' || pla.po_line_id po_line_id
+			 , pla.po_line_id
 			 , pla.line_num
 			 , pla.quantity
 			 , pla.amount
@@ -509,7 +501,7 @@ Requester ID on Invoice Line is same as Preparer ID on REQ Line
 			 , '#################' po_reqs_____
 			 , prha.requisition_number req_number
 			 , prha.created_by req_created_by
-			 , '#' || prha.preparer_id req_preparer_id
+			 , prha.preparer_id req_preparer_id
 			 , to_char(prha.creation_date, 'yyyy-mm-dd hh24:mi:ss') req_created
 			 , '#################' po_req_lines_____
 			 , prla.line_number req_line
@@ -575,7 +567,7 @@ order by aia.creation_date desc
 -- ##############################################################
 
 		select distinct 
-			  '#' || fwt.identificationkey id_key
+			  fwt.identificationkey id_key
 			 , fwt.tasknumber num
 			 , to_char(fwt.createddate, 'yyyy-mm-dd hh24:mi:ss') created
 			 , to_char(fwt.assigneddate, 'yyyy-mm-dd hh24:mi:ss') assigned
@@ -601,7 +593,7 @@ order by aia.creation_date desc
 -- TAX INFO 1
 -- ##############################################################
 
-		select aia.invoice_id invoice_id
+		select aia.invoice_id
 			 , '#' || aia.invoice_num invoice_num
 			 , hou.name org
 			 , aia.invoice_type_lookup_code
@@ -647,7 +639,7 @@ order by aia.creation_date desc
 Cost Centre Manager part only works if the Cost Centre in the Chart of Accounts is held in Segment2
 */
 
-		select aia.invoice_id invoice_id
+		select aia.invoice_id
 			 , aia.source
 			 , flv_source.meaning source_description
 			 , '#' || aia.invoice_num invoice_num
@@ -716,7 +708,7 @@ The process inserts a record for each approver assigned to review an invoice.
 This table corresponds to the invoice approval history window.
 */
 
-		select aia.invoice_id invoice_id
+		select aia.invoice_id
 			 , '#' || aia.invoice_num invoice_num
 			 , aia.doc_sequence_value voucher
 			 , hou.name operating_unit
@@ -738,10 +730,10 @@ This table corresponds to the invoice approval history window.
 			 , aia.amount_paid
 			 , '##################'
 			 , to_char(aiaha.creation_date, 'yyyy-mm-dd hh24:mi:ss') apprv_created
-			 , '#' || aiaha.approval_history_id apprv_id
+			 , aiaha.approval_history_id apprv_id
 			 , aiaha.response apprv_resp_1
 			 , flv_status.meaning apprv_resp_2
-			 , '#' || aiaha.approver_id approver_id
+			 , aiaha.approver_id
 			 , aiaha.amount_approved apprv_amt
 			 , (replace(replace(aiaha.approver_comments,chr(10),''),chr(13),' ')) apprv_comments
 			 , aiaha.approval_request_id apprv_req_id
@@ -764,7 +756,7 @@ This table corresponds to the invoice approval history window.
 -- INVOICE APPROVAL HISTORY - COUNT BY APPROVER_ID
 -- ##############################################################
 
-		select '#' || aiaha.approver_id approver_id
+		select aiaha.approver_id
 			 , aiaha.rule_name -- The workflow rule used for assigning the workflow task to the user.
 			 , aiaha.approval_step -- The approval step where the workflow rule is defined.
 			 , min(to_char(aiaha.creation_date, 'yyyy-mm-dd hh24:mi:ss')) wf_created_min
@@ -781,7 +773,7 @@ This table corresponds to the invoice approval history window.
 		  join ap_inv_aprvl_hist_all aiaha on aiaha.invoice_id = aia.invoice_id
 		 where 1 = 1
 		   and 1 = 1
-	  group by '#' || aiaha.approver_id
+	  group by aiaha.approver_id
 			 , aiaha.rule_name
 			 , aiaha.approval_step
 
@@ -812,7 +804,7 @@ This table corresponds to the invoice approval history window.
 -- INVOICE HEADERS - WITH PO VALUE 1
 -- ##############################################################
 
-		select aia.invoice_id invoice_id
+		select aia.invoice_id
 			 , '#' || aia.invoice_num invoice_num
 			 , hou.name operating_unit
 			 , aia.invoice_type_lookup_code
@@ -873,7 +865,7 @@ This table corresponds to the invoice approval history window.
 -- ##############################################################
 
 		with my_data as
-	   (select aia.invoice_id invoice_id
+	   (select aia.invoice_id
 			 , '#' || aia.invoice_num invoice_num
 			 , (select min(pha.po_header_id) from po_headers_all pha join po_distributions_all pda on pha.po_header_id = pda.po_header_id join ap_invoice_distributions_all aida on aida.invoice_id = aia.invoice_id and pda.po_distribution_id = aida.po_distribution_id) po_header_id
 			 , hou.name operating_unit
@@ -905,7 +897,7 @@ This table corresponds to the invoice approval history window.
 		   and 1 = 1)
 		select my_data.invoice_id
 			 , my_data.invoice_num
-			 , '#' || my_data.po_header_id po_header_id
+			 , my_data.po_header_id
 			 , my_data.operating_unit
 			 , my_data.invoice_type_lookup_code
 			 , my_data.source
@@ -922,7 +914,7 @@ This table corresponds to the invoice approval history window.
 			 , my_data.wfapproval_status
 			 , my_data.accounted
 			 , my_data.cancelled
-			 , '#' || po_value.po po
+			 , po_value.po
 			 , po_value.po_value
 			 , po_value.po_received
 			 , po_value.po_billed
@@ -1231,7 +1223,7 @@ SQL to compare Invoice Date with Received Date
 -- INVOICE COUNT - LINES
 -- ##############################################################
 
-		select aia.invoice_id invoice_id
+		select aia.invoice_id
 			 , '#' || aia.invoice_num invoice_num
 			 , aia.source
 			 , flv_source.meaning source_description
@@ -1265,7 +1257,7 @@ SQL to compare Invoice Date with Received Date
 -- INVOICE COUNT - LINES AND DISTRIBUTIONS
 -- ##############################################################
 
-		select aia.invoice_id invoice_id
+		select aia.invoice_id
 			 , '#' || aia.invoice_num invoice_num
 			 , aia.source
 			 , flv_source.meaning source_description
@@ -1419,8 +1411,8 @@ SQL to compare Invoice Date with Received Date
 -- ##############################################################
 
 		select '#' || aia.invoice_num invoice_num
-			 , '#' || fad.pk1_value pk1_value
-			 , aia.invoice_id invoice_id
+			 , fad.pk1_value
+			 , aia.invoice_id
 			 , psv.vendor_name supplier
 			 , to_char(aia.creation_date, 'yyyy-mm-dd hh24:mi:ss') inv_created
 			 , to_char(fad.creation_date, 'yyyy-mm-dd hh24:mi:ss') att_created

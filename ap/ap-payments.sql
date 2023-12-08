@@ -32,7 +32,7 @@ Queries:
 			 , '#' || cbbv.branch_number branch_number
 			 , '#' || cbbv.bank_branch_name bank_branch_name
 			 , ipp.system_profile_code
-			 , '#' || ipp.payment_profile_id payment_profile_id
+			 , ipp.payment_profile_id
 			 , ipp.payment_format_code
 			 , ipp.system_profile_name
 			 , ipp.system_profile_description
@@ -167,7 +167,7 @@ REMIT_ADVICE_DELIVERY_METHOD: Remittance advice delivery method. Values from the
 			 , cbbv.branch_number
 			 , cbbv.bank_branch_name
 			 , '########' supplier_inv_______
-			 , '#' || aia.invoice_id inv_id
+			 , aia.invoice_id
 			 , '#' || aia.invoice_num inv_num
 			 , to_char(aia.creation_date, 'yyyy-mm-dd hh24:mi:ss') inv_created
 			 , to_char(aia.invoice_date, 'yyyy-mm-dd') invoice_date
@@ -186,12 +186,12 @@ REMIT_ADVICE_DELIVERY_METHOD: Remittance advice delivery method. Values from the
 			 , to_char(aisc.check_date, 'yyyy-mm-dd') check_date
 			 , to_char(aisc.pay_thru_date, 'yyyy-mm-dd') pay_thru_date
 			 , aisc.pay_group_option
-			 , '#' || aipa.invoice_payment_id invoice_payment_id
+			 , aipa.invoice_payment_id
 			 , aipa.amount aipa_payment_amount
 			 , to_char(aipa.creation_date, 'yyyy-mm-dd hh24:mi:ss') aipa_created
 			 , '#### payment info ####'
-			 , '#' || ipa.payment_instruction_id payment_instruction_id -- payment file name
-			 , '#' || ipa.payment_id payment_id
+			 , ipa.payment_instruction_id -- payment file name
+			 , ipa.payment_id
 			 , to_char(ipa.creation_date, 'yyyy-mm-dd hh24:mi:ss') ipa_created
 			 , to_char(ipa.payment_date, 'yyyy-mm-dd') payment_date
 			 , ipa.payment_status
