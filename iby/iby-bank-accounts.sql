@@ -15,7 +15,7 @@ Queries:
 -- BANK ACCOUNTS - SUPPLIER / EMPLOYEE / CUSTOMER
 -- ##############################################################
 
-		select '#' || ieba.ext_bank_account_id acct_id
+		select ieba.ext_bank_account_id
 			 , ieba.bank_account_name
 			 , ieba.bank_account_num
 			 , ieba.currency_code curr
@@ -26,13 +26,13 @@ Queries:
 			 , bank.party_name bank_name
 			 , branch.party_name branch_name
 			 , branch.party_name branch_number
-			 , '#' || ipiua.instrument_payment_use_id instrument_payment_use_id
+			 , ipiua.instrument_payment_use_id
 			 , ipiua.payment_flow "ipiua.payment_flow payment_flow" -- Specifies funds capture or disbursement flow. Values taken from lookup: IBY_PAYMENT_FLOW. DISBURSEMENT = Paying money out, FUNDS_CAPTURE is money coming in
 			 , ipiua.payment_function "ipiua.payment_function"
 			 , iepa.payment_function "iepa.payment_function"
-			 , '#' || ipiua.ext_pmt_party_id ext_pmt_party_id
+			 , ipiua.ext_pmt_party_id
 			 , ipiua.instrument_type instrument_type
-			 , '#' || ipiua.instrument_id instrument_id
+			 , ipiua.instrument_id
 			 , ipiua.order_of_preference order_of_preference
 			 , ipiua.primary_flag primary_flag
 			 , ipiua.created_by instr_created_by
@@ -46,8 +46,8 @@ Queries:
 			 , party_supplier.address1 || ', ' || party_supplier.address2 || ', ' || party_supplier.address3 || ', ' || party_supplier.city || ', ' || party_supplier.postal_code vendor_address
 			 , pssm.vendor_site_code site
 			 , prc_bu_id.bu_name procurement_bu
-			 , '##' || iepa.ext_payee_id "iepa.ext_payee_id"
-			 , '##' || iepa_ext.ext_payer_id "iepa_ext.ext_payer_id"
+			 , iepa.ext_payee_id "iepa.ext_payee_id"
+			 , iepa_ext.ext_payer_id "iepa_ext.ext_payer_id"
 			 , iepa.remit_advice_delivery_method remit_advice_delivery_method
 			 , iepa.remit_advice_email remit_advice_email
 			 , party_employee_fc.party_name employee_funds_capture
@@ -88,7 +88,7 @@ Queries:
 -- BANK ACCOUNT OWNERS
 -- ##############################################################
 
-		select '#' || ieba.ext_bank_account_id acct_id
+		select ieba.ext_bank_account_id
 			 , ieba.bank_account_name
 			 , ieba.bank_account_num
 			 , ieba.currency_code curr
