@@ -23,7 +23,7 @@ Queries:
 			 , num_rows 
 		  from all_tables
 		 where 1 = 1
-		   and upper(table_name) like '%DUNN%'
+		   and upper(table_name) like '%IMPORT%'
 		   -- and num_rows between 1300 and 1400
 		   and num_rows > 0
 	  order by num_rows desc
@@ -70,10 +70,6 @@ Queries:
 -- TABLES AND COLUMNS
 -- ##############################################################
 
-		select *
-		  from all_tab_columns
-		 where column_name = 'ACTION_OCCURRENCE_ID';
-
 		select distinct upper(atc.table_name)
              , att.num_rows
 			 , atc.column_name
@@ -82,9 +78,9 @@ Queries:
 		  from all_tab_columns atc
 		  join all_tables att on upper(atc.table_name) = upper(att.table_name)
 		 where 1 = 1
-		   and upper(atc.column_name) LIKE '%EMAIL%'
+		   and upper(atc.column_name) = 'ACCOUNTING_EVENT_ID'
 		   -- and upper(atc.column_name) = 'NOTES'
-		   and upper(atc.table_name) LIKE 'IBY%'
+		   -- and upper(atc.table_name) like 'Z%'
 		   and att.num_rows > 0
 		   -- and atc.data_type = 'DATE'
 		   -- and atc.data_length = 80
