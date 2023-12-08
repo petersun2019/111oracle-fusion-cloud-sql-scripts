@@ -6,14 +6,14 @@ URL: https://github.com/throwing-cheese/oracle-fusion-cloud-sql-scripts
 
 Queries:
 
--- RECEIPT ACCOUNTING LINKED TO po
+-- RECEIPT ACCOUNTING LINKED TO PO
 -- RECEIPT ACCOUNTING SLA JOURNALS
 -- ACCOUNTING SUMMARY FOR RECEIPT ACCOUNTING
 
 */
 
 -- ##############################################################
--- RECEIPT ACCOUNTING LINKED TO po
+-- RECEIPT ACCOUNTING LINKED TO PO
 -- ##############################################################
 
 		select cre.source_doc_number source_doc
@@ -67,7 +67,6 @@ Queries:
 	 left join po_headers_all pha on cre.source_doc_number = pha.segment1
 	 left join poz_suppliers_v psv on pha.vendor_id = psv.vendor_id
 		 where 1 = 1
-		   and pha.segment1 = '351001877'
 		   and 1 = 1
 	  order by cre.creation_date desc
 
@@ -77,11 +76,11 @@ Queries:
 
 		select gl.name ledger
 			 , fat.application_name app
-			 , '#' || gjh.je_header_id je_header_id
-			 , '#' || gjh.parent_je_header_id
+			 , gjh.je_header_id
+			 , gjh.parent_je_header_id
 			 , nvl(gjh.reversed_je_header_id, null) reversed_je_header_id
 			 , to_char(gjb.creation_date, 'yyyy-mm-dd hh24:mi:ss') batch_created
-			 , '#' || gjb.je_batch_id je_batch_id
+			 , gjb.je_batch_id
 			 , gjb.created_by batch_created_by
 			 , to_char(gjh.creation_date, 'yyyy-mm-dd hh24:mi:ss') journal_created
 			 , gjh.created_by journal_created_by
@@ -109,7 +108,7 @@ Queries:
 			 , xah.product_rule_code
 			 , xte.entity_code
 			 , xal.accounting_class_code
-			 , '#' || xe.event_id event_id
+			 , xe.event_id
 			 , xal.description
 			 , xal.entered_dr
 			 , xal.entered_cr
