@@ -30,22 +30,22 @@ Queries:
 -- ##############################################################
 
 		select '####' xla_transaction_entities
-			 , '#' || xte.entity_id entity_id
-			 , '#' || xte.source_id_int_1 source_id_int_1
-			 , '#' || xte.source_id_int_2 source_id_int_2
-			 , '#' || xte.source_id_int_3 source_id_int_3
+			 , xte.entity_id
+			 , xte.source_id_int_1
+			 , xte.source_id_int_2
+			 , xte.source_id_int_3
 			 , '#' || xte.transaction_number transaction_number
 			 , xte.entity_code
 			 , fat.application_name app
 			 , '####' xla_events
-			 , '#' || xe.event_id event_id
+			 , xe.event_id
 			 , xe.event_number
 			 , xe.creation_date event_created
 			 , flv2.meaning event_status
 			 , flv3.meaning event_process_status
 			 , xe.event_type_code
 			 , '####' xla_ae_headers
-			 , '#' || xah.ae_header_id ae_header_id
+			 , xah.ae_header_id
 			 , decode(xah.balance_type_code,'e','encumbrance','a','actual') balance_type
 			 , xah.period_name
 			 , xah.completed_date
@@ -56,10 +56,10 @@ Queries:
 			 , xah.je_category_name
 			 , xah.creation_date
 			 , xah.request_id
-			 , '#' || xah.group_id group_id
+			 , xah.group_id
 			 , (replace(replace(xah.description,chr(10),''),chr(13),' ')) header_description
 			 , '####' xla_ae_lines
-			 , '#' || xal.code_combination_id code_combination_id
+			 , xal.code_combination_id
 			 , '#' || gcc.segment1 seg1
 			 , '#' || gcc.segment2 seg2
 			 , '#' || gcc.segment3 seg3
@@ -105,22 +105,22 @@ Queries:
 -- ##############################################################
 
 		select '####' xla_transaction_entities
-			 , '#' || xte.entity_id entity_id
-			 , '#' || xte.source_id_int_1 source_id_int_1
-			 , '#' || xte.source_id_int_2 source_id_int_2
-			 , '#' || xte.source_id_int_3 source_id_int_3
+			 , xte.entity_id entity_id
+			 , xte.source_id_int_1
+			 , xte.source_id_int_2
+			 , xte.source_id_int_3
 			 , '#' || xte.transaction_number transaction_number
 			 , xte.entity_code
 			 , fat.application_name app
 			 , '####' xla_events
-			 , '#' || xe.event_id event_id
+			 , xe.event_id
 			 , xe.event_number
 			 , xe.creation_date event_created
 			 , flv2.meaning event_status
 			 , flv3.meaning event_process_status
 			 , xe.event_type_code
 			 , '####' xla_ae_headers
-			 , '#' || xah.ae_header_id ae_header_id
+			 , xah.ae_header_id
 			 , decode(xah.balance_type_code,'e','encumbrance','a','actual') balance_type
 			 , xah.period_name
 			 , xah.completed_date
@@ -131,10 +131,10 @@ Queries:
 			 , xah.je_category_name
 			 , xah.creation_date
 			 , xah.request_id
-			 , '#' || xah.group_id group_id
+			 , xah.group_id
 			 , (replace(replace(xah.description,chr(10),''),chr(13),' ')) description
 			 , '####' xla_ae_lines
-			 , '#' || xal.code_combination_id code_combination_id
+			 , xal.code_combination_id
 			 , '#' || gcc.segment1 seg1
 			 , '#' || gcc.segment2 seg2
 			 , '#' || gcc.segment3 seg3
@@ -169,27 +169,27 @@ Queries:
 -- DETAILS - INCLUDING XLA_DISTRIBUTION_LINKS - 2
 -- ##############################################################
 
-		select '#' || xal.gl_sl_link_id gl_sl_link_id
+		select xal.gl_sl_link_id
 			 , xal.gl_sl_link_table
 			 , xal.ae_line_num
-			 , '#' || xte.source_id_int_1 source_id_int_1
+			 , xte.source_id_int_1
 			 , xal.accounting_class_code
 			 , flv1.meaning accounting_class
 			 , xal.displayed_line_number
 			 , xal.currency_code currency
 			 , xal.application_id
-			 , '#' || xal.ae_header_id ae_header_id
+			 , xal.ae_header_id
 			 , xal.entered_dr
 			 , xal.entered_cr
 			 , xal.accounted_dr
 			 , xal.accounted_cr
 			 , xal.creation_date line_created
 			 , xal.last_update_date line_updated
-			 , '#' || xdl.source_distribution_id_num_1 source_distribution_id_num_1
+			 , xdl.source_distribution_id_num_1
 			 , '#_________'
-			 , '#' || inv.vendor_id vendor_id
+			 , inv.vendor_id
 			 , '#' || inv.invoice_num invoice_num
-			 , '#' || inv.invoice_id invoice_id
+			 , inv.invoice_id
 			 , poh.segment1 po_number
 			 , su.segment1 supplier_number
 			 , pty.party_name supplier_name
@@ -271,8 +271,8 @@ Queries:
 			 , xah.je_category_name
 			 , min(to_char(xe.creation_date, 'yyyy-mm-dd')) min_created
 			 , max(to_char(xe.creation_date, 'yyyy-mm-dd')) max_created
-			 , min('#' || xte.source_id_int_1) min_source_id_int_1
-			 , max('#' || xte.source_id_int_1) max_source_id_int_1
+			 , min(xte.source_id_int_1) min_source_id_int_1
+			 , max(xte.source_id_int_1) max_source_id_int_1
 			 , min('#' || xte.transaction_number) min_transaction_number
 			 , max('#' || xte.transaction_number) max_transaction_number
 			 , sum(xal.entered_dr) dr_sum
@@ -313,12 +313,12 @@ Queries:
 			 , max(to_char(xah.accounting_date, 'yyyy-mm-dd')) max_acct_date
 			 , min(to_char(xal.accounting_date, 'yyyy-mm-dd')) min_line_acct_date
 			 , max(to_char(xal.accounting_date, 'yyyy-mm-dd')) max_line_acct_date
-			 , min('#' || xte.source_id_int_1) min_source_id_int_1
-			 , max('#' || xte.source_id_int_1) max_source_id_int_1
-			 , min('#' || xte.source_id_int_2) min_source_id_int_2
-			 , max('#' || xte.source_id_int_2) max_source_id_int_2
-			 , min('#' || xte.source_id_int_3) min_source_id_int_3
-			 , max('#' || xte.source_id_int_3) max_source_id_int_3
+			 , min(xte.source_id_int_1) min_source_id_int_1
+			 , max(xte.source_id_int_1) max_source_id_int_1
+			 , min(xte.source_id_int_2) min_source_id_int_2
+			 , max(xte.source_id_int_2) max_source_id_int_2
+			 , min(xte.source_id_int_3) min_source_id_int_3
+			 , max(xte.source_id_int_3) max_source_id_int_3
 			 , min('#' || xte.transaction_number) min_transaction_number
 			 , max('#' || xte.transaction_number) max_transaction_number
 			 , sum(xal.entered_dr) dr_sum
@@ -364,12 +364,12 @@ Queries:
 			 , xah.je_category_name
 			 , min(to_char(xe.creation_date, 'yyyy-mm-dd')) min_created
 			 , max(to_char(xe.creation_date, 'yyyy-mm-dd')) max_created
-			 , min('#' || xte.source_id_int_1) min_source_id_int_1
-			 , max('#' || xte.source_id_int_1) max_source_id_int_1
-			 , min('#' || xte.source_id_int_2) min_source_id_int_2
-			 , max('#' || xte.source_id_int_2) max_source_id_int_2
-			 , min('#' || xte.source_id_int_3) min_source_id_int_3
-			 , max('#' || xte.source_id_int_3) max_source_id_int_3
+			 , min(xte.source_id_int_1) min_source_id_int_1
+			 , max(xte.source_id_int_1) max_source_id_int_1
+			 , min(xte.source_id_int_2) min_source_id_int_2
+			 , max(xte.source_id_int_2) max_source_id_int_2
+			 , min(xte.source_id_int_3) min_source_id_int_3
+			 , max(xte.source_id_int_3) max_source_id_int_3
 			 , min('#' || xte.transaction_number) min_transaction_number
 			 , max('#' || xte.transaction_number) max_transaction_number
 			 , count(distinct xte.transaction_number) trx_count
@@ -414,12 +414,12 @@ Queries:
 			 , flv1.meaning accounting_class
 			 , min(to_char(xe.creation_date, 'yyyy-mm-dd')) min_created
 			 , max(to_char(xe.creation_date, 'yyyy-mm-dd')) max_created
-			 , min('#' || xte.source_id_int_1) min_source_id_int_1
-			 , max('#' || xte.source_id_int_1) max_source_id_int_1
-			 , min('#' || xte.source_id_int_2) min_source_id_int_2
-			 , max('#' || xte.source_id_int_2) max_source_id_int_2
-			 , min('#' || xte.source_id_int_3) min_source_id_int_3
-			 , max('#' || xte.source_id_int_3) max_source_id_int_3
+			 , min(xte.source_id_int_1) min_source_id_int_1
+			 , max(xte.source_id_int_1) max_source_id_int_1
+			 , min(xte.source_id_int_2) min_source_id_int_2
+			 , max(xte.source_id_int_2) max_source_id_int_2
+			 , min(xte.source_id_int_3) min_source_id_int_3
+			 , max(xte.source_id_int_3) max_source_id_int_3
 			 , min('#' || xte.transaction_number) min_transaction_number
 			 , max('#' || xte.transaction_number) max_transaction_number
 			 , count(distinct xte.transaction_number) trx_count
@@ -436,6 +436,7 @@ Queries:
 		  join fnd_lookup_values_vl flv3 on xe.process_status_code = flv3.lookup_code and flv3.lookup_type = 'XLA_EVENT_PROCESS_STATUS'
 		  join gl_ledgers gl on gl.ledger_id = xal.ledger_id
 		 where 1 = 1
+		   and fat.application_name = 'Cost Management'
 		   and 1 = 1
 	  group by fat.application_name
 			 , gl.name
@@ -462,6 +463,8 @@ Queries:
 			 , xah.period_name
 			 , xah.gl_transfer_status_code
 			 , xah.accounting_entry_status_code
+			 , xal.accounting_class_code
+			 , flv1.meaning accounting_class
 			 , sum(round(peia.project_raw_cost,2)) project_raw_cost
 			 , sum(round(peia.project_burdened_cost,2)) project_burdened_cost
 			 , sum(round(peia.quantity, 2)) quantity
@@ -484,6 +487,8 @@ Queries:
 			 , xah.period_name
 			 , xah.gl_transfer_status_code
 			 , xah.accounting_entry_status_code
+			 , xal.accounting_class_code
+			 , flv1.meaning accounting_class
 
 -- ##############################################################
 -- SUMMARY BY APPLICATION, ENTITY_CODE, STATUSES, EVENT CLASS AND TYPE
@@ -503,8 +508,8 @@ Queries:
 			 , xetl.event_type_code xetl_event_type_code
 			 , min(to_char(xte.creation_date, 'yyyy-mm-dd')) min_xte_created
 			 , max(to_char(xte.creation_date, 'yyyy-mm-dd')) max_xte_created
-			 , min('#' || xte.source_id_int_1) min_id_1
-			 , max('#' || xte.source_id_int_1) max_id_1
+			 , min(xte.source_id_int_1) min_id_1
+			 , max(xte.source_id_int_1) max_id_1
 			 , min('#' || xte.transaction_number) min_trx
 			 , max('#' || xte.transaction_number) max_trx
 			 , min(xe.request_id) min_xe_request_id
@@ -515,14 +520,17 @@ Queries:
 			 , count(distinct xe.event_id) xe_count
 			 , count(distinct xah.ae_header_id) xah_count
 		  from xla_transaction_entities xte
-	 left join fnd_application_tl fat on xte.application_id = fat.application_id and fat.language = userenv('lang')
-	 left join xla_events xe on xe.entity_id = xte.entity_id and xte.application_id = xe.application_id
-	 left join xla_ae_headers xah on xah.entity_id = xe.entity_id and xah.event_id = xe.event_id and xah.application_id = xe.application_id
-	 left join fnd_lookup_values_vl flv2 on xe.event_status_code = flv2.lookup_code and flv2.lookup_type = 'XLA_EVENT_STATUS'
-	 left join fnd_lookup_values_vl flv3 on xe.process_status_code = flv3.lookup_code and flv3.lookup_type = 'XLA_EVENT_PROCESS_STATUS'
-	 left join xla_event_types_tl xetl on xetl.event_type_code = xe.event_type_code and xetl.application_id = xe.application_id and xetl.language = userenv('lang')
-	 left join xla_event_classes_tl xecl on xecl.entity_code = xetl.entity_code and xecl.event_class_code = xetl.event_class_code and xecl.application_id = xetl.application_id and xecl.language = userenv('lang')
+		  join fnd_application_tl fat on xte.application_id = fat.application_id and fat.language = userenv('lang')
+		  join xla_events xe on xe.entity_id = xte.entity_id and xte.application_id = xe.application_id
+		  join xla_ae_headers xah on xah.entity_id = xe.entity_id and xah.event_id = xe.event_id and xah.application_id = xe.application_id
+		  join fnd_lookup_values_vl flv2 on xe.event_status_code = flv2.lookup_code and flv2.lookup_type = 'XLA_EVENT_STATUS'
+		  join fnd_lookup_values_vl flv3 on xe.process_status_code = flv3.lookup_code and flv3.lookup_type = 'XLA_EVENT_PROCESS_STATUS'
+		  join xla_event_types_tl xetl on xetl.event_type_code = xe.event_type_code and xetl.application_id = xe.application_id and xetl.language = userenv('lang')
+		  join xla_event_classes_tl xecl on xecl.entity_code = xetl.entity_code and xecl.event_class_code = xetl.event_class_code and xecl.application_id = xetl.application_id and xecl.language = userenv('lang')
+		  join xla_ae_lines xal on xal.application_id = xah.application_id and xal.ae_header_id = xah.ae_header_id
+		  join fnd_lookup_values_vl flv1 on xal.accounting_class_code = flv1.lookup_code and flv1.lookup_type = 'XLA_ACCOUNTING_CLASS'
 		 where 1 = 1
+		   and fat.application_name = 'Project Costing'
 		   and 1 = 1
 	  group by fat.application_name
 			 , xte.entity_code
@@ -542,20 +550,20 @@ Queries:
 -- ##############################################################
 
 		select '####' xla_transaction_entities
-			 , '#' || xte.entity_id entity_id
-			 , '#' || xte.source_id_int_1 source_id_int_1
+			 , xte.entity_id
+			 , xte.source_id_int_1
 			 , '#' || xte.transaction_number transaction_number
 			 , xte.entity_code
 			 , fat.application_name app
 			 , '####' xla_events
-			 , '#' || xe.event_id event_id
+			 , xe.event_id
 			 , xe.event_number
 			 , xe.creation_date event_created
 			 , flv2.meaning event_status
 			 , flv3.meaning event_process_status
 			 , xe.event_type_code
 			 , '####' xla_ae_headers
-			 , '#' || xah.ae_header_id ae_header_id
+			 , xah.ae_header_id
 			 , decode(xah.balance_type_code,'e','encumbrance','a','actual') balance_type
 			 , xah.period_name
 			 , xah.completed_date
@@ -566,7 +574,7 @@ Queries:
 			 , xah.creation_date
 			 , xah.request_id
 			 , xte.application_id
-			 , '#' || xah.group_id group_id
+			 , xah.group_id
 			 , (replace(replace(xah.description,chr(10),''),chr(13),' ')) header_description
 		  from xla_transaction_entities xte
 	 left join fnd_application_tl fat on xte.application_id = fat.application_id and fat.language = userenv('lang')

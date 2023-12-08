@@ -41,7 +41,7 @@ This helps with being able to work out e.g. the SQL to find the XLA and journal 
 Related Queries:
 
 xla/05_xla_all.sql
-gl-journals-xla.sql
+gl/gl-journals-xla.sql
 
 Queries:
 
@@ -83,7 +83,7 @@ Queries:
 			 , gjct.user_je_category_name category
 			 , xte.entity_code
 			 , fat.application_name
-			 , '#' || fat.application_id app_id
+			 , fat.application_id app_id
 			 , xeim.source_id_col_name_1
 			 , xeim.transaction_id_col_name_1
 			 , xeim.source_id_col_name_2
@@ -115,7 +115,7 @@ Queries:
 			 , gjct.user_je_category_name
 			 , xte.entity_code
 			 , fat.application_name
-			 , '#' || fat.application_id
+			 , fat.application_id
 			 , xeim.source_id_col_name_1
 			 , xeim.transaction_id_col_name_1
 			 , xeim.source_id_col_name_2

@@ -7,7 +7,6 @@ URL: https://github.com/throwing-cheese/oracle-fusion-cloud-sql-scripts
 Manage Subledger Application Transaction Objects
 Why Description Rule is not visible in the Dropdown of Line Description Rule under Edit Subledger Journal Entry Rule Set? (Doc ID 2642012.1)
 Attributes linked to specific Transaction Object
-
 */
 
 -- ##############################################################

@@ -57,6 +57,8 @@ Queries:
 		  from xla_accounting_errors xae
 		  join fnd_application_tl fat on xae.application_id = fat.application_id and fat.language = userenv('lang')
 		 where 1 = 1
+		   and fat.application_name = 'Payables'
+		   and xae.message_name not in ('XLA_AP_NO_EVENT_TO_PROCESS','XLA_AP_INVALID_GL_DATE')
 		   and 1 = 1
 	  order by xae.creation_date desc
 
@@ -65,22 +67,22 @@ Queries:
 -- ##############################################################
 
 		select '####' xla_transaction_entities
-			 , '#' || xte.entity_id entity_id
-			 , '#' || xte.source_id_int_1 source_id_int_1
-			 , '#' || xte.source_id_int_2 source_id_int_2
-			 , '#' || xte.source_id_int_3 source_id_int_3
+			 , xte.entity_id
+			 , xte.source_id_int_1
+			 , xte.source_id_int_2
+			 , xte.source_id_int_3
 			 , '#' || xte.transaction_number transaction_number
 			 , xte.entity_code
 			 , fat.application_name app
 			 , '####' xla_events
-			 , '#' || xe.event_id event_id
+			 , xe.event_id
 			 , xe.event_number
 			 , xe.creation_date event_created
 			 , flv2.meaning event_status
 			 , flv3.meaning event_process_status
 			 , xe.event_type_code
 			 , '####' xla_ae_headers
-			 , '#' || xah.ae_header_id ae_header_id
+			 , xah.ae_header_id
 			 , decode(xah.balance_type_code,'e','encumbrance','a','actual') balance_type
 			 , xah.period_name
 			 , xah.completed_date
@@ -90,10 +92,10 @@ Queries:
 			 , xah.je_category_name
 			 , xah.creation_date
 			 , xah.request_id
-			 , '#' || xah.group_id group_id
+			 , xah.group_id
 			 , (replace(replace(xah.description,chr(10),''),chr(13),' ')) header_description
 			 , '####' xla_ae_lines
-			 , '#' || xal.code_combination_id code_combination_id
+			 , xal.code_combination_id
 			 , '#' || gcc.segment1 seg1
 			 , '#' || gcc.segment2 seg2
 			 , '#' || gcc.segment3 seg3
@@ -138,6 +140,8 @@ Queries:
 	 left join xla_event_classes_tl xecl on xecl.entity_code = xetl.entity_code and xecl.event_class_code = xetl.event_class_code and xecl.application_id = xetl.application_id and xecl.language = userenv('lang')
 		  join xla_accounting_errors xae on xae.event_id = xe.event_id and xae.entity_id = xah.entity_id and xae.ae_header_id = xah.ae_header_id and xae.ae_line_num = xal.ae_line_num
 		 where 1 = 1
+		   and fat.application_name = 'Payables'
+		   and xae.message_name not in ('XLA_AP_NO_EVENT_TO_PROCESS','XLA_AP_INVALID_GL_DATE')
 		   and 1 = 1
 	  order by to_char(xah.accounting_date, 'yyyy-mm-dd') desc
 
