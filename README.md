@@ -30,6 +30,7 @@ If you have any problems with the scripts, [please log an issue](https://github.
 
 ## Contents
 
+```
 +---ap
 |       ap-expenses.sql
 |       ap-idr-options.sql
@@ -190,3 +191,4 @@ If you have any problems with the scripts, [please log an issue](https://github.
 |       
 \---_misc
         misc-count-volumes-group-by-rollup.sql
+```
