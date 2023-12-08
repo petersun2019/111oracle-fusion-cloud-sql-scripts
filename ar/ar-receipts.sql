@@ -67,7 +67,7 @@ https://community.oracle.com/customerconnect/discussion/601846/query-to-find-amo
 */
 
 		SELECT receipt.amount
-			 , '#' || receipt.cash_receipt_id cash_receipt_id
+			 , receipt.cash_receipt_id
 			 , receipt.doc_sequence_value
 			 , receipt.receipt_date
 			 , receipt.receipt_number
@@ -94,11 +94,11 @@ https://community.oracle.com/customerconnect/discussion/601846/query-to-find-amo
 			 , hca.account_number
 			 , hca.account_name
 			 , araa.request_id
-			 , '#' || araa.cash_receipt_id cash_receipt_id
-			 , '#' || araa.receivable_application_id receivable_application_id
-			 , '#' || araa.payment_schedule_id payment_schedule_id
-			 , '#' || araa.applied_customer_trx_id applied_customer_trx_id
-			 , '#' || araa.applied_payment_schedule_id applied_payment_schedule_id
+			 , araa.cash_receipt_id
+			 , araa.receivable_application_id
+			 , araa.payment_schedule_id
+			 , araa.applied_customer_trx_id
+			 , araa.applied_payment_schedule_id
 			 , to_char(araa.creation_date, 'yyyy-mm-dd hh24:mi:ss') creation_date
 			 , araa.created_by
 			 , to_char(araa.gl_date, 'yyyy-mm-dd') gl_date
@@ -122,11 +122,11 @@ https://community.oracle.com/customerconnect/discussion/601846/query-to-find-amo
 			 , hca.account_number
 			 , hca.account_name
 			 , araa.request_id
-			 , '#' || araa.cash_receipt_id
-			 , '#' || araa.receivable_application_id
-			 , '#' || araa.payment_schedule_id
-			 , '#' || araa.applied_customer_trx_id
-			 , '#' || araa.applied_payment_schedule_id
+			 , araa.cash_receipt_id
+			 , araa.receivable_application_id
+			 , araa.payment_schedule_id
+			 , araa.applied_customer_trx_id
+			 , araa.applied_payment_schedule_id
 			 , to_char(araa.creation_date, 'yyyy-mm-dd hh24:mi:ss')
 			 , araa.created_by
 			 , to_char(araa.gl_date, 'yyyy-mm-dd')
@@ -150,11 +150,11 @@ https://community.oracle.com/customerconnect/discussion/601846/query-to-find-amo
 			 , idsa.number_delinquencies
 			 , idsa.display_name
 			 , araa.request_id
-			 , '#' || araa.cash_receipt_id cash_receipt_id
-			 , '#' || araa.receivable_application_id receivable_application_id
-			 , '#' || araa.payment_schedule_id payment_schedule_id
-			 , '#' || araa.applied_customer_trx_id applied_customer_trx_id
-			 , '#' || araa.applied_payment_schedule_id applied_payment_schedule_id
+			 , araa.cash_receipt_id
+			 , araa.receivable_application_id
+			 , araa.payment_schedule_id
+			 , araa.applied_customer_trx_id
+			 , araa.applied_payment_schedule_id
 			 , to_char(araa.creation_date, 'yyyy-mm-dd hh24:mi:ss') creation_date
 			 , araa.created_by
 			 , acra.amount
@@ -167,7 +167,7 @@ https://community.oracle.com/customerconnect/discussion/601846/query-to-find-amo
 		  join iex_delinq_summaries_all idsa on idsa.cust_account_id = hca.cust_account_id
 		 where 1 = 1
 		   and araa.display = 'Y'
-		   and rcta.trx_number = '123'
+		   and rcta.trx_number = '123456'
 		   and 1 = 1
 	  group by acra.receipt_number
 			 , acra.status
@@ -177,11 +177,11 @@ https://community.oracle.com/customerconnect/discussion/601846/query-to-find-amo
 			 , idsa.number_delinquencies
 			 , idsa.display_name
 			 , araa.request_id
-			 , '#' || araa.cash_receipt_id
-			 , '#' || araa.receivable_application_id
-			 , '#' || araa.payment_schedule_id
-			 , '#' || araa.applied_customer_trx_id
-			 , '#' || araa.applied_payment_schedule_id
+			 , araa.cash_receipt_id
+			 , araa.receivable_application_id
+			 , araa.payment_schedule_id
+			 , araa.applied_customer_trx_id
+			 , araa.applied_payment_schedule_id
 			 , to_char(araa.creation_date, 'yyyy-mm-dd hh24:mi:ss')
 			 , araa.created_by
 			 , acra.amount
@@ -217,10 +217,10 @@ https://community.oracle.com/customerconnect/discussion/601846/query-to-find-amo
 -- ##############################################################	
 
 		select haou.name org
-			 ,'#' || hca.account_number account_number
+			 , hca.account_number
 			 , hca.account_name
 			 , hp.party_name
-			 , '#' || hp.party_number party_number
+			 , hp.party_number
 			 , hp.party_type
 			 , min(to_char(araa.creation_date, 'yyyy-mm-dd hh24:mi:ss')) min_created
 			 , max(to_char(araa.creation_date, 'yyyy-mm-dd hh24:mi:ss')) max_created
@@ -249,10 +249,10 @@ https://community.oracle.com/customerconnect/discussion/601846/query-to-find-amo
 -- ##############################################################
 
 		select haou.name org
-			 ,'#' || hca.account_number account_number
+			 , hca.account_number
 			 , hca.account_name
 			 , hp.party_name
-			 , '#' || hp.party_number party_number
+			 , hp.party_number
 			 , hp.party_type
 			 , '####'
 			 , tbl_summary.bill_cust_class
@@ -312,10 +312,10 @@ https://community.oracle.com/customerconnect/discussion/601846/query-to-find-amo
 		   and araa.status = 'ACC'
 		   and 1 = 1
 	  group by haou.name
-			 , '#' || hca.account_number
+			 , hca.account_number
 			 , hca.account_name
 			 , hp.party_name
-			 , '#' || hp.party_number
+			 , hp.party_number
 			 , hp.party_type
 			 , '####'
 			 , tbl_summary.bill_cust_class
@@ -334,9 +334,9 @@ https://community.oracle.com/customerconnect/discussion/601846/query-to-find-amo
 -- ##############################################################
 
 		select haou.name org
-			 ,'#' || hca.account_number account_number
+			 , hca.account_number
 			 , hca.account_name
-			 , '#' || hp.party_number party_number
+			 , hp.party_name
 			 , tbl_summary.sum_outstanding
 			 , tbl_summary.count_ trx_count
 			 , sum(araa.amount_applied) sum_on_account_amt_applied
@@ -360,9 +360,9 @@ https://community.oracle.com/customerconnect/discussion/601846/query-to-find-amo
 		   and araa.status = 'ACC'
 		   and 1 = 1
 	  group by haou.name
-			 ,'#' || hca.account_number
+			 , hca.account_number
 			 , hca.account_name
-			 , '#' || hp.party_number
+			 , hp.party_name
 			 , tbl_summary.sum_outstanding
 			 , tbl_summary.count_
 
@@ -371,8 +371,8 @@ https://community.oracle.com/customerconnect/discussion/601846/query-to-find-amo
 -- ##############################################################
 
 		select hca.account_name acct_name
-			 , '#' || hca.account_number
-			 , '#' || hp.party_number
+			 , hca.account_number
+			 , hp.party_name
 			 , hca.customer_class_code bill_cust_class
 			 , rbsa.name trx_source
 			 , rctta.name trx_type
@@ -392,8 +392,8 @@ https://community.oracle.com/customerconnect/discussion/601846/query-to-find-amo
 		 where 1 = 1
 		   and 1 = 1
 	  group by hca.account_name
-			 , '#' || hca.account_number
-			 , '#' || hp.party_number
+			 , hca.account_number
+			 , hp.party_name
 			 , hca.customer_class_code
 			 , rbsa.name
 			 , rctta.name
@@ -403,8 +403,8 @@ https://community.oracle.com/customerconnect/discussion/601846/query-to-find-amo
 -- ##############################################################
 
 		select hca.account_name acct_name
-			 , '#' || hca.account_number act_number
-			 , '#' || hp.party_number party_name
+			 , hca.account_number
+			 , hp.party_name
 			 , hca.customer_class_code bill_cust_class
 			 , rbsa.name trx_source
 			 , rctta.name trx_type
@@ -442,8 +442,8 @@ https://community.oracle.com/customerconnect/discussion/601846/query-to-find-amo
 			 , sum(adjustment_total) sum_adjustment
 			 , count(*) count_
 		  from (select hca.account_name
-					 , '#' || hca.account_number account_number
-					 , '#' || hp.party_number party_name
+					 , hca.account_number
+					 , hp.party_name
 					 , hca.cust_account_id account_id
 					 , hca.customer_class_code bill_cust_class
 					 , rbsa.name trx_source

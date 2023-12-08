@@ -36,7 +36,7 @@ select * from ar_adjustments_all where customer_trx_id = 123
 -- ##############################################################
 
 		select rcta.trx_number
-			 , '#' || rcta.customer_trx_id trx_id
+			 , rcta.customer_trx_id trx_id
 			 , haou.name org
 			 , rcta.bill_template_name -- populated after transaction is printed, if never printed, this remains null
 			 , rcta.interface_header_attribute1 reference
@@ -97,7 +97,7 @@ select * from ar_adjustments_all where customer_trx_id = 123
 -- ##############################################################
 
 		select rcta.trx_number
-			 , '#' || rcta.customer_trx_id trx_id
+			 , rcta.customer_trx_id
 			 , haou.name org
 			 , rcta.bill_template_name -- populated after transaction is printed, if never printed, this remains null
 			 , rcta.interface_header_attribute1 reference
@@ -112,7 +112,7 @@ select * from ar_adjustments_all where customer_trx_id = 123
 			 , rcta.doc_sequence_value doc_num
 			 , rcta.request_id
 			 , rtt.name term_name
-			 , '#' || rtb.billing_cycle_id billing_cycle_id -- if populated, trx will not be printed
+			 , rtb.billing_cycle_id -- if populated, trx will not be printed
 			 , rbsa.name trx_source
 			 , rctta.name trx_type
 			 , rctta.accounting_affect_flag -- must be Y for transactions to be printed
@@ -136,21 +136,21 @@ select * from ar_adjustments_all where customer_trx_id = 123
 			 , (select sum(amount_due_remaining) from ar_payment_schedules_all apsa where rcta.customer_trx_id = apsa.customer_trx_id) amt_outstanding
 			 , (select sum(line_adjusted) from ar_adjustments_all aaa where aaa.customer_trx_id = rcta.customer_trx_id) adjustment_total
 			 , ' -- CUSTOMER ###########################'
-			 , '#' || hca.cust_account_id cust_account_id
+			 , hca.cust_account_id
 			 , hp.party_name
 			 , hca.account_number
 			 , hca.customer_class_code
-			 , '#' || rcta.bill_to_site_use_id bill_to_site_use_id
+			 , rcta.bill_to_site_use_id
 			 , ' -- PARTY SITE ###########################'
-			 , '#' || hps.party_site_id party_site_id
+			 , hps.party_site_id
 			 , hps.party_site_number
 			 , hps.status party_site_status
 			 , ' -- CUST_ACCOUNT_SITES ###########################'
-			 , '#' || hcasa.cust_acct_site_id cust_acct_site_id
+			 , hcasa.cust_acct_site_id
 			 , hcasa.status cust_account_site_status
 			 , hcasa.bill_to_flag
 			 , ' -- CUST_ACCOUNT_SITE_USES ###########################'
-			 , '#' || hcsua.site_use_id site_use_id
+			 , hcsua.site_use_id
 			 , hcsua.status site_use_status
 			 , hcsua.site_use_code
 			 , hcsua.location
@@ -187,72 +187,72 @@ This doesn't really work but it's a starting point
 */
 
 		select rcta.trx_number
-			 -- , '#' || rcta.customer_trx_id trx_id
+			 , rcta.customer_trx_id
 			 , haou.name org
-			 -- , rcta.bill_template_name -- populated after transaction is printed, if never printed, this remains null
-			 -- , rcta.interface_header_attribute1 reference
+			 , rcta.bill_template_name -- populated after transaction is printed, if never printed, this remains null
+			 , rcta.interface_header_attribute1 reference
 			 , to_char(rcta.creation_date, 'yyyy-mm-dd hh24:mi:ss') creation_date
 			 , rcta.created_by
 			 , to_char(rcta.last_update_date, 'yyyy-mm-dd hh24:mi:ss') last_update_date
 			 , rcta.last_updated_by
 			 , to_char(rcta.trx_date, 'yyyy-mm-dd') trx_date
 			 , to_char(rcta.printing_original_date, 'yyyy-mm-dd') printing_original_date
-			 -- , to_char(rcta.printing_last_printed, 'yyyy-mm-dd') printing_last_printed
-			 -- , rcta.invoice_currency_code currency
-			 -- , rcta.doc_sequence_value doc_num
-			 -- , rcta.request_id
-			 -- , rtt.name term_name
-			 -- , '#' || rtb.billing_cycle_id billing_cycle_id -- if populated, trx will not be printed
+			 , to_char(rcta.printing_last_printed, 'yyyy-mm-dd') printing_last_printed
+			 , rcta.invoice_currency_code currency
+			 , rcta.doc_sequence_value doc_num
+			 , rcta.request_id
+			 , rtt.name term_name
+			 , rtb.billing_cycle_id -- if populated, trx will not be printed
 			 , rbsa.name trx_source
 			 , rctta.name trx_type
-			 -- , rctta.accounting_affect_flag -- must be Y for transactions to be printed
-			 -- , rctta.default_printing_option -- Printing option to default for invoices of this transaction type
-			 -- , rcta.complete_flag complete
+			 , rctta.accounting_affect_flag -- must be Y for transactions to be printed
+			 , rctta.default_printing_option -- Printing option to default for invoices of this transaction type
+			 , rcta.complete_flag complete
 			 , rcta.printing_option -- if Miscellaneous > Generate Bill = Yes, PRINTING_OPTION = PRI. If No, PRINTING_PENDING = N, If NULL, PRINTING_OPTION = NULL
-			 -- , rcta.printing_pending -- if Miscellaneous > Generate Bill = Yes, PRINTING_PENDING = Y. If No, PRINTING_PENDING = N, If NULL, PRINTING_PENDING = N
-			 -- , rcta.printing_count
-			 -- , rcta.print_request_id
-			 -- , rcta.batch_id
-			 -- , rcta.old_trx_number
-			 -- , rcta.upgrade_method
-			 -- , rcta.del_contact_email_address
-			 -- , rcta.delivery_method_code
-			 -- , rcta.trx_business_category
-			 -- , rcta.payment_attributes
-			 -- , rcta.interface_header_context
-			 -- , rcta.interface_header_attribute1
-			 -- , rcta.interface_header_attribute2
-			 , (select sum(extended_amount) from ra_customer_trx_lines_all rctla where rcta.customer_trx_id = rctla.customer_trx_id) trx_value
-			 , (select sum(amount_due_remaining) from ar_payment_schedules_all apsa where rcta.customer_trx_id = apsa.customer_trx_id) amt_outstanding
+			 , rcta.printing_pending -- if Miscellaneous > Generate Bill = Yes, PRINTING_PENDING = Y. If No, PRINTING_PENDING = N, If NULL, PRINTING_PENDING = N
+			 , rcta.printing_count
+			 , rcta.print_request_id
+			 , rcta.batch_id
+			 , rcta.old_trx_number
+			 , rcta.upgrade_method
+			 , rcta.del_contact_email_address
+			 , rcta.delivery_method_code
+			 , rcta.trx_business_category
+			 , rcta.payment_attributes
+			 , rcta.interface_header_context
+			 , rcta.interface_header_attribute1
+			 , rcta.interface_header_attribute2
+			 -- , (select sum(extended_amount) from ra_customer_trx_lines_all rctla where rcta.customer_trx_id = rctla.customer_trx_id) trx_value
+			 -- , (select sum(amount_due_remaining) from ar_payment_schedules_all apsa where rcta.customer_trx_id = apsa.customer_trx_id) amt_outstanding
 			 -- , (select sum(line_adjusted) from ar_adjustments_all aaa where aaa.customer_trx_id = rcta.customer_trx_id) adjustment_total
-			 -- , ' -- CUSTOMER ###########################'
-			 -- , '#' || hca.cust_account_id cust_account_id
+			 , ' -- CUSTOMER ###########################'
+			 , hca.cust_account_id
 			 , hp.party_name customer_name
 			 , hca.account_number
-			 -- , hca.customer_class_code
-			 -- , '#' || rcta.bill_to_site_use_id bill_to_site_use_id
-			 -- , ' -- PARTY SITE ###########################'
-			 -- , '#' || hps.party_site_id party_site_id
+			 , hca.customer_class_code
+			 , rcta.bill_to_site_use_id
+			 , ' -- PARTY SITE ###########################'
+			 , hps.party_site_id
 			 , hps.party_site_number site
-			 -- , hps.status party_site_status
-			 -- , ' -- CUST_ACCOUNT_SITES ###########################'
-			 -- , '#' || hcasa.cust_acct_site_id cust_acct_site_id
-			 -- , hcasa.status cust_account_site_status
-			 -- , hcasa.bill_to_flag
-			 -- , ' -- CUST_ACCOUNT_SITE_USES ###########################'
-			 -- , '#' || hcsua.site_use_id site_use_id
-			 -- , hcsua.status site_use_status
-			 -- , hcsua.site_use_code
-			 -- , hcsua.location
-			 -- , hcsua.primary_flag
-			 -- , ' -- PROFILES ###########################'
-			 -- , profile_acct.stmt_delivery_method acct_statement_del_method -- Method of delivering statements to the customer. Valid values are E-Mail,PRINT and XML.	
-			 -- , profile_acct.txn_delivery_method acct_txn_del_method -- Method of delivering transactions to the customer. Valid values are PRINT and XML.
-			 -- , profile_site.stmt_delivery_method site_statement_del_method -- Method of delivering statements to the customer. Valid values are E-Mail,PRINT and XML.	
-			 -- , profile_site.txn_delivery_method site_txn_del_method -- Method of delivering transactions to the customer. Valid values are PRINT and XML.
+			 , hps.status party_site_status
+			 , ' -- CUST_ACCOUNT_SITES ###########################'
+			 , hcasa.cust_acct_site_id
+			 , hcasa.status cust_account_site_status
+			 , hcasa.bill_to_flag
+			 , ' -- CUST_ACCOUNT_SITE_USES ###########################'
+			 , hcsua.site_use_id
+			 , hcsua.status site_use_status
+			 , hcsua.site_use_code
+			 , hcsua.location
+			 , hcsua.primary_flag
+			 , ' -- PROFILES ###########################'
+			 , profile_acct.stmt_delivery_method acct_statement_del_method -- Method of delivering statements to the customer. Valid values are E-Mail,PRINT and XML.	
+			 , profile_acct.txn_delivery_method acct_txn_del_method -- Method of delivering transactions to the customer. Valid values are PRINT and XML.
+			 , profile_site.stmt_delivery_method site_statement_del_method -- Method of delivering statements to the customer. Valid values are E-Mail,PRINT and XML.	
+			 , profile_site.txn_delivery_method site_txn_del_method -- Method of delivering transactions to the customer. Valid values are PRINT and XML.
 			 , ' -- APPLICATIONS ###########################'
-			 , '#' || araa.receivable_application_id receivable_application_id
-			 , '#' || araa.payment_schedule_id payment_schedule_id
+			 , araa.receivable_application_id
+			 , araa.payment_schedule_id
 			 , to_char(araa.creation_date, 'yyyy-mm-dd hh24:mi:ss') applic_created
 			 , araa.created_by applic_created_by
 			 , araa.amount_applied
@@ -345,7 +345,7 @@ This doesn't really work but it's a starting point
 			 , rctlgda.account_class
 			 , to_char(rctlgda.gl_date, 'yyyy-mm-dd') gl_date
 			 , to_char(rctlgda.gl_posted_date, 'yyyy-mm-dd') gl_posted_date
-			 , '#' || gcc.code_combination_id ccid
+			 , gcc.code_combination_id
 			 , '#' || gcc.segment1 segment1
 			 , '#' || gcc.segment2 segment2
 			 , '#' || gcc.segment3 segment3
@@ -506,7 +506,7 @@ This doesn't really work but it's a starting point
 -- ##############################################################
 
 		select rcta.trx_number
-			 , '#' || rcta.customer_trx_id trx_id
+			 , rcta.customer_trx_id
 			 , haou.name org
 			 , rbsa.name trx_source
 			 , rctta.name trx_type
@@ -524,7 +524,7 @@ This doesn't really work but it's a starting point
 		 where 1 = 1
 		   and 1 = 1
 	  group by rcta.trx_number
-			 , '#' || rcta.customer_trx_id
+			 , rcta.customer_trx_id
 			 , haou.name
 			 , rbsa.name
 			 , rctta.name

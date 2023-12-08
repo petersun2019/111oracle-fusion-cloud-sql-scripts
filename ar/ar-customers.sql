@@ -41,7 +41,7 @@ Queries:
 -- ##############################################################
 
 		select ' -- PARTY ###########################' party____
-			 , '#' || hp.party_id party_id
+			 , hp.party_id
 			 , hp.party_name
 			 , hp.party_number
 			 , hp.party_type
@@ -49,14 +49,14 @@ Queries:
 			 , hp.created_by party_created_by
 			 , hp.status party_status
 			 , ' -- CUSTOMER ###########################' customer____
-			 , '#' || hca.cust_account_id cust_account_id
+			 , hca.cust_account_id
 			 , hca.account_number
 			 , hca.account_name
 			 , hca.status account_status
 			 , to_char(hca.creation_date, 'yyyy-mm-dd hh24:mi:ss') cust_created
 			 , hca.created_by cust_created_by
 			 , ' -- PARTY SITE ###########################' party_site____
-			 , '#' || hps.party_site_id party_site_id
+			 , hps.party_site_id
 			 , hps.party_site_number
 			 , hps.status party_site_status
 			 , to_char(hps.creation_date, 'yyyy-mm-dd hh24:mi:ss') site_created
@@ -73,7 +73,7 @@ Queries:
 -- ##############################################################
 
 		select ' -- PARTY ###########################'
-			 , '#' || hp.party_id party_id
+			 , hp.party_id
 			 , hp.party_name
 			 , hp.party_number
 			 , hp.party_type
@@ -83,7 +83,7 @@ Queries:
 			 , hp.last_update_date party_updated
 			 , hp.last_updated_by party_updated_by
 			 , ' -- CUSTOMER ###########################'
-			 , '#' || hca.cust_account_id cust_account_id
+			 , hca.cust_account_id
 			 , hca.account_number
 			 , hca.account_name
 			 , hca.status account_status
@@ -92,7 +92,7 @@ Queries:
 			 , hca.last_update_date cust_updated
 			 , hca.last_updated_by cust_updated_by
 			 , ' -- PARTY SITE ###########################'
-			 , '#' || hps.party_site_id party_site_id
+			 , hps.party_site_id
 			 , hps.party_site_number
 			 , hps.status party_site_status
 			 , hps.creation_date site_created
@@ -100,7 +100,7 @@ Queries:
 			 , hps.last_update_date site_updated
 			 , hps.last_updated_by site_updated_by
 			 , ' -- LOCATION ###########################'
-			 , '#' || hl.location_id location_id
+			 , hl.location_id
 			 , hl.creation_date
 			 , hl.address1
 			 , hl.address2
@@ -117,7 +117,7 @@ Queries:
 			 , hl.last_update_date loc_updated
 			 , hl.last_updated_by loc_updated_by
 			 , ' -- CUST_ACCOUNT_SITES ###########################'
-			 , '#' || hcasa.cust_acct_site_id cust_acct_site_id
+			 , hcasa.cust_acct_site_id
 			 , hcasa.status cust_account_site_status
 			 , hcasa.bill_to_flag
 			 , hcasa.creation_date hcasa_created
@@ -125,7 +125,7 @@ Queries:
 			 , hcasa.last_update_date hcasa_updated
 			 , hcasa.last_updated_by hcasa_updated_by
 			 , ' -- CUST_ACCOUNT_SITE_USES ###########################'
-			 , '#' || hcsua.site_use_id site_use_id
+			 , hcsua.site_use_id
 			 , hcsua.status site_use_status
 			 , hcsua.site_use_code
 			 , hcsua.location
@@ -232,18 +232,18 @@ select * from hz_customer_profiles_f where site_use_id = 321
 -- CUSTOMER BANK ACCOUNTS 2
 -- ##############################################################
 
-		select '#' || ipiu.instrument_payment_use_id
+		selectipiu.instrument_payment_use_id
 			 , ipiu.payment_flow
-			 , '#' || ipiu.ext_pmt_party_id
+			 , ipiu.ext_pmt_party_id
 			 , ipiu.instrument_type
-			 , '#' || ipiu.instrument_id
-			 , cbbv.BANK_NAME
-			 , cbbv.BANK_BRANCH_NAME
+			 , ipiu.instrument_id
+			 , cbbv.bank_name
+			 , cbbv.bank_branch_name
 			 , ieb.currency_code
 			 , ieb.bank_account_name
 			 , ieb.bank_account_num
 			 , nvl(ieb.currency_code, 'No Currency Defined') currency_code
-			 , '#' || iep.org_id
+			 , iep.org_id
 			 , hp.party_name customer_name
 			 , hca.account_number
 			 , hps.party_site_number
@@ -263,7 +263,7 @@ select * from hz_customer_profiles_f where site_use_id = 321
 -- CUSTOMER BANK ACCOUNTS 3
 -- ##############################################################
 
-		select '#' || ieba.ext_bank_account_id ext_bank_account_id
+		select ieba.ext_bank_account_id
 			 , '#' || ieba.bank_account_num bank_account_num
 			 , '#' || ieba.masked_bank_account_num
 			 , ieba.bank_account_name
@@ -276,10 +276,10 @@ select * from hz_customer_profiles_f where site_use_id = 321
 			 , cbbv.bank_name
 			 , '#' || cbbv.bank_branch_name bank_branch_name
 			 , '#### iby_pmt_instr_uses_all'
-			 , '#' || ipiua.instrument_payment_use_id instrument_payment_use_id
+			 , ipiua.instrument_payment_use_id
 			 , ipiua.payment_flow -- Specifies funds capture or disbursement flow. Values taken from lookup: IBY_PAYMENT_FLOW. DISBURSEMENT = Paying money out (Suppliers or Employees), FUNDS_CAPTURE is money coming in (AR Customers)
-			 , '#' || ipiua.ext_pmt_party_id ext_pmt_party_id -- Foreign key to IBY_EXTERNAL_PAYERS_ALL.EXT_PAYER_ID
-			 , '#' || ipiua.instrument_id instrument_id
+			 , ipiua.ext_pmt_party_id -- Foreign key to IBY_EXTERNAL_PAYERS_ALL.EXT_PAYER_ID
+			 , ipiua.instrument_id
 			 , ipiua.instrument_type -- Instrument type. Values from the IBY_INSTRUMENT_TYPES lookup include BANKACCOUNT, CREDITCARD, and DEBITCARD
 			 , ipiua.order_of_preference
 			 , ipiua.primary_flag
@@ -290,10 +290,10 @@ select * from hz_customer_profiles_f where site_use_id = 321
 			 , to_char(ipiua.start_date, 'yyyy-mm-dd') instr_start
 			 , to_char(ipiua.end_date, 'yyyy-mm-dd') instr_end
 			 , '#### iby_external_payers_all'
-			 , '#' || iepa.ext_payer_id iepa_ext_payer_id
-			 , '#' || iepa.party_id iepa_party_id
-			 , '#' || iepa.cust_account_id iepa_cust_account_id
-			 , '#' || iepa.acct_site_use_id iepa_acct_site_use_id
+			 , iepa.ext_payer_id iepa_ext_payer_id
+			 , iepa.party_id iepa_party_id
+			 , iepa.cust_account_id iepa_cust_account_id
+			 , iepa.acct_site_use_id iepa_acct_site_use_id
 			 , iepa.payment_function
 			 , to_char(iepa.creation_date, 'yyyy-mm-dd hh24:mi:ss') iepa_created
 			 , iepa.created_by iepa_created_by
@@ -503,10 +503,10 @@ account level
 
 		select hcp.*
 		  from hz_contact_points hcp
-		  join HZ_CUST_ACCOUNT_ROLES hcar on hcp.relationship_id = hcar.relationship_id
+		  join hz_cust_account_roles hcar on hcp.relationship_id = hcar.relationship_id
 		 where 1 = 1
-		   and hcar.CUST_ACCT_SITE_ID is null
-		   and hcp.CONTACT_POINT_TYPE = 'EMAIL'
+		   and hcar.cust_acct_site_id is null
+		   and hcp.contact_point_type = 'EMAIL'
 		   and 1 = 1
 
 -- ##############################################################
@@ -519,10 +519,10 @@ site level
 
 		select hcp.*
 		  from hz_contact_points hcp
-		  join HZ_CUST_ACCOUNT_ROLES hcar on hcp.relationship_id = hcar.relationship_id
+		  join hz_cust_account_roles hcar on hcp.relationship_id = hcar.relationship_id
 		 where 1 = 1
-		   and hcar.CUST_ACCT_SITE_ID is not null
-		   and hcp.CONTACT_POINT_TYPE = 'EMAIL'
+		   and hcar.cust_acct_site_id is not null
+		   and hcp.contact_point_type = 'EMAIL'
 		   and 1 = 1
 
 -- ##############################################################

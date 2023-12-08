@@ -17,9 +17,9 @@ Queries:
 -- ##############################################################
 
 		select rcta.trx_number
-			 , '#' || rcta.customer_trx_id trx_id
+			 , rcta.customer_trx_id trx_id
 			 , rcta.trx_class
-			 , '#' || aaa.adjustment_id adjustment_id
+			 , aaa.adjustment_id
 			 , aaa.adjustment_number
 			 , aaa.doc_sequence_value
 			 , aaa.created_by adj_created_by
@@ -29,8 +29,8 @@ Queries:
 			 , aaa.amount adj_amount
 			 , aaa.line_adjusted adj_line_adjusted
 			 , aaa.type adj_type
-			 , '#' || aaa.payment_schedule_id payment_schedule_id
-			 , '#' || aaa.receivables_trx_id receivables_trx_id
+			 , aaa.payment_schedule_id
+			 , aaa.receivables_trx_id
 			 , (replace(replace(aaa.comments,chr(10),''),chr(13),' ')) adj_comments
 			 , aaa.created_from
 			 , aaa.reason_code
@@ -55,9 +55,9 @@ Queries:
 -- ##############################################################
 
 		select rcta.trx_number
-			 , '#' || rcta.customer_trx_id trx_id
+			 , rcta.customer_trx_id trx_id
 			 , rcta.trx_class
-			 , '#' || aaa.adjustment_id adjustment_id
+			 , aaa.adjustment_id
 			 , aaa.adjustment_number
 			 , aaa.doc_sequence_value
 			 , aaa.created_by adj_created_by
@@ -67,8 +67,8 @@ Queries:
 			 , aaa.amount adj_amount
 			 , aaa.line_adjusted adj_line_adjusted
 			 , aaa.type adj_type
-			 , '#' || aaa.payment_schedule_id payment_schedule_id
-			 , '#' || aaa.receivables_trx_id receivables_trx_id
+			 , aaa.payment_schedule_id
+			 , aaa.receivables_trx_id
 			 , (replace(replace(aaa.comments,chr(10),''),chr(13),' ')) adj_comments
 			 , aaa.created_from
 			 , aaa.reason_code

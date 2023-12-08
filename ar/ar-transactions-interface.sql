@@ -54,15 +54,15 @@ Queries:
 -- DETAILS
 -- ##############################################################
 
-		select '#' || rila.interface_line_id interface_line_id
-			 , '#' || rila.set_of_books_id set_of_books_id
+		select rila.interface_line_id
+			 , rila.set_of_books_id
 			 , rila.line_type
 			 , (replace(replace(rila.description,chr(10),''),chr(13),' ')) description
 			 , rila.batch_source_name
 			 , rila.cust_trx_type_name
 			 , rila.term_name
-			 , '#' || rila.term_id term_id
-			 , '#' || rila.customer_trx_id customer_trx_id
+			 , rila.term_id
+			 , rila.customer_trx_id
 			 , rila.interface_status
 			 , rila.purchase_order
 			 , rila.interface_line_context
@@ -82,8 +82,8 @@ Queries:
 			 , rila.unit_selling_price
 			 , rila.orig_system_batch_name
 			 , rila.orig_system_bill_customer_ref
-			 , '#' || rila.orig_system_bill_customer_id orig_system_bill_customer_id
-			 , '#' || rila.orig_system_bill_address_id orig_system_bill_address_id
+			 , rila.orig_system_bill_customer_id
+			 , rila.orig_system_bill_address_id
 			 , rila.orig_system_ship_customer_ref
 			 , hca_bill.account_number
 			 , hp_bill.party_name account_name
@@ -106,12 +106,12 @@ Queries:
 			 , rila.primary_salesrep_number
 			 , rila.memo_line_name
 			 , rila.memo_line_id
-			 , '#' || rila.inventory_item_id inventory_item_id
+			 , rila.inventory_item_id
 			 , '#' distributions____
-			 , '#' || rida.interface_distribution_id interface_distribution_id
+			 , rida.interface_distribution_id
 			 , rida.account_class
 			 , rida.amount dist_amount
-			 , '#' || rida.code_combination_id code_combination_id
+			 , rida.code_combination_id
 			 , '#' || gcc.segment1 segment1
 			 , '#' || gcc.segment2 segment2
 			 , '#' || gcc.segment3 segment3

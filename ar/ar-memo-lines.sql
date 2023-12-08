@@ -9,11 +9,11 @@ URL: https://github.com/throwing-cheese/oracle-fusion-cloud-sql-scripts
 -- MEMO LINES
 -- ##############################################################
 
-		select '#' || amlab.memo_line_id memo_line_id
+		select amlab.memo_line_id
 			 , amlat.name memo_line_name
 			 , amlat.description memo_line_description
 			 , amlab.line_type
-			 , '#' || amlab.memo_line_seq_id memo_line_seq_id
+			 , amlab.memo_line_seq_id
 			 , to_char(amlab.creation_date, 'yyyy-mm-dd hh24:mi:ss') created
 			 , amlab.created_by
 			 , to_char(amlab.effective_start_date, 'yyyy-mm-dd') effective_start_date
