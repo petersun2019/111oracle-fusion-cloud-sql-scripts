@@ -145,54 +145,17 @@ Queries:
 
 		select gl.name ledger
 			 , fat.application_name
-			 , xah.event_type_code
-			 , xah.product_rule_code
-			 , xte.entity_code
-			 , xal.accounting_class_code
 			 , gjh.period_name
-			 , min(to_char(gjh.creation_date, 'yyyy-mm-dd')) min_gjh_cr_date
-			 , max(to_char(gjh.creation_date, 'yyyy-mm-dd')) max_gjh_cr_date
-			 , min(gjh.created_by) min_gjh_created_byt
-			 , max(gjh.created_by) max_gjh_created_byt
-			 , min(gjb.request_id)
-			 , max(gjb.request_id)
-			 , count(*)
-		  from gl_je_headers gjh 
-		  join gl_je_batches gjb on gjh.je_batch_id = gjb.je_batch_id
-		  join gl_je_lines gjl on gjh.je_header_id = gjl.je_header_id
-		  join gl_import_references gir on gjh.je_header_id = gir.je_header_id and gir.je_line_num = gjl.je_line_num
-		  join xla_ae_lines xal on gir.gl_sl_link_table = xal.gl_sl_link_table and gir.gl_sl_link_id = xal.gl_sl_link_id
-		  join xla_ae_headers xah on xal.application_id = xah.application_id and xal.ae_header_id = xah.ae_header_id
-		  join xla_events xe on xah.application_id = xe.application_id and xah.event_id = xe.event_id
-		  join xla_transaction_entities xte on xe.application_id = xte.application_id and xe.entity_id = xte.entity_id
-		  join gl_ledgers gl on gl.ledger_id = gjh.ledger_id
-		  join fnd_application_tl fat on fat.application_id = xte.application_id and fat.language = userenv('lang')
-		 where 1 = 1
-		   and 1 = 1
-	  group by gl.name
-			 , fat.application_name
-			 , xah.event_type_code
-			 , xah.product_rule_code
-			 , xte.entity_code
-			 , xal.accounting_class_code
-			 , gjh.period_name
-
--- ##############################################################
--- XLA SUMMARY - NOT BY PERIOD
--- ##############################################################
-
-		select gl.name ledger
-			 , fat.application_name
-			 -- , gcc.segment2
+			 , gjh.actual_flag
 			 , gjst.user_je_source_name source
 			 , gjct.user_je_category_name category
 			 , xah.event_type_code
 			 , xah.product_rule_code
 			 , xte.entity_code
+			 , xecl.name event_class
+			 , xetl.name event_type
 			 , xal.accounting_class_code
 			 , flv1.meaning accounting_class
-			 -- , nvl2(gjlr.jgzz_recon_ref, 'Y','N') jnl_line_rec_ref
-			 -- , nvl2(xal.jgzz_recon_ref, 'Y','N') xla_line_rec_ref
 			 , min(to_char(gjh.creation_date, 'yyyy-mm-dd')) min_gjh_cr_date
 			 , max(to_char(gjh.creation_date, 'yyyy-mm-dd')) max_gjh_cr_date
 			 , min(gjh.created_by) min_gjh_created_by
@@ -224,21 +187,87 @@ Queries:
 		  join gl_ledgers gl on gl.ledger_id = gjh.ledger_id
 		  join fnd_application_tl fat on fat.application_id = xte.application_id and fat.language = userenv('lang')
 		  join fnd_lookup_values_vl flv1 on xal.accounting_class_code = flv1.lookup_code and flv1.lookup_type = 'XLA_ACCOUNTING_CLASS'
-		  -- join gl_je_lines_recon gjlr on gjlr.je_header_id = gjh.je_header_id and gjlr.je_line_num = gjl.je_line_num
+		  join xla_event_types_tl xetl on xetl.event_type_code = xe.event_type_code and xetl.application_id = xe.application_id and xetl.language = userenv('lang')
+		  join xla_event_classes_tl xecl on xecl.entity_code = xetl.entity_code and xecl.event_class_code = xetl.event_class_code and xecl.application_id = xetl.application_id and xecl.language = userenv('lang')
 		 where 1 = 1
 		   and 1 = 1
 	  group by gl.name
 			 , fat.application_name
-			 -- , gcc.segment2
+			 , gjh.period_name
+			 , gjh.actual_flag
 			 , gjst.user_je_source_name
 			 , gjct.user_je_category_name
 			 , xah.event_type_code
 			 , xah.product_rule_code
 			 , xte.entity_code
+			 , xecl.name
+			 , xetl.name
 			 , xal.accounting_class_code
 			 , flv1.meaning
-			 -- , nvl2(gjlr.jgzz_recon_ref, 'Y','N')
-			 -- , nvl2(xal.jgzz_recon_ref, 'Y','N')
+
+-- ##############################################################
+-- XLA SUMMARY - NOT BY PERIOD
+-- ##############################################################
+
+		select gl.name ledger
+			 , fat.application_name
+			 , gjh.actual_flag
+			 , gjst.user_je_source_name source
+			 , gjct.user_je_category_name category
+			 , xah.event_type_code
+			 , xah.product_rule_code
+			 , xte.entity_code
+			 , xecl.name event_class
+			 , xetl.name event_type
+			 , xal.accounting_class_code
+			 , flv1.meaning accounting_class
+			 , min(to_char(gjh.creation_date, 'yyyy-mm-dd')) min_gjh_cr_date
+			 , max(to_char(gjh.creation_date, 'yyyy-mm-dd')) max_gjh_cr_date
+			 , min(gjh.created_by) min_gjh_created_by
+			 , max(gjh.created_by) max_gjh_created_by
+			 , min(gjh.name) min_jnl_name
+			 , max(gjh.name) max_jnl_name
+			 , min(gjb.name) min_batch_name
+			 , max(gjb.name) max_batch_name
+			 , min(xte.source_id_int_1) min_id_int_1
+			 , max(xte.source_id_int_1) max_id_int_1
+			 , min(xte.transaction_number) min_trx_num
+			 , max(xte.transaction_number) max_trx_num
+			 , min(gjh.period_name) min_period
+			 , max(gjh.period_name) max_period
+			 , count(distinct gjb.je_batch_id) count_jnl_batches
+			 , count(distinct gjh.je_header_id) count_jnl_headers
+			 , count(*) count_lines
+		  from gl_je_headers gjh 
+		  join gl_je_batches gjb on gjh.je_batch_id = gjb.je_batch_id
+		  join gl_je_lines gjl on gjh.je_header_id = gjl.je_header_id
+		  join gl_code_combinations gcc on gjl.code_combination_id = gcc.code_combination_id
+		  join gl_je_sources_tl gjst on gjh.je_source = gjst.je_source_name and gjst.language = userenv('lang')
+		  join gl_je_categories_tl gjct on gjh.je_category = gjct.je_category_name and gjct.language = userenv('lang')
+		  join gl_import_references gir on gjh.je_header_id = gir.je_header_id and gir.je_line_num = gjl.je_line_num
+		  join xla_ae_lines xal on gir.gl_sl_link_table = xal.gl_sl_link_table and gir.gl_sl_link_id = xal.gl_sl_link_id
+		  join xla_ae_headers xah on xal.application_id = xah.application_id and xal.ae_header_id = xah.ae_header_id
+		  join xla_events xe on xah.application_id = xe.application_id and xah.event_id = xe.event_id
+		  join xla_transaction_entities xte on xe.application_id = xte.application_id and xe.entity_id = xte.entity_id
+		  join gl_ledgers gl on gl.ledger_id = gjh.ledger_id
+		  join fnd_application_tl fat on fat.application_id = xte.application_id and fat.language = userenv('lang')
+		  join fnd_lookup_values_vl flv1 on xal.accounting_class_code = flv1.lookup_code and flv1.lookup_type = 'XLA_ACCOUNTING_CLASS'
+		  join xla_event_types_tl xetl on xetl.event_type_code = xe.event_type_code and xetl.application_id = xe.application_id and xetl.language = userenv('lang')
+		  join xla_event_classes_tl xecl on xecl.entity_code = xetl.entity_code and xecl.event_class_code = xetl.event_class_code and xecl.application_id = xetl.application_id and xecl.language = userenv('lang')
+		 where 1 = 1
+		   and 1 = 1
+	  group by gl.name
+			 , fat.application_name
+			 , gjh.actual_flag
+			 , gjst.user_je_source_name
+			 , gjct.user_je_category_name
+			 , xah.event_type_code
+			 , xah.product_rule_code
+			 , xte.entity_code
+			 , xecl.name
+			 , xetl.name
+			 , xal.accounting_class_code
+			 , flv1.meaning
 
 -- ##############################################################
 -- XLA SUMMARY - NOT BY PERIOD NO GCC NO EVENT_TYPE_CODE
