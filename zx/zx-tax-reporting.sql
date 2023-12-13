@@ -13,6 +13,7 @@ Queries:
 -- ZX_DIST_TAX_BOX_ASSGNMNTS
 -- JE_ZZ_VAT_REP_TRX_T - VERSION 1
 -- JE_ZZ_VAT_REP_TRX_T - VERSION 2 (SMALLER VERSION)
+-- JE_ZZ_VAT_REP_TRX_T - VERSION 3 (INCLUDE GROUP BY DATE COLUMN)
 -- BOX NUMBER ATTEMPT 1 - DETAILED LEVEL
 -- BOX NUMBER ATTEMPT 2 - SUMMARY LEVEL
 -- JG_ZZ_VAT_TRX_DETAILS - VERSION 1
@@ -151,6 +152,13 @@ select * from zx_dist_tax_box_assgnmnts where reporting_batch_id = 1234
 /*
 Oracle internal use only.
 This temporary table contains reporting information related to tax, that must be sent to the tax authority.
+
+Data is stored in JE_ZZ_VAT_REP_TRX_T
+Once run "Finalize Transactions for Tax Reporting", data will still be in the table.
+However, when run the final "Tax Box Return Preparation Report" after Finalising the period, data will be wiped from JE_ZZ_VAT_REP_TRX_T
+Therefore, if have custom reports looking at JE_ZZ_VAT_REP_TRX_T, then need to run custom report after running the Finalize job but before running the final Return Preparation Report.
+
+Cannot run following month until run the final "Tax Box Return Preparation Report" after Finalising the period.
 */
 
 		select trx.reporting_batch_id
@@ -174,6 +182,8 @@ This temporary table contains reporting information related to tax, that must be
 		  join jg_zz_vat_rep_status rpt_status on rpt_status.reporting_status_id = trx.reporting_batch_id
 		  join jg_zz_vat_rep_entities entities on entities.vat_reporting_entity_id = rpt_status.vat_reporting_entity_id
 		  join hz_parties hp on hp.party_id = entities.party_id
+		 where 1 = 1
+		   and 1 = 1
 	  group by trx.reporting_batch_id
 			 , trx.transaction_source
 			 , trx.request_id
@@ -192,7 +202,19 @@ This temporary table contains reporting information related to tax, that must be
 -- JE_ZZ_VAT_REP_TRX_T - VERSION 2 (SMALLER VERSION)
 -- ##################################################################
 
-		select trx.reporting_batch_id
+/*
+Oracle internal use only.
+This temporary table contains reporting information related to tax, that must be sent to the tax authority.
+
+Data is stored in JE_ZZ_VAT_REP_TRX_T
+Once run "Finalize Transactions for Tax Reporting", data will still be in the table.
+However, when run the final "Tax Box Return Preparation Report" after Finalising the period, data will be wiped from JE_ZZ_VAT_REP_TRX_T
+Therefore, if have custom reports looking at JE_ZZ_VAT_REP_TRX_T, then need to run custom report after running the Finalize job but before running the final Return Preparation Report.
+Cannot run following month until run the final "Tax Box Return Preparation Report" after Finalising the period.
+*/
+
+		select hp.party_name
+			 , trx.reporting_batch_id
 			 , trx.transaction_source
 			 , rpt_status.tax_calendar_period
 			 , rpt_status.source
@@ -206,13 +228,51 @@ This temporary table contains reporting information related to tax, that must be
 		  join jg_zz_vat_rep_status rpt_status on rpt_status.reporting_status_id = trx.reporting_batch_id
 		  join jg_zz_vat_rep_entities entities on entities.vat_reporting_entity_id = rpt_status.vat_reporting_entity_id
 		  join hz_parties hp on hp.party_id = entities.party_id
-	  group by trx.reporting_batch_id
+		 where 1 = 1
+		   and 1 = 1
+	  group by hp.party_name
+			 , trx.reporting_batch_id
 			 , trx.transaction_source
 			 , rpt_status.tax_calendar_period
 			 , rpt_status.source
 			 , rpt_status.final_reporting_status_flag
 			 , rpt_status.final_reporting_process_id
 			 , rpt_status.final_reporting_process_date
+
+-- ##################################################################
+-- JE_ZZ_VAT_REP_TRX_T - VERSION 3 (INCLUDE GROUP BY DATE COLUMN)
+-- ##################################################################
+
+/*
+Oracle internal use only.
+This temporary table contains reporting information related to tax, that must be sent to the tax authority.
+
+Data is stored in JE_ZZ_VAT_REP_TRX_T
+Once run "Finalize Transactions for Tax Reporting", data will still be in the table.
+However, when run the final "Tax Box Return Preparation Report" after Finalising the period, data will be wiped from JE_ZZ_VAT_REP_TRX_T
+Therefore, if have custom reports looking at JE_ZZ_VAT_REP_TRX_T, then need to run custom report after running the Finalize job but before running the final Return Preparation Report.
+Cannot run following month until run the final "Tax Box Return Preparation Report" after Finalising the period.
+*/
+
+		select hp.party_name
+			 , to_char(trx.je_info_d1, 'yyyy-mm') tr_mon
+			 , rpt_status.tax_calendar_period
+			 , rpt_status.source
+			 , rpt_status.final_reporting_status_flag
+			 , min(to_char(trx.creation_date, 'yyyy-mm-dd hh24:mi:ss')) min_created
+			 , max(to_char(trx.creation_date, 'yyyy-mm-dd hh24:mi:ss')) max_created
+			 , count(*) ct
+		  from je_zz_vat_rep_trx_t trx
+		  join jg_zz_vat_rep_status rpt_status on rpt_status.reporting_status_id = trx.reporting_batch_id
+		  join jg_zz_vat_rep_entities entities on entities.vat_reporting_entity_id = rpt_status.vat_reporting_entity_id
+		  join hz_parties hp on hp.party_id = entities.party_id
+		 where 1 = 1
+		   and 1 = 1
+	  group by hp.party_name
+			 , to_char(trx.je_info_d1, 'yyyy-mm')
+			 , rpt_status.tax_calendar_period
+			 , rpt_status.source
+			 , rpt_status.final_reporting_status_flag
 
 -- ##################################################################
 -- BOX NUMBER ATTEMPT 1 - DETAILED LEVEL
@@ -222,6 +282,12 @@ This temporary table contains reporting information related to tax, that must be
 https://community.oracle.com/customerconnect/discussion/comment/813626#Comment_813626
 Where to find employee W2 Box 1 and Box 5 Data?
 tax box allocation listing data model dataset q_return
+
+Data is stored in JE_ZZ_VAT_REP_TRX_T
+Once run "Finalize Transactions for Tax Reporting", data will still be in the table.
+However, when run the final "Tax Box Return Preparation Report" after Finalising the period, data will be wiped from JE_ZZ_VAT_REP_TRX_T
+Therefore, if have custom reports looking at JE_ZZ_VAT_REP_TRX_T, then need to run custom report after running the Finalize job but before running the final Return Preparation Report.
+Cannot run following month until run the final "Tax Box Return Preparation Report" after Finalising the period.
 */
 
 		select je_info_n21 tax_dist_id
@@ -261,10 +327,10 @@ tax box allocation listing data model dataset q_return
 			 , je_INFO_V10 box_number_description
 			 , je_INFO_V32 sign_flag
 			 , je_info_v34 trx_currency -- As per bug#30851865
-		from je_zz_vat_rep_trx_t gt
-		join jg_zz_vat_rep_status jzvrs on gt.reporting_batch_id = jzvrs.reporting_status_id
-	   where jzvrs.source not in ('GL','AR','AP')
-
+		  from je_zz_vat_rep_trx_t gt
+		  join jg_zz_vat_rep_status jzvrs on gt.reporting_batch_id = jzvrs.reporting_status_id
+		 where 1 = 1
+		   and 1 = 1
 
 -- ##################################################################
 -- BOX NUMBER ATTEMPT 2 - SUMMARY LEVEL
@@ -272,64 +338,71 @@ tax box allocation listing data model dataset q_return
 
 /*
 Seems like JE_INFO_N20 = JE_INFO_N16 + JE_INFO_N18 + JE_INFO_N19
+
+Data is stored in JE_ZZ_VAT_REP_TRX_T
+Once run "Finalize Transactions for Tax Reporting", data will still be in the table.
+However, when run the final "Tax Box Return Preparation Report" after Finalising the period, data will be wiped from JE_ZZ_VAT_REP_TRX_T
+Therefore, if have custom reports looking at JE_ZZ_VAT_REP_TRX_T, then need to run custom report after running the Finalize job but before running the final Return Preparation Report.
+Cannot run following month until run the final "Tax Box Return Preparation Report" after Finalising the period.
 */
 
-			select transaction_source
-				 , decode(jzvrs.final_reporting_status_flag,'S','REPORTED','UNREPORTED') final_reporting_status
-				 , je_info_v1 financial_document_type
-				 , je_info_v3 code
-				 , je_info_v13 l_source
-				 , je_info_v16 box_type
-				 , je_info_v18 doc_seq
-				 , je_info_v19 tax_box
-				 , je_info_v20 box_num
-				 , je_info_v22 l_org
-				 , je_info_v24 report_type_name
-				 , to_char(je_info_d1,'mm-yyyy') d1
-				 , to_char(je_info_d1,'yyyy') d1_year
-				 , to_char(je_info_d2,'mm-yyyy') d2
-				 , to_char(je_info_d2,'yyyy') d2_year
-				 , gt.request_id
-				 , sum(je_info_n10) sum_n10
-				 , sum(je_info_n15) sum_n15
-				 , sum(je_info_n16) sum_n16
-				 , sum(je_info_n17) sum_n17
-				 , sum(je_info_n18) sum_n18
-				 , sum(je_info_n19) sum_n19
-				 , sum(je_info_n20) sum_n20
-				 , min(to_char(gt.creation_date, 'yyyy-mm-dd hh24:mi:ss')) min_trx_created
-				 , max(to_char(gt.creation_date, 'yyyy-mm-dd hh24:mi:ss')) max_trx_created
-				 , min(gt.created_by) min_created_by
-				 , max(gt.created_by) max_created_by
-				 , min(to_char(gt.last_update_date, 'yyyy-mm-dd hh24:mi:ss')) min_trx_updated
-				 , max(to_char(gt.last_update_date, 'yyyy-mm-dd hh24:mi:ss')) max_trx_updated
-				 , min(gt.last_updated_by) min_updated_by
-				 , max(gt.last_updated_by) max_updated_by
-				 , min('#' || je_info_v7) min_doc_number
-				 , max('#' || je_info_v7) max_doc_number
-				 , min('#' || je_info_v2) min_inv_num
-				 , max('#' || je_info_v2) max_inv_num
-				 , count(*) ct
-			  from je_zz_vat_rep_trx_t gt
-			  join jg_zz_vat_rep_status jzvrs on gt.reporting_batch_id = jzvrs.reporting_status_id
-			 where 1 = 1
-			   and jzvrs.source not in ('GL','AR','AP')
-		  group by transaction_source
-				 , decode(jzvrs.final_reporting_status_flag,'S','REPORTED','UNREPORTED')
-				 , je_info_v1
-				 , je_info_v3
-				 , je_info_v13
-				 , je_info_v16
-				 , je_info_v18
-				 , je_info_v19
-				 , je_info_v20
-				 , je_info_v22
-				 , je_info_v24
-				 , to_char(je_info_d1,'mm-yyyy')
-				 , to_char(je_info_d1,'yyyy')
-				 , to_char(je_info_d2,'mm-yyyy')
-				 , to_char(je_info_d2,'yyyy')
-				 , gt.request_id
+		select transaction_source
+			 , decode(jzvrs.final_reporting_status_flag,'S','REPORTED','UNREPORTED') final_reporting_status
+			 , je_info_v1 financial_document_type
+			 , je_info_v3 code
+			 , je_info_v13 l_source
+			 , je_info_v16 box_type
+			 , je_info_v18 doc_seq
+			 , je_info_v19 tax_box
+			 , je_info_v20 box_num
+			 , je_info_v22 l_org
+			 , je_info_v24 report_type_name
+			 , to_char(je_info_d1,'mm-yyyy') d1
+			 , to_char(je_info_d1,'yyyy') d1_year
+			 , to_char(je_info_d2,'mm-yyyy') d2
+			 , to_char(je_info_d2,'yyyy') d2_year
+			 , gt.request_id
+			 , sum(je_info_n10) sum_n10
+			 , sum(je_info_n15) sum_n15
+			 , sum(je_info_n16) sum_n16
+			 , sum(je_info_n17) sum_n17
+			 , sum(je_info_n18) sum_n18
+			 , sum(je_info_n19) sum_n19
+			 , sum(je_info_n20) sum_n20
+			 , min(to_char(gt.creation_date, 'yyyy-mm-dd hh24:mi:ss')) min_trx_created
+			 , max(to_char(gt.creation_date, 'yyyy-mm-dd hh24:mi:ss')) max_trx_created
+			 , min(gt.created_by) min_created_by
+			 , max(gt.created_by) max_created_by
+			 , min(to_char(gt.last_update_date, 'yyyy-mm-dd hh24:mi:ss')) min_trx_updated
+			 , max(to_char(gt.last_update_date, 'yyyy-mm-dd hh24:mi:ss')) max_trx_updated
+			 , min(gt.last_updated_by) min_updated_by
+			 , max(gt.last_updated_by) max_updated_by
+			 , min('#' || je_info_v7) min_doc_number
+			 , max('#' || je_info_v7) max_doc_number
+			 , min('#' || je_info_v2) min_inv_num
+			 , max('#' || je_info_v2) max_inv_num
+			 , count(*) ct
+		  from je_zz_vat_rep_trx_t gt
+		  join jg_zz_vat_rep_status jzvrs on gt.reporting_batch_id = jzvrs.reporting_status_id
+		 where 1 = 1
+		   and jzvrs.source not in ('GL','AR','AP')
+		   and 1 = 1
+	  group by transaction_source
+			 , decode(jzvrs.final_reporting_status_flag,'S','REPORTED','UNREPORTED')
+			 , je_info_v1
+			 , je_info_v3
+			 , je_info_v13
+			 , je_info_v16
+			 , je_info_v18
+			 , je_info_v19
+			 , je_info_v20
+			 , je_info_v22
+			 , je_info_v24
+			 , to_char(je_info_d1,'mm-yyyy')
+			 , to_char(je_info_d1,'yyyy')
+			 , to_char(je_info_d2,'mm-yyyy')
+			 , to_char(je_info_d2,'yyyy')
+			 , gt.request_id
 
 -- ##################################################################
 -- JG_ZZ_VAT_TRX_DETAILS - VERSION 1
@@ -359,6 +432,8 @@ It can be used as a source for audits to provide information reported to the tax
 			 , count(*) ct
 		  from jg_zz_vat_trx_details trx
 		  join jg_zz_vat_rep_status rpt_status on rpt_status.reporting_status_id = trx.reporting_status_id
+		 where 1 = 1
+		   and 1 = 1
 	  group by trx.final_reporting_id
 			 , trx.extract_source_ledger
 			 , trx.request_id
@@ -386,6 +461,8 @@ It can be used as a source for audits to provide information reported to the tax
 			 , max(to_char(trx.last_update_date, 'yyyy-mm-dd hh24:mi:ss')) max_updated
 			 , count(*) ct
 		  from jg_zz_vat_trx_details trx
+		 where 1 = 1
+		   and 1 = 1
 	  group by trx.final_reporting_id
 			 , trx.extract_source_ledger
 			 , trx.request_id
