@@ -14,6 +14,7 @@ Queries:
 -- AP INVOICE > PO > RECEIPT (MATCH TO PO) 1
 -- AP INVOICE > PO > RECEIPT (MATCH TO PO) 2
 -- REQ -> PO -> RECEIPT -> ID DATA DISTINCT
+-- RECEIPT COUNTS
 
 */
 
@@ -72,41 +73,6 @@ Queries:
 		  join fun_all_business_units_v bu on bu.bu_id = pha.req_bu_id
 		 where 1 = 1
 		   and 1 = 1
-
--- ##############################################################
-
-		select rsh.shipment_header_id shipment_header_id_
-			 , pha.segment1 po_
-			 , rsh.receipt_num rx_num
-			 , '####################'
-			 , rt.*
-		  from rcv_shipment_headers rsh
-		  join rcv_transactions rt on rt.shipment_header_id = rsh.shipment_header_id
-		  join po_headers_all pha on rt.po_header_id = pha.po_header_id
-		  join poz_suppliers_v psv on pha.vendor_id = psv.vendor_id
-		  join fun_all_business_units_v bu on bu.bu_id = pha.req_bu_id
-		 where 1 = 1
-		   and 1 = 1
-
--- ##############################################################
-
-		select rsh.shipment_header_id
-			 , pha.segment1 po_
-			 , rsh.receipt_num rx_num
-			 , rsh.created_by
-			 , count(*)
-		  from rcv_shipment_headers rsh
-		  join rcv_transactions rt on rt.shipment_header_id = rsh.shipment_header_id
-		  join po_headers_all pha on rt.po_header_id = pha.po_header_id
-		  join poz_suppliers_v psv on pha.vendor_id = psv.vendor_id
-		  join fun_all_business_units_v bu on bu.bu_id = pha.req_bu_id
-		 where 1 = 1
-		   and 1 = 1
-	  group by rsh.shipment_header_id
-			 , pha.segment1
-			 , rsh.receipt_num
-			 , rsh.created_by
-	    having count(*) = 2
 
 -- ##############################################################
 -- RECEIPTS JOINED TO PO TABLE 2
@@ -345,8 +311,43 @@ In which case can join rcv_transactions to AP Invoice Distribution: rt.transacti
 		  join pjf_projects_all_vl ppav on pda.pjc_project_id = ppav.project_id
 		  join pjf_exp_types_tl exp_type on pda.pjc_expenditure_type_id = exp_type.expenditure_type_id and exp_type.language = userenv('lang')
 		 where 1 = 1
-		   and pla.item_id is not null
-		   and exp_type.expenditure_type_name = 'MATERIALS'
-		   -- and ppav.segment1 = '14080'
 		   and 1 = 1
 	order by to_char(rsh.creation_date, 'yyyy-mm-dd hh24:mi:ss') desc
+
+-- ##############################################################
+-- RECEIPT COUNTS
+-- ##############################################################
+
+		select bu.bu_name
+			 , to_char(rsh.creation_date, 'yyyy-mm-dd') creation_date
+			 , rt.transaction_type receipt_type
+			 , rt.destination_type_code receipt_destination
+			 , min(rsh.created_by) min_created_by
+			 , max(rsh.created_by) max_created_by
+			 , min(psv.vendor_name) min_supplier
+			 , max(psv.vendor_name) max_supplier
+			 , min(rsh.receipt_num) min_receipt_num
+			 , max(rsh.receipt_num) max_receipt_num
+			 , min(pha.segment1) min_po
+			 , max(pha.segment1) max_po
+			 , min(prha.requisition_number) min_req
+			 , max(prha.requisition_number) max_req
+			 , count (distinct rsh.shipment_header_id) receipt_count
+		  from rcv_shipment_headers rsh
+		  join rcv_transactions rt on rt.shipment_header_id = rsh.shipment_header_id
+		  join po_headers_all pha on rt.po_header_id = pha.po_header_id
+		  join poz_suppliers_v psv on pha.vendor_id = psv.vendor_id
+		  join fun_all_business_units_v bu on bu.bu_id = pha.req_bu_id
+		  join po_lines_all pla on rt.po_line_id = pla.po_line_id
+		  join po_distributions_all pda on pla.po_line_id = pda.po_line_id
+		  join po_line_locations_all plla on pla.po_line_id = plla.po_line_id
+		  join por_req_distributions_all prda on pda.req_distribution_id = prda.distribution_id
+		  join por_requisition_lines_all prla on prla.requisition_line_id = prda.requisition_line_id
+		  join por_requisition_headers_all prha on prha.requisition_header_id = prla.requisition_header_id
+		 where 1 = 1
+		   and rsh.creation_date > sysdate - 10
+		   and 1 = 1
+	  group by bu.bu_name
+			 , to_char(rsh.creation_date, 'yyyy-mm-dd')
+			 , rt.transaction_type
+			 , rt.destination_type_code
