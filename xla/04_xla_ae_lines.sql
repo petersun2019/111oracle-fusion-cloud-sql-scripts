@@ -84,10 +84,10 @@ select * from xla_ae_lines xal where ae_header_id = 12345678
 			 , xal.accounting_class_code
 			 , flv1.meaning accounting_class
 			 , xal.displayed_line_number
-			 , xal.entered_dr
-			 , xal.entered_cr
-			 , xal.accounted_dr
-			 , xal.accounted_cr
+			 , nvl(xal.entered_dr, 0) entered_dr
+			 , nvl(xal.entered_cr, 0) entered_cr
+			 , nvl(xal.accounted_dr, 0) accounted_dr
+			 , nvl(xal.accounted_cr, 0) accounted_cr
 			 , xal.gl_sl_link_table
 			 , xal.gl_sl_link_id
 			 , xal.currency_code
