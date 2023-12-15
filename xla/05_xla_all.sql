@@ -69,10 +69,10 @@ Queries:
 			 , xal.accounting_class_code
 			 , flv1.meaning accounting_class
 			 , xal.displayed_line_number
-			 , xal.entered_dr
-			 , xal.entered_cr
-			 , xal.accounted_dr
-			 , xal.accounted_cr
+			 , nvl(xal.entered_dr, 0) entered_dr
+			 , nvl(xal.entered_cr, 0) entered_cr
+			 , nvl(xal.accounted_dr, 0) accounted_dr
+			 , nvl(xal.accounted_cr, 0) accounted_cr
 			 , xal.creation_date line_created
 			 , xal.last_update_date line_updated
 			 , xal.currency_code
@@ -145,10 +145,10 @@ Queries:
 			 , flv1.meaning accounting_class
 			 , xal.displayed_line_number
 			 , xal.currency_code currency
-			 , xal.entered_dr
-			 , xal.entered_cr
-			 , xal.accounted_dr
-			 , xal.accounted_cr
+			 , nvl(xal.entered_dr, 0) entered_dr
+			 , nvl(xal.entered_cr, 0) entered_cr
+			 , nvl(xal.accounted_dr, 0) accounted_dr
+			 , nvl(xal.accounted_cr, 0) accounted_cr
 			 , xal.creation_date line_created
 			 , xal.last_update_date line_updated
 		  from xla_transaction_entities xte
@@ -179,10 +179,10 @@ Queries:
 			 , xal.currency_code currency
 			 , xal.application_id
 			 , xal.ae_header_id
-			 , xal.entered_dr
-			 , xal.entered_cr
-			 , xal.accounted_dr
-			 , xal.accounted_cr
+			 , nvl(xal.entered_dr, 0) entered_dr
+			 , nvl(xal.entered_cr, 0) entered_cr
+			 , nvl(xal.accounted_dr, 0) accounted_dr
+			 , nvl(xal.accounted_cr, 0) accounted_cr
 			 , xal.creation_date line_created
 			 , xal.last_update_date line_updated
 			 , xdl.source_distribution_id_num_1
@@ -232,8 +232,8 @@ Queries:
 			 , max(to_char(xah.accounting_date, 'yyyy-mm-dd')) max_acct_date
 			 , min(to_char(xal.accounting_date, 'yyyy-mm-dd')) min_line_acct_date
 			 , max(to_char(xal.accounting_date, 'yyyy-mm-dd')) max_line_acct_date
-			 , sum(xal.entered_dr) dr_sum
-			 , sum(xal.entered_cr) cr_sum
+			 , sum(nvl(xal.entered_dr, 0)) dr_sum
+			 , sum(nvl(xal.entered_cr, 0)) cr_sum
 			 , count(distinct xte.transaction_number) trx_count
 			 , count(*)
 		  from xla_transaction_entities xte
@@ -275,8 +275,8 @@ Queries:
 			 , max(xte.source_id_int_1) max_source_id_int_1
 			 , min('#' || xte.transaction_number) min_transaction_number
 			 , max('#' || xte.transaction_number) max_transaction_number
-			 , sum(xal.entered_dr) dr_sum
-			 , sum(xal.entered_cr) cr_sum
+			 , sum(nvl(xal.entered_dr, 0)) dr_sum
+			 , sum(nvl(xal.entered_cr, 0)) cr_sum
 			 , count(distinct xte.transaction_number) trx_count
 			 , count(*)
 		  from xla_transaction_entities xte
@@ -321,8 +321,8 @@ Queries:
 			 , max(xte.source_id_int_3) max_source_id_int_3
 			 , min('#' || xte.transaction_number) min_transaction_number
 			 , max('#' || xte.transaction_number) max_transaction_number
-			 , sum(xal.entered_dr) dr_sum
-			 , sum(xal.entered_cr) cr_sum
+			 , sum(nvl(xal.entered_dr, 0)) dr_sum
+			 , sum(nvl(xal.entered_cr, 0)) cr_sum
 			 , count(distinct xte.transaction_number) trx_count
 			 , count(*)
 		  from xla_transaction_entities xte
@@ -476,7 +476,7 @@ Queries:
 		  join xla_ae_headers xah on xah.entity_id = xe.entity_id and xah.event_id = xe.event_id and xah.application_id = xe.application_id
 		  join fnd_lookup_values_vl flv2 on xe.event_status_code = flv2.lookup_code and flv2.lookup_type = 'XLA_EVENT_STATUS'
 		  join fnd_lookup_values_vl flv3 on xe.process_status_code = flv3.lookup_code and flv3.lookup_type = 'XLA_EVENT_PROCESS_STATUS'
-		  join pjc_exp_items_all peia on xte.source_id_int_1 = peia.expenditure_item_id
+	 left join pjc_exp_items_all peia on xte.source_id_int_1 = peia.expenditure_item_id
 		 where 1 = 1
 		   and 1 = 1
 	  group by xte.entity_code
