@@ -61,10 +61,10 @@ Queries:
 			 , gjh.doc_sequence_value doc
 			 , decode(gjb.approval_status_code, 'A', gl_journals_rpt_pkg.get_action_user(gjb.je_batch_id, 'APPROVED'), null) approved_by
 			 , decode(gjb.approval_status_code, 'A', gl_journals_rpt_pkg.get_action_date(gjb.je_batch_id, 'APPROVED'), null) batch_approved_date
-			 , gjb.running_total_dr batch_dr
-			 , gjb.running_total_cr batch_cr
-			 , gjh.running_total_cr jnl_cr
-			 , gjh.running_total_dr jnl_dr
+			 , nvl(gjb.running_total_dr, 0) batch_dr
+			 , nvl(gjb.running_total_cr, 0) batch_cr
+			 , nvl(gjh.running_total_cr, 0) jnl_cr
+			 , nvl(gjh.running_total_dr, 0) jnl_dr
 		  from gl_je_batches gjb
 		  join gl_je_headers gjh on gjh.je_batch_id = gjb.je_batch_id
 	 left join gl_ledgers gl on gl.ledger_id = gjh.ledger_id
@@ -74,7 +74,6 @@ Queries:
 	 left join fnd_lookup_values_vl gjb_status on gjb_status.lookup_code = gjb.status and gjb_status.lookup_type = 'MJE_BATCH_STATUS' and gjb_status.view_application_id = 101
 		 where 1 = 1
 		   and 1 = 1
-	  order by gjh.je_header_id desc
 
 -- ##############################################################
 -- JOURNAL HEADERS - VERSION 2
@@ -95,10 +94,10 @@ Queries:
 			 , (select count(*) from gl_je_lines gjl where gjh.je_header_id = gjl.je_header_id) lines
 			 , gjh.period_name period
 			 , gjh.accrual_rev_period_name rev_period
-			 , gjb.running_total_cr batch_cr
-			 , gjb.running_total_dr batch_dr
-			 , gjh.running_total_cr jnl_cr
-			 , gjh.running_total_dr jnl_dr
+			 , nvl(gjb.running_total_cr, 0) batch_cr
+			 , nvl(gjb.running_total_dr, 0) batch_dr
+			 , nvl(gjh.running_total_cr, 0) jnl_cr
+			 , nvl(gjh.running_total_dr, 0) jnl_dr
 			 , to_char(gjh.default_effective_date, 'yyyy-mm-dd') gl_date_header
 			 , gjst.user_je_source_name source
 			 , gjct.user_je_category_name category
@@ -130,10 +129,10 @@ Queries:
 			 , gjst.user_je_source_name source
 			 , gjct.user_je_category_name category
 			 , gjh_status.meaning jnl_status
-			 , gjb.running_total_cr batch_cr
-			 , gjb.running_total_dr batch_dr
-			 , gjh.running_total_cr jnl_cr
-			 , gjh.running_total_dr jnl_dr
+			 , nvl(gjb.running_total_cr, 0) batch_cr
+			 , nvl(gjb.running_total_dr, 0) batch_dr
+			 , nvl(gjh.running_total_cr, 0) jnl_cr
+			 , nvl(gjh.running_total_dr, 0) jnl_dr
 			 , (select count(*) from gl_je_lines gjl where gjl.je_header_id = gjh.je_header_id) line_count
 		  from gl_je_batches gjb
 		  join gl_je_headers gjh on gjh.je_batch_id = gjb.je_batch_id
@@ -174,10 +173,10 @@ Queries:
 			 , gjh.doc_sequence_value doc
 			 , decode(gjb.approval_status_code, 'A', gl_journals_rpt_pkg.get_action_user(gjb.je_batch_id, 'APPROVED'), null) approved_by
 			 , decode(gjb.approval_status_code, 'A', gl_journals_rpt_pkg.get_action_date(gjb.je_batch_id, 'APPROVED'), null) batch_approved_date
-			 , gjb.running_total_cr batch_cr
-			 , gjb.running_total_dr batch_dr
-			 , gjh.running_total_cr jnl_cr
-			 , gjh.running_total_dr jnl_dr
+			 , nvl(gjb.running_total_cr, 0) batch_cr
+			 , nvl(gjb.running_total_dr, 0) batch_dr
+			 , nvl(gjh.running_total_cr, 0) jnl_cr
+			 , nvl(gjh.running_total_dr, 0) jnl_dr
 			 , '#' rev___
 			 , gjh_rev.je_header_id rev_jnl_id
 			 , gjh_rev.reversed_je_header_id parent_id
@@ -219,14 +218,14 @@ https://rpforacle.blogspot.com/2020/08/sql-query-to-get-journal-approver-in-orac
 			 , gjh.period_name
 			 , gjb.description "batch_desc"
 			 , gjh.description "header_desc"
-			 , gjh.running_total_cr jnl_cr
-			 , gjh.running_total_dr jnl_dr
+			 , nvl(gjh.running_total_cr, 0) jnl_cr
+			 , nvl(gjh.running_total_dr, 0) jnl_dr
 			 , decode(gjb.approval_status_code, 'A', gl_journals_rpt_pkg.get_action_user(gjb.je_batch_id, 'APPROVED'), null) approved_by
 			 , decode(gjb.approval_status_code, 'A', gl_journals_rpt_pkg.get_action_date(gjb.je_batch_id, 'APPROVED'), null) batch_approved_date
 		  from gl_je_headers gjh
 		  join gl_je_batches gjb on gjh.je_batch_id = gjb.je_batch_id
 		 where 1 = 1
-	  order by gjh.je_header_id desc
+		   and 1 = 1
 
 -- ##############################################################
 -- JOURNAL BATCHES AND HEADERS AND LINES WITH RECONCILIATION INFO
@@ -251,17 +250,17 @@ https://rpforacle.blogspot.com/2020/08/sql-query-to-get-journal-approver-in-orac
 			 , to_char(gp.end_date, 'yyyy-mm-dd') period_end
 			 , gjh.accrual_rev_period_name rev_period
 			 , gjh.name journal
-			 , gjb.running_total_cr batch_cr
-			 , gjb.running_total_dr batch_dr
-			 , gjh.running_total_cr jnl_cr
-			 , gjh.running_total_dr jnl_dr
+			 , nvl(gjb.running_total_cr, 0) batch_cr
+			 , nvl(gjb.running_total_dr, 0) batch_dr
+			 , nvl(gjh.running_total_cr, 0) jnl_cr
+			 , nvl(gjh.running_total_dr, 0) jnl_dr
 			 , to_char(gjh.default_effective_date, 'yyyy-mm-dd') gl_date_header
 			 , gjst.user_je_source_name source
 			 , gjct.user_je_category_name category
 			 , decode(gjh.actual_flag,'A','Actual','E','Encumbrance','Other') jnl_type
 			 , gjl.je_line_num line
-			 , gjl.accounted_dr dr
-			 , gjl.accounted_cr cr
+			 , nvl(gjl.accounted_dr, 0) line_dr
+			 , nvl(gjl.accounted_cr, 0) line_cr
 			 , gcc.segment1 || '.' || gcc.segment2 || '.' || gcc.segment3 || '.' || gcc.segment4 || '.' || gcc.segment5 || '.' || gcc.segment6 cgh_acct
 			 , to_char(gjl.effective_date, 'yyyy-mm-dd') gl_date_line
 			 , gjlr.jgzz_recon_status
@@ -519,6 +518,7 @@ https://rpforacle.blogspot.com/2020/08/sql-query-to-get-journal-approver-in-orac
 			 , gl_je_categories_b gjcb
 			 , gl_je_headers gjh
 		 WHERE 1 = 1
+		   and 1 = 1
 		   AND gjsb.je_source_name = gjb.je_source
 		   AND gjcb.je_category_name = gjh.je_category
 		   AND gjb.group_id IS NOT NULL
@@ -582,6 +582,8 @@ https://rpforacle.blogspot.com/2020/08/sql-query-to-get-journal-approver-in-orac
 		  join gl_je_headers gjh on gjh.je_source = gjst.je_source_name and gjst.language = userenv('lang')
 		  join gl_je_lines gjl on gjh.je_header_id = gjl.je_header_id
 		  join gl_ledgers gl on gl.ledger_id = gjh.ledger_id
+		 where 1 = 1
+		   and 1 = 1
 	  group by gjst.user_je_source_name
 			 , gl.name
 
@@ -646,10 +648,10 @@ https://rpforacle.blogspot.com/2020/08/sql-query-to-get-journal-approver-in-orac
 			 , gjb_status.meaning batch_status
 			 , gjh_status.meaning jnl_status
 			 , gjb.request_id
-			 , gjb.running_total_cr batch_cr
-			 , gjb.running_total_dr batch_dr
-			 , gjh.running_total_cr jnl_cr
-			 , gjh.running_total_dr jnl_dr
+			 , nvl(gjb.running_total_cr, 0) batch_cr
+			 , nvl(gjb.running_total_dr, 0) batch_dr
+			 , nvl(gjh.running_total_cr, 0) jnl_cr
+			 , nvl(gjh.running_total_dr, 0) jnl_dr
 			 , min(to_char(gjh.creation_date, 'yyyy-mm-dd')) min_gjh_cr_date
 			 , max(to_char(gjh.creation_date, 'yyyy-mm-dd')) max_gjh_cr_date		
 			 , sum(gjl.accounted_dr) dr
