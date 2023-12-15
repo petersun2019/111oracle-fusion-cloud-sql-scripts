@@ -9,7 +9,8 @@ So if you have that ID, you can check what SLA data exists for that Transaction 
 
 Queries:
 
--- JOURNAL BATCHES AND HEADERS AND LINES AND XLA DATA
+-- JOURNAL BATCHES AND HEADERS AND LINES AND XLA DATA (SHORT)
+-- JOURNAL BATCHES AND HEADERS AND LINES AND XLA DATA (FULL)
 -- WITH XLA_DISTRIBUTION_LINKS
 -- XLA SUMMARY - BY PERIOD
 -- XLA SUMMARY - NOT BY PERIOD
@@ -21,7 +22,54 @@ Queries:
 */
 
 -- ##############################################################
--- JOURNAL BATCHES AND HEADERS AND LINES AND XLA DATA
+-- JOURNAL BATCHES AND HEADERS AND LINES AND XLA DATA (SHORT)
+-- ##############################################################
+
+		select gl.name ledger
+			 , fat.application_name
+			 , to_char(gjb.creation_date, 'yyyy-mm-dd hh24:mi:ss') batch_created
+			 , gjb.created_by batch_created_by
+			 , gjst.user_je_source_name source
+			 , gjct.user_je_category_name category
+			 , decode(gjh.actual_flag,'A','Actual','E','Encumbrance','Other') jnl_type
+			 , decode(gjh.status,'U','Unposted','P','Posted','Other') status 
+			 , gjb.name batch_name
+			 , gjh.period_name period
+			 , gjh.name jnl_name
+			 , gjl.je_line_num jnl_line
+			 , gcc.segment1 || '.' || gcc.segment2 || '.' || gcc.segment3 || '.' || gcc.segment4 || '.' || gcc.segment5 || '.' || gcc.segment6 cgh_acct
+			 , nvl(gjl.accounted_dr, 0) jnl_dr
+			 , nvl(gjl.accounted_cr, 0) jnl_cr
+			 , '#' || xte.transaction_number trx
+			 , xte.source_id_int_1 trx_id
+			 , xal.ae_line_num sla_line
+			 , nvl(xal.accounted_dr, 0) sla_dr
+			 , nvl(xal.accounted_cr, 0) sla_cr
+			 , flv1.meaning accounting_class
+			 , xecl.name event_class
+			 , xetl.name event_type
+		  from gl_je_headers gjh 
+		  join gl_je_batches gjb on gjh.je_batch_id = gjb.je_batch_id
+		  join gl_je_lines gjl on gjh.je_header_id = gjl.je_header_id
+	 left join gl_code_combinations gcc on gjl.code_combination_id = gcc.code_combination_id
+	 left join gl_je_sources_tl gjst on gjh.je_source = gjst.je_source_name and gjst.language = userenv('lang')
+	 left join gl_je_categories_tl gjct on gjh.je_category = gjct.je_category_name and gjct.language = userenv('lang')
+	 left join gl_import_references gir on gjh.je_header_id = gir.je_header_id and gir.je_line_num = gjl.je_line_num
+	 left join xla_ae_lines xal on gir.gl_sl_link_table = xal.gl_sl_link_table and gir.gl_sl_link_id = xal.gl_sl_link_id
+	 left join xla_ae_headers xah on xal.application_id = xah.application_id and xal.ae_header_id = xah.ae_header_id
+	 left join xla_events xe on xah.application_id = xe.application_id and xah.event_id = xe.event_id
+	 left join xla_transaction_entities xte on xe.application_id = xte.application_id and xe.entity_id = xte.entity_id
+	 left join gl_ledgers gl on gl.ledger_id = gjh.ledger_id
+	 left join gl_ledgers glx on glx.ledger_id = xal.ledger_id
+	 left join fnd_application_tl fat on fat.application_id = xte.application_id and fat.language = userenv('lang')
+	 left join xla_event_types_tl xetl on xetl.event_type_code = xe.event_type_code and xetl.application_id = xe.application_id and xetl.language = userenv('lang')
+	 left join xla_event_classes_tl xecl on xecl.entity_code = xetl.entity_code and xecl.event_class_code = xetl.event_class_code and xecl.application_id = xetl.application_id and xecl.language = userenv('lang')
+	 left join fnd_lookup_values_vl flv1 on xal.accounting_class_code = flv1.lookup_code and flv1.lookup_type = 'XLA_ACCOUNTING_CLASS'
+		 where 1 = 1
+		   and 1 = 1
+
+-- ##############################################################
+-- JOURNAL BATCHES AND HEADERS AND LINES AND XLA DATA (FULL)
 -- ##############################################################
 
 		select gl.name ledger
@@ -44,38 +92,35 @@ Queries:
 			 , gjh.period_name period
 			 , gjh.name jnl_name
 			 , gjh.doc_sequence_value doc
-			 , gjb.running_total_cr batch_cr
-			 , gjb.running_total_dr batch_dr
-			 , gjh.running_total_cr jnl_cr
-			 , gjh.running_total_dr jnl_dr
+			 , nvl(gjb.running_total_cr, 0) batch_cr
+			 , nvl(gjb.running_total_dr, 0) batch_dr
+			 , nvl(gjh.running_total_cr, 0) jnl_cr
+			 , nvl(gjh.running_total_dr, 0) jnl_dr
 			 , '#' jnl_line_data___
 			 , to_char(gjl.creation_date, 'yyyy-mm-dd hh24:mi:ss') journal_line_created
 			 , to_char(gjl.effective_date, 'yyyy-mm-dd') gl_date_line
-			 , gjl.je_line_num line
+			 , gjl.je_line_num jnl_line
 			 , (replace(replace(gjl.description,chr(10),''),chr(13),' ')) line_descr
-			 , gcc.segment1 || '.' || gcc.segment2 || '.' || gcc.segment3 || '.' || gcc.segment4 || '.' || gcc.segment5 || '.' || gcc.segment6 || '.' || gcc.segment7 cgh_acct
+			 , gcc.segment1 || '.' || gcc.segment2 || '.' || gcc.segment3 || '.' || gcc.segment4 || '.' || gcc.segment5 || '.' || gcc.segment6 cgh_acct
 			 , '#' || gcc.segment1 segment1
 			 , '#' || gcc.segment2 segment2
 			 , '#' || gcc.segment3 segment3
 			 , '#' || gcc.segment4 segment4
 			 , '#' || gcc.segment5 segment5
 			 , '#' || gcc.segment6 segment6
-			 , '#' || gcc.segment7 segment7
-			 , gjl.accounted_dr dr
-			 , gjl.accounted_cr cr
-			 , case when gjl.accounted_dr is not null then -1 * gjl.accounted_dr when gjl.accounted_cr is not null then gjl.accounted_cr end accounted_net
+			 , nvl(gjl.accounted_dr, 0) jnl_dr
+			 , nvl(gjl.accounted_cr, 0) jnl_cr
 			 , '#' sla_data___
-			 , '#' || xte.transaction_number transaction_number
-			 , xte.source_id_int_1
+			 , '#' || xte.transaction_number trx
+			 , xte.source_id_int_1 trx_id
 			 , xte.source_id_int_2
 			 , xte.source_id_int_3
 			 , xah.event_type_code
 			 , xah.product_rule_code
 			 , (replace(replace(xah.description,chr(10),''),chr(13),' ')) xah_description
 			 , xte.entity_code
-			 , xal.ae_line_num
+			 , xal.ae_line_num sla_line
 			 , xal.accounting_class_code
-			 , flv1.meaning accounting_class
 			 , xe.event_id
 			 , gjl.code_combination_id
 			 , xal.overridden_code_combination_id
@@ -83,14 +128,13 @@ Queries:
 			 , (replace(replace(xal.description,chr(10),''),chr(13),' ')) xal_description
 			 , xal.entered_dr
 			 , xal.entered_cr
-			 , case when xal.entered_dr is not null then -1 * xal.entered_dr when xal.entered_cr is not null then xal.entered_cr end xal_entered_net
-			 , xal.accounted_dr
-			 , xal.accounted_cr
-			 , case when xal.accounted_dr is not null then -1 * xal.accounted_dr when xal.accounted_cr is not null then xal.accounted_cr end xal_accounted_net
+			 , nvl(xal.accounted_dr, 0) sla_dr
+			 , nvl(xal.accounted_cr, 0) sla_cr
 			 , xal.accounting_date
 			 , glx.name xal_ledger
 			 , xal.creation_date xal_created
 			 , xal.jgzz_recon_ref xla_jgzz_recon_ref
+			 , flv1.meaning accounting_class
 			 , xecl.name event_class
 			 , xecl.event_class_code
 			 , xetl.name event_type
@@ -435,10 +479,10 @@ http://oraclemasterminds.blogspot.com/2015/01/ap-distribution-query-ap-xla-gl.ht
 			 , xal.description je_line_desc
 			 , xal.accounting_class_code transaction_type
 			 , '#' || aia.invoice_num
-			 , xal.entered_dr xal_entered_dr
-			 , gjl.entered_dr gjl_entered_dr
-			 , xal.entered_cr xal_entered_cr
-			 , gjl.entered_cr gjl_entered_cr
+			 , nvl(xal.entered_dr, 0) xal_entered_dr
+			 , nvl(gjl.entered_dr, 0) gjl_entered_dr
+			 , nvl(xal.entered_cr, 0) xal_entered_cr
+			 , nvl(gjl.entered_cr, 0) gjl_entered_cr
 			 , aida.amount dist_amt
 			 , gjh.period_name
 			 , gl.name ledger_name
